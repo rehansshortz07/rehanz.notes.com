@@ -1,0 +1,118 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* NAVBAR */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #111;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 15px;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #00c3ff;
+}
+
+/* HOME */
+.home {
+  height: 50vh;
+  background: linear-gradient(to right, #141e30, #243b55);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 60px;
+  text-align: center;
+}
+
+.home h1 {
+  font-size: 40px;
+}
+
+.home p {
+  margin-top: 15px;
+  font-size: 30px;
+}
+
+/* NOTES */
+.notes {
+  padding: 80px 20px;
+  background: #f4f4f4;
+}
+
+.notes h2 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.pdf-box {
+  background: white;
+  max-width: 600px;
+  margin: 15px auto;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.pdf-box a {
+  display: block;
+  margin: 8px 0;
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* FOOTER */
+footer {
+  background: #111;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+footer a {
+  color: #00c3ff;
+  text-decoration: none;
+  margin: 0 5px;
+}
+@media (max-width: 600px) {
+  .home h1 {
+    font-size: 26px;
+  }
+
+  .home p {
+    font-size: 15px;
+  }
+
+  nav {
+    padding: 10px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
