@@ -1,127 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" 
-    content="width=device-width, 
-    initial-scale=1.0">
-  <title> Rehan Notes  </title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rehan Notes</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- NAVBAR -->
-<nav>
-  <div class="logo"> 📚 Rehan Notes </div>
-  <div class="menu">
-    <a href="#home">Home</a>
-    <a href="#notes">PDFs</a>
-    <button id="loginBtn">Login</button>
-  </div>
-</nav>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">📚 Rehan Notes</div>
 
-<!-- HOME SECTION -->
-<section id="home" class="home">
-  
-  <h1>Assignments •  Notes • PDFs </h1>
-</section>
+    <div class="menu">
+      <a href="#home">Home</a>
+      <a href="#notes">Notes</a>
+      <button id="loginBtn">Login</button>
+    </div>
+  </nav>
 
-<!-- PDF SECTION -->
-<section id="notes" class="notes">
-  <h2>📚 STUDY MATERIALS </h2>
+  <!-- HERO SECTION -->
+  <section id="home" class="hero">
+    <div class="hero-content">
+      <h1>Engineering Notes Made Simple</h1>
 
-  <div class="pdf-box">
-    <h3> Main Content </h3>
-    <a href="Mechanical_Engineering_Complete_Guide.pdf" target="_blank"> All about Mechanical engg </a>
-    
-  </div>
+      <p>
+        Assignments • Notes • PDFs • Study Materials
+      </p>
 
-  <div class="pdf-box">
-    <h3>1st SEM</h3>
-    <a href="WebProgramming-notes-all modules.pdf" target="_blank"> Web Programming All Modules </a>
-    <a href="" target="_blank"> </a>
-  </div>
+      <a href="#notes" class="hero-btn">Explore Notes</a>
+    </div>
+  </section>
 
-  <div class="pdf-box">
-    <h3>2nd SEM</h3>
-    <a href="math II 1, 2, 4 module notes.pdf" target="_blank"> MATH II Module 1,2,4</a>
-    <a href="physics Q-bank.pdf" target="_blank"> Physics Q-Bank </a>
-     <a href="physics.pdf" target="_blank"> Physics Notes 1 </a>
-     <a href="phy.pdf" target="_blank"> Physics Notes 2 </a>
-     <a href="FINAL IOT QB with ANS.pdf" target="_blank"> Final IOT Q-Bank With Ans </a>
-     <a href="PPS-2026-qbank.docx" target="_blank"> PPS Q-Bank </a>
-     <a href="PPS.pdf" target="_blank"> PPS-Notes </a>
-     <a href="IMP QUESTION BIOLOGY FOR ENGINEERS QUESTION BANK.pdf" target="_blank"> Biology Q-bank </a>
-     <a href="biology 10 marks answers.docx" target="_blank"> Biology 10 marks answers </a>
-     <a href="Biology.pdf" target="_blank"> Biology 5-Marks </a>
-     <a href="English Q-bank.docx" target="_blank"> English Q-bank </a>
-     <a href="English  2marks answers.pdf" target="_blank"> English 2 Marks Answers </a>
-    <a href="english 5mark answers.pdf" target="_blank"> English 5 Mark Answers </a>
-    <a href="" target="_blank">  </a>
-  </div>  
-</section>
+  <!-- NOTES SECTION -->
+  <section id="notes" class="notes-section">
 
-<!-- FOOTER -->
-<footer id="footer">
-
-<p>  © All rights reserved.</p>
-</footer>
-  <!-- Your website content -->
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCp_dBpfDmH41-ppTX2mRjzu-TIO6NrraA",
-  authDomain: "notes-7671d.firebaseapp.com",
-  projectId: "notes-7671d",
-  storageBucket: "notes-7671d.firebasestorage.app",
-  messagingSenderId: "249462166446",
-  appId: "1:249462166446:web:d14ef1b3d4cd2f814f6e3f",
-  measurementId: "G-6HM2PCREZF"
-};
-
-const app = initializeApp(firebaseConfig);
-
-const analytics = getAnalytics(app);
+    <div class="section-title">
+      <h2>📘 Study Materials</h2>
+      <p>Free engineering notes and important resources</p>
+    </div>
 
 
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-console.log("Firebase Connected");
+    <!-- MAIN CONTENT -->
+    <div class="card">
+      <h3>Main Content</h3>
 
-  const auth = getAuth();
+      <a href="Mechanical_Engineering_Complete_Guide.pdf" target="_blank">
+        Mechanical Engineering Complete Guide
+      </a>
+    </div>
 
-const provider = new GoogleAuthProvider();
 
-document.getElementById("loginBtn").addEventListener("click", () => {
+    <!-- 1ST SEM -->
+    <div class="card">
+      <h3>1st Semester</h3>
 
-  signInWithPopup(auth, provider)
-    .then((result) => {
+      <a href="WebProgramming-notes-all modules.pdf" target="_blank">
+        Web Programming All Modules
+      </a>
+    </div>
 
-      const user = result.user;
 
-      alert("Welcome " + user.displayName);
+    <!-- 2ND SEM -->
+    <div class="card">
+      <h3>2nd Semester</h3>
 
-      console.log(user);
+      <a href="math II 1, 2, 4 module notes.pdf" target="_blank">
+        Math II Module 1,2,4
+      </a>
 
-    })
-    .catch((error) => {
+      <a href="physics Q-bank.pdf" target="_blank">
+        Physics Q-Bank
+      </a>
 
-      console.error(error);
+      <a href="physics.pdf" target="_blank">
+        Physics Notes 1
+      </a>
+
+      <a href="phy.pdf" target="_blank">
+        Physics Notes 2
+      </a>
+
+      <a href="FINAL IOT QB with ANS.pdf" target="_blank">
+        Final IOT Q-Bank With Answers
+      </a>
+
+      <a href="PPS-2026-qbank.docx" target="_blank">
+        PPS Q-Bank
+      </a>
+
+      <a href="PPS.pdf" target="_blank">
+        PPS Notes
+      </a>
+
+      <a href="IMP QUESTION BIOLOGY FOR ENGINEERS QUESTION BANK.pdf" target="_blank">
+        Biology Q-Bank
+      </a>
+
+      <a href="biology 10 marks answers.docx" target="_blank">
+        Biology 10 Marks Answers
+      </a>
+
+      <a href="Biology.pdf" target="_blank">
+        Biology 5 Marks
+      </a>
+
+      <a href="English Q-bank.docx" target="_blank">
+        English Q-Bank
+      </a>
+
+      <a href="English  2marks answers.pdf" target="_blank">
+        English 2 Marks Answers
+      </a>
+
+      <a href="english 5mark answers.pdf" target="_blank">
+        English 5 Marks Answers
+      </a>
+
+    </div>
+
+  </section>
+
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Rehan Notes • Built by Rehan</p>
+  </footer>
+
+
+  <!-- FIREBASE -->
+  <script type="module">
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCp_dBpfDmH41-ppTX2mRjzu-TIO6NrraA",
+      authDomain: "notes-7671d.firebaseapp.com",
+      projectId: "notes-7671d",
+      storageBucket: "notes-7671d.firebasestorage.app",
+      messagingSenderId: "249462166446",
+      appId: "1:249462166446:web:d14ef1b3d4cd2f814f6e3f",
+      measurementId: "G-6HM2PCREZF"
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+
+
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+
+
+    document.getElementById("loginBtn").addEventListener("click", () => {
+
+      signInWithPopup(auth, provider)
+        .then((result) => {
+
+          const user = result.user;
+
+          document.getElementById("loginBtn").innerText = user.displayName;
+
+          console.log(user);
+
+        })
+        .catch((error) => {
+          console.error(error);
+        });
 
     });
 
-});
-  
-console.log("Firebase Connected");
+  </script>
 
-</script>
 </body>
 </html>
-
