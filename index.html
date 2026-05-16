@@ -67,17 +67,12 @@
 <p>  © All rights reserved.</p>
 </footer>
   <!-- Your website content -->
-
 <script type="module">
 
-  // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCp_dBpfDmH41-ppTX2mRjzu-TIO6NrraA",
   authDomain: "notes-7671d.firebaseapp.com",
@@ -88,11 +83,13 @@ const firebaseConfig = {
   measurementId: "G-6HM2PCREZF"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-  </script>
 
+const analytics = getAnalytics(app);
+
+console.log("Firebase Connected");
+
+</script>
 </body>
 </html>
 
