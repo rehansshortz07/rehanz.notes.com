@@ -6,12 +6,6 @@
   <title>Rehan Notes</title>
 
   <link rel="stylesheet" href="style.css"/>
-
-<script>
-if(localStorage.getItem("loggedIn") !== "true"){
-    window.location.href = "login.html";
-}
-</script>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,80 +136,88 @@ if(localStorage.getItem("loggedIn") !== "true"){
 
 
   <!-- FIREBASE -->
-  <script type="module">
+<script type="module">
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCp_dBpfDmH41-ppTX2mRjzu-TIO6NrraA",
-      authDomain: "notes-7671d.firebaseapp.com",
-      projectId: "notes-7671d",
-      storageBucket: "notes-7671d.firebasestorage.app",
-      messagingSenderId: "249462166446",
-      appId: "1:249462166446:web:d14ef1b3d4cd2f814f6e3f",
-      measurementId: "G-6HM2PCREZF"
-    };
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyCp_dBpfDmH41-ppTX2mRjzu-TIO6NrraA",
+  authDomain: "notes-7671d.firebaseapp.com",
+  projectId: "notes-7671d",
+  storageBucket: "notes-7671d.firebasestorage.app",
+  messagingSenderId: "249462166446",
+  appId: "1:249462166446:web:d14ef1b3d4cd2f814f6e3f",
+  measurementId: "G-6HM2PCREZF"
+};
 
 
-    const auth = getAuth();
-    const provider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const provider = new GoogleAuthProvider();
+
+const loginBtn = document.getElementById("loginBtn");
 
 
-    document.getElementById("loginBtn").addEventListener("click", () => {
+// CHECK LOGIN STATUS
+onAuthStateChanged(auth, (user) => {
 
-      signInWithPopup(auth, provider)
-        .then((result) => {
+  if(user){
 
-          const user = result.user;
+    loginBtn.innerText = user.displayName;
 
-          document.getElementById("loginBtn").innerText = user.displayName;
+  } else {
 
-          console.log(user);
-
-        })
-
-      
-
-function login() {
-    let password = document.getElementById("password").value;
-
-    if(password === "rehan123") {
-
-        localStorage.setItem("loggedIn", "true");
-
-        window.location.href = "index.html";
-    }
-    else {
-        alert("Wrong Password");
-    }
-}
-        
-function logout(){
-    localStorage.removeItem("loggedIn");
     window.location.href = "login.html";
-}
 
-        
-        .catch((error) => {
-          console.error(error);
-        });
+  }
+
+});
+
+
+// GOOGLE LOGIN
+loginBtn.addEventListener("click", () => {
+
+  signInWithPopup(auth, provider)
+    .then((result) => {
+
+      const user = result.user;
+
+      loginBtn.innerText = user.displayName;
+
+    })
+
+    .catch((error) => {
+
+      console.log(error);
 
     });
 
-  </script>
+});
+
+
+// LOGOUT
+window.logout = function(){
+
+  signOut(auth).then(() => {
+
+    window.location.href = "login.html";
+
+  });
+
+}
+
+</script>
 
 </body>
 </html>
