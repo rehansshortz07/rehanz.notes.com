@@ -21,7 +21,8 @@
       <a href="#home">Home</a>
       <a href="#notes">Notes</a>
       <button id="loginBtn">Login</button>
-      <img id="userPhoto" src="" />
+      <button id="signOutBtn">LogOut</button>
+
     </div>
   </nav>
 
@@ -177,8 +178,7 @@
           document.getElementById("loginBtn").innerText = user.displayName;
 
           console.log(user);
-document.getElementById("userPhoto").src =
-user.photoURL;
+
           signOut(auth);
         })
         .catch((error) => {
