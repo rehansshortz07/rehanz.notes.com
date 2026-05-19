@@ -68,6 +68,22 @@ body {
 }
 
 
+#logoutBtn{
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #ef4444;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#logoutBtn:hover{
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
 
 /* HERO */
 .hero {
