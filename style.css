@@ -67,21 +67,6 @@ body {
   transform: translateY(-2px);
 }
 
-#logout {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 10px;
-  background: #38bdf8;
-  color: black;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-#logout:hover {
-  transform: translateY(-2px);
-}
-
 
 
 /* HERO */
