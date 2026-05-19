@@ -7,6 +7,12 @@
 
   <link rel="stylesheet" href="style.css"/>
 
+<script>
+if(localStorage.getItem("loggedIn") !== "true"){
+    window.location.href = "login.html";
+}
+</script>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -21,7 +27,7 @@
       <a href="#home">Home</a>
       <a href="#notes">Notes</a>
       <button id="loginBtn">Login</button>
-    
+    <button onclick="logout()">Logout</button>
 
     </div>
   </nav>
@@ -180,6 +186,29 @@
           console.log(user);
 
         })
+
+      
+
+function login() {
+    let password = document.getElementById("password").value;
+
+    if(password === "rehan123") {
+
+        localStorage.setItem("loggedIn", "true");
+
+        window.location.href = "index.html";
+    }
+    else {
+        alert("Wrong Password");
+    }
+}
+        
+function logout(){
+    localStorage.removeItem("loggedIn");
+    window.location.href = "login.html";
+}
+
+        
         .catch((error) => {
           console.error(error);
         });
