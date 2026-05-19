@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login - Rehan Notes</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
+
+        body{
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg,#081b3a,#0f2f5f,#1e4d8f);
+        }
+
+        .login-box{
+            width:350px;
+            background:white;
+            padding:35px;
+            border-radius:15px;
+            box-shadow:0 5px 25px rgba(0,0,0,0.3);
+            text-align:center;
+        }
+
+        .login-box h1{
+            margin-bottom:10px;
+            color:#0f2f5f;
+        }
+
+        .login-box p{
+            margin-bottom:25px;
+            color:gray;
+            font-size:14px;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            margin:10px 0;
+            border:1px solid #ccc;
+            border-radius:8px;
+            font-size:16px;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            border:none;
+            background:#1da1f2;
+            color:white;
+            font-size:17px;
+            border-radius:8px;
+            cursor:pointer;
+            transition:0.3s;
+        }
+
+        button:hover{
+            background:#0d8ae0;
+        }
+
+        .error{
+            color:red;
+            margin-top:10px;
+            font-size:14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+        <h1>Rehan Notes</h1>
+        <p>Login to access engineering notes</p>
+
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        function login(){
+
+            let user = document.getElementById("username").value;
+            let pass = document.getElementById("password").value;
+
+            // Change username and password here
+            if(user === "rehan" && pass === "12345"){
+
+                localStorage.setItem("loggedIn","true");
+
+                window.location.href = "index.html";
+
+            }else{
+                document.getElementById("error").innerHTML =
+                "Wrong username or password!";
+            }
+        }
+    </script>
+
+</body>
+</html>
