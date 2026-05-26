@@ -83,18 +83,6 @@ body {
   transform: translateY(-2px);
 }
 
-
-#userPhoto{
-  width:45px;
-  height:45px;
-  border-radius:50%;
-  object-fit:cover;
-  border:2px solid #38bdf8;
-}
-
-
-
-
 /* HERO */
 .hero {
   min-height: 90vh;
