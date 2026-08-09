@@ -1,209 +1,639 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rehan Notes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniNotes - Centralized Study Hub</title>
+    <style>
+        /* --- CSS VARIABLES & THEMES --- */
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --border-color: #e2e8f0;
+            --input-bg: #f1f5f9;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+        }
 
-  <link rel="stylesheet" href="style.css"/>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- RESET & BASE STYLES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            padding: 10px;
+        }
+
+        /* --- NAVBAR --- -->
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-toggle, .btn-secondary {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover, .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        /* --- CONTAINER & VIEWS --- */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .view {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- TYPOGRAPHY & FORMS --- */
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* --- ROLE SELECTION CARDS --- */
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .role-card {
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .role-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .role-card h3 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        /* --- DASHBOARDS & GRIDS (300px Responsive) --- */
+        .grid-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .option-tile {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .option-tile:hover, .option-tile.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .file-list {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--input-bg);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .file-info span {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .file-info strong {
+            font-size: 0.9rem;
+        }
+
+        .download-btn {
+            background: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* --- MEDIA QUERIES FOR LARGER DEVICES --- */
+        @media (min-width: 480px) {
+            body { padding: 16px; }
+            .role-grid { grid-template-columns: 1fr 1fr; }
+            .grid-options { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 768px) {
+            body { padding: 24px; }
+            .grid-options { grid-template-columns: repeat(3, 1fr); }
+            .view { padding: 30px; }
+        }
+
+        @media (min-width: 1024px) {
+            .grid-options { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
-    <div class="logo">📚 Rehan Notes</div>
+    <header>
+        <div class="logo">📚 UniNotes</div>
+        <div class="nav-controls">
+            <button class="btn-secondary" id="logoutBtn" style="display: none;" onclick="logoutUser()">Switch Profile</button>
+            <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+        </div>
+    </header>
 
-    <div class="menu">
-      <a href="#home">Home</a>
-      <a href="#notes">Notes</a>
-      
-      <button id="loginBtn">Login</button>
-    <button id="logoutBtn" onclick="logout()">Logout</button>
+    <div class="container">
+
+        <!-- VIEW 1: SELECT ROLE -->
+        <div id="viewRoleSelect" class="view active">
+            <h2>Welcome to UniNotes</h2>
+            <p>Select your user type to get started instantly without passwords.</p>
+            <div class="role-grid">
+                <div class="role-card" onclick="selectRole('student')">
+                    <h3>👨‍🎓 Student</h3>
+                    <p>Browse branches, semesters, and download notes.</p>
+                </div>
+                <div class="role-card" onclick="selectRole('teacher')">
+                    <h3>👩‍🏫 Teacher / Uploader</h3>
+                    <p>Upload lecture notes and study material easily.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: PROFILE SETUP (STUDENT) -->
+        <div id="viewStudentSetup" class="view">
+            <h2>Student Profile Setup</h2>
+            <p>Provide details to customize your note stream.</p>
+            <form onsubmit="handleStudentSubmit(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="stdName" required placeholder="e.g. Alex Smith">
+                </div>
+                <div class="form-group">
+                    <label>University Number</label>
+                    <input type="text" id="stdId" required placeholder="e.g. ENG2026001">
+                </div>
+                <div class="form-group">
+                    <label>Select Branch</label>
+                    <select id="stdBranch" required>
+                        <option value="">-- Choose Branch --</option>
+                        <option value="CSE">Computer Science Engineering</option>
+                        <option value="ECE">Electronics & Communication</option>
+                        <option value="ME">Mechanical Engineering</option>
+                        <option value="CE">Civil Engineering</option>
+                        <option value="AE">Aeronautical Engineering</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Current Semester</label>
+                    <select id="stdSemester" required>
+                        <option value="">-- Choose Semester --</option>
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Semester 6</option>
+                        <option value="7">Semester 7</option>
+                        <option value="8">Semester 8</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Continue to Portal</button>
+            </form>
+        </div>
+
+        <!-- VIEW 2B: PROFILE SETUP (TEACHER) -->
+        <div id="viewTeacherSetup" class="view">
+            <h2>Teacher Uploader Setup</h2>
+            <p>Enter your credentials to unlock upload permissions.</p>
+            <form onsubmit="handleTeacherSubmit(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="tchName" required placeholder="e.g. Prof. Johnson">
+                </div>
+                <div class="form-group">
+                    <label>Teacher University ID</label>
+                    <input type="text" id="tchId" required placeholder="e.g. TCH-992">
+                </div>
+                <div class="form-group">
+                    <label>Department / Branch</label>
+                    <select id="tchBranch" required>
+                        <option value="">-- Choose Branch --</option>
+                        <option value="CSE">Computer Science Engineering</option>
+                        <option value="ECE">Electronics & Communication</option>
+                        <option value="ME">Mechanical Engineering</option>
+                        <option value="CE">Civil Engineering</option>
+                        <option value="AE">Aeronautical Engineering</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Open Uploader Panel</button>
+            </form>
+        </div>
+
+        <!-- VIEW 3: STUDENT DASHBOARD -->
+        <div id="viewStudentDashboard" class="view">
+            <h2 id="stdWelcomeHeader">Study Portal</h2>
+            <p>Select your branch & semester or access your saved path below.</p>
+            
+            <div class="form-group">
+                <label>Branch Explorer</label>
+                <div class="grid-options" id="branchSelectorGrid">
+                    <div class="option-tile" onclick="filterBranch('CSE')">CSE</div>
+                    <div class="option-tile" onclick="filterBranch('ECE')">ECE</div>
+                    <div class="option-tile" onclick="filterBranch('ME')">Mechanical</div>
+                    <div class="option-tile" onclick="filterBranch('CE')">Civil</div>
+                    <div class="option-tile" onclick="filterBranch('AE')">Aeronautical</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Semester Explorer</label>
+                <div class="grid-options" id="semSelectorGrid">
+                    <!-- Dynamic Semesters 1-8 -->
+                </div>
+            </div>
+
+            <h3 id="currentSelectionLabel" style="font-size: 1rem; margin-top: 15px;">Available Notes</h3>
+            <div class="file-list" id="studentFileList">
+                <!-- Dynamic File Results -->
+            </div>
+        </div>
+
+        <!-- VIEW 4: TEACHER UPLOAD DASHBOARD -->
+        <div id="viewTeacherDashboard" class="view">
+            <h2 id="tchWelcomeHeader">Uploader Panel</h2>
+            <p>Upload study notes directly for your branch students.</p>
+            <form onsubmit="handleFileUpload(event)">
+                <div class="form-group">
+                    <label>Target Branch</label>
+                    <select id="uploadBranch" required>
+                        <option value="CSE">Computer Science Engineering</option>
+                        <option value="ECE">Electronics & Communication</option>
+                        <option value="ME">Mechanical Engineering</option>
+                        <option value="CE">Civil Engineering</option>
+                        <option value="AE">Aeronautical Engineering</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Semester</label>
+                    <select id="uploadSem" required>
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Semester 6</option>
+                        <option value="7">Semester 7</option>
+                        <option value="8">Semester 8</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Subject Name & Title</label>
+                    <input type="text" id="uploadTitle" required placeholder="e.g. Data Structures - Module 1 Notes">
+                </div>
+                <div class="form-group">
+                    <label>Select PDF File</label>
+                    <input type="file" id="uploadFile" accept=".pdf" required>
+                </div>
+                <button type="submit" class="btn-primary">Upload Material</button>
+            </form>
+        </div>
+
     </div>
-  </nav>
 
-  <!-- HERO SECTION -->
-  <section id="home" class="hero">
-    <div class="hero-content">
-      <h1>Engineering Notes</h1>
-
-      <a href="#notes" class="hero-btn">Explore Notes</a>
-    </div>
-  </section>
-
-  <!-- NOTES SECTION -->
-  <section id="notes" class="notes-section">
-
-    <div class="section-title">
-      <h2>📘 Study Materials</h2>
-      <p>Free engineering notes and important resources</p>
-    </div>
-
-
-    <!-- MAIN CONTENT -->
-   
-
-
-    <!-- 1ST SEM -->
-    <div class="card">
-      <h3>1st Semester</h3>
-
-      <a href="WebProgramming-notes-all modules.pdf" target="_blank">
-        Web Programming All Modules
-      </a>
-    </div>
-
-
-    <!-- 2ND SEM -->
-    <div class="card">
-      <h3>2nd Semester</h3>
-
-      <a href="math II 1, 2, 4 module notes.pdf" target="_blank">
-        Math II Module 1,2,4
-      </a>
-
-      <a href="physics Q-bank.pdf" target="_blank">
-        Physics Q-Bank
-      </a>
-
-      <a href="physics.pdf" target="_blank">
-        Physics Notes 1
-      </a>
-
-      <a href="phy.pdf" target="_blank">
-        Physics Notes 2
-      </a>
-
-      <a href="PPS-2026-qbank.docx" target="_blank">
-        PPS Q-Bank
-      </a>
-
-      <a href="PPS.pdf" target="_blank">
-        PPS Notes
-      </a>
-
-      <a href="IMP QUESTION BIOLOGY FOR ENGINEERS QUESTION BANK.pdf" target="_blank">
-        Biology Q-Bank
-      </a>
-
-      <a href="biology 10 marks answers.docx" target="_blank">
-        Biology 10 Marks Answers
-      </a>
-
-      <a href="Biology.pdf" target="_blank">
-        Biology 5 Marks
-      </a>
-
-      <a href="English Q-bank.docx" target="_blank">
-        English Q-Bank
-      </a>
-
-      <a href="English  2marks answers.pdf" target="_blank">
-        English 2 Marks Answers
-      </a>
-
-      <a href="english 5mark answers.pdf" target="_blank">
-        English 5 Marks Answers
-      </a>
-
-    </div>
-
-  </section>
-
-
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2026 Rehan Notes • Built by Rehan</p>
-  </footer>
-
-
-  <!-- FIREBASE -->
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCp_dBpfDmH41-ppTX2mRjzu-TIO6NrraA",
-  authDomain: "notes-7671d.firebaseapp.com",
-  projectId: "notes-7671d",
-  storageBucket: "notes-7671d.firebasestorage.app",
-  messagingSenderId: "249462166446",
-  appId: "1:249462166446:web:d14ef1b3d4cd2f814f6e3f",
-  measurementId: "G-6HM2PCREZF"
-};
-
-
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
-
-const provider = new GoogleAuthProvider();
-
-const loginBtn = document.getElementById("loginBtn");
-
-
-// CHECK LOGIN STATUS
-onAuthStateChanged(auth, (user) => {
-
-  if(user){
-
-    loginBtn.innerText = user.displayName;
-
-  } else {
-
-    window.location.href = "login.html";
-
-  }
-
-});
-
-
-// GOOGLE LOGIN
-loginBtn.addEventListener("click", () => {
-
-  signInWithPopup(auth, provider)
-    .then((result) => {
-
-      const user = result.user;
-
-      loginBtn.innerText = user.displayName;
-
-    })
-
-    .catch((error) => {
-
-      console.log(error);
-
-    });
-
-});
-
-
-// LOGOUT
-window.logout = function(){
-
-  signOut(auth).then(() => {
-
-    window.location.href = "login.html";
-
-  });
-
-}
-
-</script>
-
+    <script>
+        /* --- CORE JAVASCRIPT LOGIC & STATE MANAGEMENT --- */
+        let activeRole = null;
+        let selectedBranchFilter = '';
+        let selectedSemFilter = '';
+
+        // Initialize Semesters Grid
+        document.addEventListener('DOMContentLoaded', () => {
+            const semGrid = document.getElementById('semSelectorGrid');
+            for (let i = 1; i <= 8; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'option-tile';
+                tile.innerText = `Sem ${i}`;
+                tile.onclick = () => filterSemester(i);
+                semGrid.appendChild(tile);
+            }
+
+            // Check if profile exists locally
+            const savedRole = localStorage.getItem('user_role');
+            if (savedRole) {
+                activeRole = savedRole;
+                document.getElementById('logoutBtn').style.display = 'block';
+                if (savedRole === 'student') {
+                    showView('viewStudentDashboard');
+                    loadStudentData();
+                } else {
+                    showView('viewTeacherDashboard');
+                    loadTeacherData();
+                }
+            }
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            html.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function selectRole(role) {
+            activeRole = role;
+            if (role === 'student') {
+                showView('viewStudentSetup');
+            } else {
+                showView('viewTeacherSetup');
+            }
+        }
+
+        // Student Profile Handler
+        function handleStudentSubmit(e) {
+            e.preventDefault();
+            const profile = {
+                name: document.getElementById('stdName').value,
+                id: document.getElementById('stdId').value,
+                branch: document.getElementById('stdBranch').value,
+                semester: document.getElementById('stdSemester').value
+            };
+            localStorage.setItem('user_role', 'student');
+            localStorage.setItem('user_profile', JSON.stringify(profile));
+            document.getElementById('logoutBtn').style.display = 'block';
+            showView('viewStudentDashboard');
+            loadStudentData();
+        }
+
+        // Teacher Profile Handler
+        function handleTeacherSubmit(e) {
+            e.preventDefault();
+            const profile = {
+                name: document.getElementById('tchName').value,
+                id: document.getElementById('tchId').value,
+                branch: document.getElementById('tchBranch').value
+            };
+            localStorage.setItem('user_role', 'teacher');
+            localStorage.setItem('user_profile', JSON.stringify(profile));
+            document.getElementById('logoutBtn').style.display = 'block';
+            showView('viewTeacherDashboard');
+            loadTeacherData();
+        }
+
+        function loadStudentData() {
+            const profile = JSON.parse(localStorage.getItem('user_profile'));
+            if (profile) {
+                document.getElementById('stdWelcomeHeader').innerText = `Welcome, ${profile.name}`;
+                selectedBranchFilter = profile.branch;
+                selectedSemFilter = profile.semester;
+                fetchFiles();
+            }
+        }
+
+        function loadTeacherData() {
+            const profile = JSON.parse(localStorage.getItem('user_profile'));
+            if (profile) {
+                document.getElementById('tchWelcomeHeader').innerText = `Uploader Panel (${profile.name})`;
+                document.getElementById('uploadBranch').value = profile.branch;
+            }
+        }
+
+        function filterBranch(branch) {
+            selectedBranchFilter = branch;
+            fetchFiles();
+        }
+
+        function filterSemester(sem) {
+            selectedSemFilter = sem;
+            fetchFiles();
+        }
+
+        // Simulated Mock Fetch / Local Storage Registry for demo responsiveness
+        function handleFileUpload(e) {
+            e.preventDefault();
+            const title = document.getElementById('uploadTitle').value;
+            const branch = document.getElementById('uploadBranch').value;
+            const sem = document.getElementById('uploadSem').value;
+            const fileInput = document.getElementById('uploadFile');
+            
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                const newFile = { title, branch, semester: sem, fileName, date: new Date().toLocaleDateString() };
+                
+                let existingFiles = JSON.parse(localStorage.getItem('mock_notes') || '[]');
+                existingFiles.push(newFile);
+                localStorage.setItem('mock_notes', JSON.stringify(existingFiles));
+                
+                alert('Study material uploaded successfully!');
+                e.target.reset();
+            }
+        }
+
+        function fetchFiles() {
+            const fileListContainer = document.getElementById('studentFileList');
+            fileListContainer.innerHTML = '';
+            
+            document.getElementById('currentSelectionLabel').innerText = 
+                `Notes for: Branch [${selectedBranchFilter || 'All'}] - Semester [${selectedSemFilter || 'All'}]`;
+
+            let files = JSON.parse(localStorage.getItem('mock_notes') || '[]');
+            
+            // Default mock item if empty so screen looks populated
+            if (files.length === 0) {
+                files = [
+                    { title: 'Engineering Mathematics - Unit 1', branch: 'CSE', semester: '1', fileName: 'math_unit1.pdf', date: '2026-06-01' }
+                ];
+            }
+
+            const filtered = files.filter(f => {
+                let matchB = selectedBranchFilter ? f.branch === selectedBranchFilter : true;
+                let matchS = selectedSemFilter ? f.semester == selectedSemFilter : true;
+                return matchB && matchS;
+            });
+
+            if (filtered.length === 0) {
+                fileListContainer.innerHTML = `<p style="text-align:center; padding: 20px;">No notes uploaded for this section yet.</p>`;
+                return;
+            }
+
+            filtered.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.innerHTML = `
+                    <div class="file-info">
+                        <strong>${file.title}</strong>
+                        <span>Branch: ${file.branch} | Sem: ${file.semester} • ${file.date}</span>
+                    </div>
+                    <a href="#" class="download-btn" onclick="alert('Downloading ${file.fileName}...')">Download PDF</a>
+                `;
+                fileListContainer.appendChild(item);
+            });
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('user_role');
+            localStorage.removeItem('user_profile');
+            document.getElementById('logoutBtn').style.display = 'none';
+            activeRole = null;
+            showView('viewRoleSelect');
+        }
+    </script>
 </body>
 </html>
