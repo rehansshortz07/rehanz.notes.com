@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6366f1">
+  <title>UniNotes — Academic Resource Hub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Top Navigation -->
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="UniNotes home" onclick="goHome(event)">
+        <span class="brand-mark">U</span>
+        <span class="brand-text">
+          <strong>UniNotes</strong>
+          <small>Academic Resource Hub</small>
+        </span>
+      </a>
+
+      <div class="topbar-actions">
+        <span id="roleBadge" class="role-badge hidden"></span>
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+          <span id="themeIcon">☾</span>
+        </button>
+        <button class="profile-btn hidden" id="profileBtn" type="button" onclick="switchProfile()">
+          <span class="profile-avatar" id="profileAvatar">R</span>
+          <span class="profile-name" id="profileName">Profile</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <!-- Role Selection -->
+      <section id="roleView" class="view active">
+        <div class="hero-card">
+          <div class="hero-copy">
+            <span class="eyebrow">COLLEGE RESOURCE PLATFORM</span>
+            <h1>Everything you need.<br><span>In one place.</span></h1>
+            <p>
+              Find notes, question papers, assignments and study materials
+              organized by branch, semester and subject.
+            </p>
+          </div>
+
+          <div class="role-grid">
+            <button class="role-card" type="button" onclick="selectRole('student')">
+              <span class="role-icon student-icon">🎓</span>
+              <span class="role-card-content">
+                <strong>I'm a Student</strong>
+                <small>Browse and download academic resources.</small>
+              </span>
+              <span class="arrow">→</span>
+            </button>
+
+            <button class="role-card" type="button" onclick="selectRole('teacher')">
+              <span class="role-icon teacher-icon">📚</span>
+              <span class="role-card-content">
+                <strong>I'm Faculty</strong>
+                <small>Upload and manage study materials.</small>
+              </span>
+              <span class="arrow">→</span>
+            </button>
+          </div>
+
+          <div class="hero-stats">
+            <div><strong>5</strong><span>Branches</span></div>
+            <div><strong>8</strong><span>Semesters</span></div>
+            <div><strong>∞</strong><span>Resources</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Student Profile -->
+      <section id="studentSetupView" class="view">
+        <div class="form-card">
+          <button class="back-btn" type="button" onclick="showView('roleView')">← Back</button>
+          <div class="section-heading">
+            <span class="section-icon">🎓</span>
+            <div>
+              <span class="eyebrow">STUDENT PROFILE</span>
+              <h2>Set up your profile</h2>
+              <p>Just a few details to personalize your study portal.</p>
+            </div>
+          </div>
+
+          <form id="studentForm" class="smart-form">
+            <div class="field">
+              <label for="studentName">Full name</label>
+              <input id="studentName" type="text" placeholder="e.g. Shaikh Rehan" autocomplete="name" required>
+            </div>
+
+            <div class="field">
+              <label for="studentId">University number</label>
+              <input id="studentId" type="text" placeholder="e.g. 2XXME0001" required>
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label for="studentBranch">Branch</label>
+                <select id="studentBranch" required>
+                  <option value="">Select branch</option>
+                  <option value="CSE">Computer Science Engineering</option>
+                  <option value="ECE">Electronics & Communication</option>
+                  <option value="ME">Mechanical Engineering</option>
+                  <option value="CE">Civil Engineering</option>
+                  <option value="AE">Aeronautical Engineering</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="studentSemester">Current semester</label>
+                <select id="studentSemester" required>
+                  <option value="">Select semester</option>
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                  <option value="3">Semester 3</option>
+                  <option value="4">Semester 4</option>
+                  <option value="5">Semester 5</option>
+                  <option value="6">Semester 6</option>
+                  <option value="7">Semester 7</option>
+                  <option value="8">Semester 8</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="primary-btn" type="submit">Enter Student Portal <span>→</span></button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Teacher Profile -->
+      <section id="teacherSetupView" class="view">
+        <div class="form-card">
+          <button class="back-btn" type="button" onclick="showView('roleView')">← Back</button>
+          <div class="section-heading">
+            <span class="section-icon faculty">📚</span>
+            <div>
+              <span class="eyebrow">FACULTY PORTAL</span>
+              <h2>Faculty profile</h2>
+              <p>Set up your faculty workspace. Verification can be added later.</p>
+            </div>
+          </div>
+
+          <form id="teacherForm" class="smart-form">
+            <div class="field">
+              <label for="teacherName">Full name</label>
+              <input id="teacherName" type="text" placeholder="e.g. Prof. Mohammed" required>
+            </div>
+
+            <div class="field">
+              <label for="teacherId">University / faculty ID</label>
+              <input id="teacherId" type="text" placeholder="e.g. FAC-1024" required>
+            </div>
+
+            <div class="field">
+              <label for="teacherBranch">Department / branch</label>
+              <select id="teacherBranch" required>
+                <option value="">Select branch</option>
+                <option value="CSE">Computer Science Engineering</option>
+                <option value="ECE">Electronics & Communication</option>
+                <option value="ME">Mechanical Engineering</option>
+                <option value="CE">Civil Engineering</option>
+                <option value="AE">Aeronautical Engineering</option>
+              </select>
+            </div>
+
+            <button class="primary-btn" type="submit">Open Faculty Portal <span>→</span></button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Student Dashboard -->
+      <section id="studentDashboardView" class="view">
+        <div class="dashboard-header">
+          <div>
+            <span class="eyebrow">STUDENT PORTAL</span>
+            <h2 id="studentWelcome">Welcome back</h2>
+            <p>Choose a branch, semester and subject to find your materials.</p>
+          </div>
+          <div class="dashboard-avatar" id="dashboardAvatar">R</div>
+        </div>
+
+        <div class="search-box">
+          <span>⌕</span>
+          <input id="resourceSearch" type="search" placeholder="Search subjects, notes, question papers..." oninput="renderResources()">
+        </div>
+
+        <div class="selection-panel">
+          <div class="selection-title">
+            <span>Browse library</span>
+            <small id="selectionSummary">Select your branch and semester</small>
+          </div>
+
+          <div class="control-group">
+            <label>Branch</label>
+            <div class="chip-grid" id="branchGrid"></div>
+          </div>
+
+          <div class="control-group">
+            <label>Semester</label>
+            <div class="chip-grid semester-grid" id="semesterGrid"></div>
+          </div>
+        </div>
+
+        <div class="subjects-section">
+          <div class="section-line">
+            <div>
+              <h3>Subjects</h3>
+              <p>Select a subject to view its resources.</p>
+            </div>
+            <span class="count-badge" id="subjectCount">0</span>
+          </div>
+          <div class="subject-grid" id="subjectGrid"></div>
+        </div>
+
+        <div class="resources-section">
+          <div class="section-line">
+            <div>
+              <h3 id="resourceHeading">Resources</h3>
+              <p id="resourceSubheading">Choose a subject above.</p>
+            </div>
+            <span class="count-badge" id="resourceCount">0</span>
+          </div>
+          <div class="resource-list" id="resourceList"></div>
+        </div>
+      </section>
+
+      <!-- Teacher Dashboard -->
+      <section id="teacherDashboardView" class="view">
+        <div class="dashboard-header">
+          <div>
+            <span class="eyebrow">FACULTY PORTAL</span>
+            <h2 id="teacherWelcome">Faculty workspace</h2>
+            <p>Upload organized academic materials for your students.</p>
+          </div>
+          <div class="dashboard-avatar faculty-avatar" id="teacherAvatar">F</div>
+        </div>
+
+        <div class="faculty-layout">
+          <div class="upload-card">
+            <div class="card-heading">
+              <div class="heading-icon">↑</div>
+              <div>
+                <h3>Upload material</h3>
+                <p>Add a PDF to the academic library.</p>
+              </div>
+            </div>
+
+            <form id="uploadForm" class="smart-form">
+              <div class="form-row">
+                <div class="field">
+                  <label for="uploadBranch">Branch</label>
+                  <select id="uploadBranch" required></select>
+                </div>
+                <div class="field">
+                  <label for="uploadSemester">Semester</label>
+                  <select id="uploadSemester" required></select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="uploadSubject">Subject</label>
+                <select id="uploadSubject" required></select>
+              </div>
+
+              <div class="field">
+                <label for="uploadType">Material type</label>
+                <select id="uploadType" required>
+                  <option>Lecture Notes</option>
+                  <option>Question Paper</option>
+                  <option>Assignment</option>
+                  <option>Lab Manual</option>
+                  <option>Important Questions</option>
+                  <option>Syllabus</option>
+                  <option>Reference Material</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="uploadTitle">Resource title</label>
+                <input id="uploadTitle" type="text" placeholder="e.g. Thermodynamics — Unit 1 Notes" required>
+              </div>
+
+              <div class="field">
+                <label for="uploadDescription">Short description <span>(optional)</span></label>
+                <textarea id="uploadDescription" rows="3" placeholder="Briefly describe this material..."></textarea>
+              </div>
+
+              <label class="file-drop" for="uploadFile">
+                <input id="uploadFile" type="file" accept=".pdf,application/pdf" required>
+                <span class="upload-symbol">↑</span>
+                <strong>Choose PDF file</strong>
+                <small id="fileName">PDF up to 20 MB</small>
+              </label>
+
+              <button class="primary-btn" type="submit">Upload to Library <span>↑</span></button>
+              <p class="security-note">🔒 Faculty uploads will be protected by Supabase authorization in the production version.</p>
+            </form>
+          </div>
+
+          <aside class="faculty-info-card">
+            <span class="eyebrow">YOUR WORKSPACE</span>
+            <h3>Keep materials organized</h3>
+            <ul class="check-list">
+              <li><span>✓</span> Select the correct branch</li>
+              <li><span>✓</span> Select semester and subject</li>
+              <li><span>✓</span> Give every file a clear title</li>
+              <li><span>✓</span> Upload PDF materials</li>
+            </ul>
+            <div class="mini-stat">
+              <strong id="teacherUploadCount">0</strong>
+              <span>materials in this demo</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 UniNotes</span>
+      <span>Built for a better academic workflow.</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
