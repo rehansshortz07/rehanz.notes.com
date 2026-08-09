@@ -4,6 +4,14 @@
    Supabase can replace these demo functions later.
    ========================================================= */
 
+const SUPABASE_URL = "https://vxzsqdrcuwesorystkdn.supabase.co/rest/v1/";
+const SUPABASE_KEY = "sb_publishable_amVCeTz9-6L4rKdvJqIn_A_QJ7J3Tc3";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
 const BRANCHES = [
   { code: "CSE", name: "Computer Science Engineering", short: "CSE" },
   { code: "ECE", name: "Electronics & Communication", short: "ECE" },
