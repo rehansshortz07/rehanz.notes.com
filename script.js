@@ -500,21 +500,32 @@ async function handleTeacherSubmit(event) {
     }
 }
 
-// Add a Preview Toggle function so faculty can view what students see
-function toggleStudentPreview() {
+/* =========================================================
+   AUTHORIZED FACULTY VERIFICATION & PREVIEW UPDATES
+   ========================================================= */
+
+window.toggleStudentPreview = function() {
     if (currentRole !== "teacher") return;
     
-    // Temporarily switch view elements to the student portal layout for previewing
-    const isPreviewing = document.getElementById("teacherDashboardView").classList.contains("hidden");
+    const teacherView = document.getElementById("teacherDashboardView");
+    const studentView = document.getElementById("studentDashboardView");
+    
+    if (!teacherView || !studentView) return;
+
+    const isPreviewing = studentView.classList.contains("active");
     
     if (!isPreviewing) {
-        document.getElementById("teacherDashboardView").classList.remove("active");
-        document.getElementById("studentDashboardView").classList.add("active");
+        teacherView.classList.remove("active");
+        studentView.classList.add("active");
         renderSubjects();
         renderResources();
-        showToast("Switched to Student View Preview. Click 'Back to Workspace' to return.");
+        showToast("Switched to Student View Preview.");
+    } else {
+        studentView.classList.remove("active");
+        teacherView.classList.add("active");
+        showToast("Returned to Faculty Workspace.");
     }
-}
+};
 
 async function restoreTeacherProfile(user) {
     const { data: profile, error } = await supabaseClient
