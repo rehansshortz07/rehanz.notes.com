@@ -403,14 +403,23 @@ async function handleTeacherSubmit(event) {
     try {
         let user = null;
 
+        // 1. Try signing up first
         let { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
 
         if (authError) {
-            const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (loginError) {
+            // Check if user already exists (handles 422 Unprocessable Content / already registered)
+            if (authError.message?.toLowerCase().includes("already registered") || authError.status === 422) {
+                console.log("User already exists. Switching to sign in...");
+                
+                // 2. Fall back to signing in if account already exists
+                const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (loginError) {
+                    throw loginError;
+                }
+                user = loginData?.user;
+            } else {
                 throw authError;
             }
-            user = loginData?.user;
         } else {
             user = authData?.user;
         }
