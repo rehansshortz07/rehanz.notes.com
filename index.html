@@ -10,6 +10,12 @@
 <body>
 <div class="app-shell">
 
+<!-- Workspace Return Banner (Visible only during student preview mode) -->
+<div id="previewBanner" class="preview-banner hidden">
+  <span>👁 You are currently viewing the app as a student.</span>
+  <button type="button" class="preview-exit-btn" onclick="toggleStudentPreview()">← Return to Workspace</button>
+</div>
+
 <header class="topbar">
   <a class="brand" href="#" aria-label="UniNotes home" onclick="goHome(event)">
     <span class="brand-mark">U</span>
@@ -240,6 +246,13 @@
       <span class="count-badge" id="resourceCount">0</span>
     </div>
     <div class="resource-list" id="resourceList"></div>
+    
+    <!-- Load More Pagination Button -->
+    <div id="loadMoreContainer" class="hidden" style="margin-top: 16px; text-align: center;">
+      <button type="button" class="primary-btn" id="loadMoreBtn" onclick="loadMoreResources()" style="background: var(--surface-2); color: var(--text); border: 1px solid var(--border);">
+        Load More Resources ↓
+      </button>
+    </div>
   </div>
 </section>
 
@@ -311,17 +324,27 @@
             <small id="fileName">PDF up to 10 MB</small>
           </label>
 
-          <button class="primary-btn" type="submit">Upload to Library <span>↑</span></button>
+          <!-- Real-time Upload Progress Bar Container -->
+          <div id="uploadProgressContainer" class="hidden" style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 4px;">
+              <span id="uploadProgressLabel">Uploading...</span>
+              <span id="uploadProgressPercent">0%</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; border: 1px solid var(--border);">
+              <div id="uploadProgressBar" style="width: 0%; height: 100%; background: var(--primary); transition: width 100ms ease;"></div>
+            </div>
+          </div>
+
+          <button class="primary-btn" id="uploadSubmitBtn" type="submit" style="margin-top: 14px;">Upload to Library <span>↑</span></button>
           <p class="security-note">🔒 Uploads are restricted by Supabase RLS to approved faculty accounts.</p>
         </form>
       </div>
 
-      <button class="primary-btn" type="button" onclick="toggleStudentPreview()" style="margin-bottom: 16px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border);">
-  👁 Preview What Students See
-</button>
+      <button class="primary-btn" type="button" onclick="toggleStudentPreview()" style="margin-top: 16px; margin-bottom: 16px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border);">
+        👁 Preview What Students See
+      </button>
 
-      <!-- Added Manage your uploads section below the upload-card -->
-      <div class="upload-card" style="margin-top: 16px;">
+      <div class="upload-card">
         <div class="card-heading">
           <div class="heading-icon" style="color: var(--danger); background: var(--danger-soft, #fef2f2);">🗑</div>
           <div>
