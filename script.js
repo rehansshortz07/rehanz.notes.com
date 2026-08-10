@@ -1,5 +1,5 @@
 /* =========================================================
-   UniNotes - Complete Supabase Integration
+   UniNotes - Complete Supabase Integration & Enhancements
    ========================================================= */
 
 "use strict";
@@ -80,6 +80,10 @@ let selectedSubject = "";
 
 let toastTimer = null;
 
+// Pagination State
+let displayedResourceLimit = 5;
+const RESOURCE_PAGE_SIZE = 5;
+
 /* =========================================================
    DOM INITIALIZATION
    ========================================================= */
@@ -108,15 +112,12 @@ async function initializeUniNotes() {
             return;
         }
 
-        console.log("Active Supabase session found:", session.user.id);
-
         let restored = await restoreStudentProfile(session.user);
         if (restored) return;
 
         restored = await restoreTeacherProfile(session.user);
         if (restored) return;
 
-        console.log("Authenticated but no profile found. Prompting setup.");
         showView("roleView");
 
     } catch (error) {
@@ -125,13 +126,7 @@ async function initializeUniNotes() {
     }
 }
 
-/* =========================================================
-   AUTH STATE LISTENER
-   ========================================================= */
-
 supabaseClient.auth.onAuthStateChange(async (event) => {
-    console.log("Auth event:", event);
-
     if (event === "SIGNED_OUT") {
         currentRole = null;
         currentProfile = null;
@@ -289,21 +284,8 @@ async function handleStudentSubmit(event) {
         const user = authData?.user;
         if (!user) throw new Error("Authentication failed.");
 
-        const { data: branchData, error: branchError } = await supabaseClient
-            .from("branches")
-            .select("id, code, name")
-            .eq("code", branchCode)
-            .single();
-
-        if (branchError || !branchData) throw new Error("Invalid branch selection.");
-
-        const { data: semesterData, error: semesterError } = await supabaseClient
-            .from("semesters")
-            .select("id, semester_number")
-            .eq("semester_number", Number(semesterNumber))
-            .single();
-
-        if (semesterError || !semesterData) throw new Error("Invalid semester selection.");
+        const { data: branchData } = await supabaseClient.from("branches").select("id, code, name").eq("code", branchCode).single();
+        const { data: semesterData } = await supabaseClient.from("semesters").select("id, semester_number").eq("semester_number", Number(semesterNumber)).single();
 
         const profilePayload = {
             id: user.id,
@@ -313,11 +295,7 @@ async function handleStudentSubmit(event) {
             current_semester_id: semesterData.id
         };
 
-        const { error: profileError } = await supabaseClient
-            .from("student_profiles")
-            .upsert(profilePayload, { onConflict: "id" });
-
-        if (profileError) throw profileError;
+        await supabaseClient.from("student_profiles").upsert(profilePayload, { onConflict: "id" });
 
         currentRole = "student";
         currentProfile = {
@@ -334,9 +312,7 @@ async function handleStudentSubmit(event) {
         saveLocalProfile();
         selectedBranch = branchCode;
         selectedSemester = String(semesterNumber);
-        
-        const subjects = getSubjects(selectedBranch, selectedSemester);
-        selectedSubject = subjects[0] || "";
+        selectedSubject = getSubjects(selectedBranch, selectedSemester)[0] || "";
 
         openStudentDashboard();
         showToast("Student portal loaded successfully.");
@@ -350,11 +326,7 @@ async function handleStudentSubmit(event) {
 async function restoreStudentProfile(user) {
     const { data: profile, error } = await supabaseClient
         .from("student_profiles")
-        .select(`
-            id, name, university_number, branch_id, current_semester_id,
-            branches ( code, name ),
-            semesters ( semester_number )
-        `)
+        .select(`id, name, university_number, branch_id, current_semester_id, branches ( code, name ), semesters ( semester_number )`)
         .eq("id", user.id)
         .maybeSingle();
 
@@ -374,17 +346,13 @@ async function restoreStudentProfile(user) {
 
     selectedBranch = currentProfile.branch;
     selectedSemester = currentProfile.semester;
-    const subjects = getSubjects(selectedBranch, selectedSemester);
-    selectedSubject = subjects[0] || "";
+    selectedSubject = getSubjects(selectedBranch, selectedSemester)[0] || "";
 
     saveLocalProfile();
     openStudentDashboard();
     return true;
 }
 
-/* =========================================================
-   TEACHER AUTHENTICATION & PROFILE CREATION
-   ========================================================= */
 /* =========================================================
    AUTHORIZED FACULTY VERIFICATION & PREVIEW UPDATES
    ========================================================= */
@@ -404,12 +372,10 @@ async function handleTeacherSubmit(event) {
     }
 
     try {
-        // 1. Check against the authorized faculty JSON registry first
         const response = await fetch("authorized_faculty.json");
         if (!response.ok) throw new Error("Could not load authorization records.");
         
         const authorizedList = await response.json();
-        
         const isAuthorized = authorizedList.some(teacher => 
             teacher.universityId.toLowerCase() === universityId.toLowerCase() &&
             teacher.branch === branchCode
@@ -437,13 +403,7 @@ async function handleTeacherSubmit(event) {
 
         if (!user) throw new Error("Faculty authentication failed.");
 
-        const { data: branchData, error: branchError } = await supabaseClient
-            .from("branches")
-            .select("id, code, name")
-            .eq("code", branchCode)
-            .single();
-
-        if (branchError || !branchData) throw new Error("Invalid department branch.");
+        const { data: branchData } = await supabaseClient.from("branches").select("id, code, name").eq("code", branchCode).single();
 
         const profilePayload = {
             auth_user_id: user.id,
@@ -453,29 +413,14 @@ async function handleTeacherSubmit(event) {
             approved: true
         };
 
-        const { data: existingTeacher } = await supabaseClient
-            .from("teacher_profiles")
-            .select("id")
-            .eq("auth_user_id", user.id)
-            .maybeSingle();
+        const { data: existingTeacher } = await supabaseClient.from("teacher_profiles").select("id").eq("auth_user_id", user.id).maybeSingle();
 
         let teacherId;
         if (existingTeacher) {
-            const { data: updated, error: updateErr } = await supabaseClient
-                .from("teacher_profiles")
-                .update(profilePayload)
-                .eq("auth_user_id", user.id)
-                .select("id")
-                .single();
-            if (updateErr) throw updateErr;
+            const { data: updated } = await supabaseClient.from("teacher_profiles").update(profilePayload).eq("auth_user_id", user.id).select("id").single();
             teacherId = updated.id;
         } else {
-            const { data: inserted, error: insertErr } = await supabaseClient
-                .from("teacher_profiles")
-                .insert(profilePayload)
-                .select("id")
-                .single();
-            if (insertErr) throw insertErr;
+            const { data: inserted } = await supabaseClient.from("teacher_profiles").insert(profilePayload).select("id").single();
             teacherId = inserted.id;
         }
 
@@ -501,7 +446,7 @@ async function handleTeacherSubmit(event) {
 }
 
 /* =========================================================
-   AUTHORIZED FACULTY VERIFICATION & PREVIEW UPDATES
+   WORKSPACE RETURN BANNER & PREVIEW TOGGLE
    ========================================================= */
 
 window.toggleStudentPreview = function() {
@@ -509,6 +454,7 @@ window.toggleStudentPreview = function() {
     
     const teacherView = document.getElementById("teacherDashboardView");
     const studentView = document.getElementById("studentDashboardView");
+    const previewBanner = document.getElementById("previewBanner");
     
     if (!teacherView || !studentView) return;
 
@@ -517,12 +463,14 @@ window.toggleStudentPreview = function() {
     if (!isPreviewing) {
         teacherView.classList.remove("active");
         studentView.classList.add("active");
+        if (previewBanner) previewBanner.classList.remove("hidden");
         renderSubjects();
         renderResources();
         showToast("Switched to Student View Preview.");
     } else {
         studentView.classList.remove("active");
         teacherView.classList.add("active");
+        if (previewBanner) previewBanner.classList.add("hidden");
         showToast("Returned to Faculty Workspace.");
     }
 };
@@ -530,10 +478,7 @@ window.toggleStudentPreview = function() {
 async function restoreTeacherProfile(user) {
     const { data: profile, error } = await supabaseClient
         .from("teacher_profiles")
-        .select(`
-            id, auth_user_id, name, university_id, branch_id, approved,
-            branches ( code, name )
-        `)
+        .select(`id, auth_user_id, name, university_id, branch_id, approved, branches ( code, name )`)
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
@@ -576,6 +521,11 @@ async function logoutUser() {
     currentProfile = null;
     localStorage.removeItem("uninotes_profile");
     localStorage.removeItem("uninotes_role");
+    
+    // Hide preview banner on logout
+    const banner = document.getElementById("previewBanner");
+    if (banner) banner.classList.add("hidden");
+
     showView("roleView");
     showToast("Signed out successfully.");
 }
@@ -614,8 +564,7 @@ function openTeacherDashboard() {
     updateTeacherSubjects();
     updateHeaderForRole("teacher");
     updateTeacherUploadCount();
-    
-    loadTeacherUploads(); // Populates files list immediately upon opening[cite: 11]
+    loadTeacherUploads();
     
     showView("teacherDashboardView");
 }
@@ -648,8 +597,8 @@ function setAvatar(elementId, name) {
 
 function selectBranch(branch) {
     selectedBranch = branch;
-    const subjects = getSubjects(branch, selectedSemester);
-    selectedSubject = subjects[0] || "";
+    selectedSubject = getSubjects(branch, selectedSemester)[0] || "";
+    displayedResourceLimit = RESOURCE_PAGE_SIZE; // Reset pagination limit on selection change
     updateSelectionButtons();
     renderSubjects();
     renderResources();
@@ -657,8 +606,8 @@ function selectBranch(branch) {
 
 function selectSemester(semester) {
     selectedSemester = String(semester);
-    const subjects = getSubjects(selectedBranch, selectedSemester);
-    selectedSubject = subjects[0] || "";
+    selectedSubject = getSubjects(selectedBranch, selectedSemester)[0] || "";
+    displayedResourceLimit = RESOURCE_PAGE_SIZE; // Reset pagination limit on selection change
     updateSelectionButtons();
     renderSubjects();
     renderResources();
@@ -710,13 +659,14 @@ function renderSubjects() {
 
 function selectSubject(subject) {
     selectedSubject = subject;
+    displayedResourceLimit = RESOURCE_PAGE_SIZE; // Reset pagination limit on subject change
     renderSubjects();
     renderResources();
     document.querySelector(".resources-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 /* =========================================================
-   RESOURCES & SUPABASE STORAGE INTEGRATION
+   RESOURCES & PAGINATION SUPPORT
    ========================================================= */
 
 async function getResourcesFromDatabase() {
@@ -744,12 +694,7 @@ async function getResourcesFromDatabase() {
             .in("subject_id", subjectIds)
             .eq("status", "published");
 
-        if (error) {
-            console.error("Error fetching notes from DB:", error);
-            return [];
-        }
-
-        if (!notesData || notesData.length === 0) return [];
+        if (error || !notesData) return [];
 
         return notesData.map(note => ({
             id: note.id,
@@ -799,13 +744,21 @@ async function renderResources() {
     const heading = document.getElementById("resourceHeading");
     if (heading) heading.textContent = search ? "Search results" : (selectedSubject || "Resources");
 
-    const subheading = document.getElementById("resourceSubheading");
-    if (subheading) subheading.textContent = search ? `Results matching “${search}”` : "Study materials available for this subject.";
-
     const count = document.getElementById("resourceCount");
     if (count) count.textContent = resources.length;
 
-    if (!resources.length) {
+    // Apply pagination constraint limit
+    const paginatedResources = resources.slice(0, displayedResourceLimit);
+    const loadMoreContainer = document.getElementById("loadMoreContainer");
+    if (loadMoreContainer) {
+        if (resources.length > displayedResourceLimit) {
+            loadMoreContainer.classList.remove("hidden");
+        } else {
+            loadMoreContainer.classList.add("hidden");
+        }
+    }
+
+    if (!paginatedResources.length) {
         list.innerHTML = `
             <div class="empty-state">
                 <strong>No resources found</strong>
@@ -815,7 +768,7 @@ async function renderResources() {
         return;
     }
 
-    list.innerHTML = resources.map(resource => `
+    list.innerHTML = paginatedResources.map(resource => `
         <div class="resource-item">
             <div class="file-icon">PDF</div>
             <div class="resource-info">
@@ -838,6 +791,11 @@ async function renderResources() {
     });
 }
 
+function loadMoreResources() {
+    displayedResourceLimit += RESOURCE_PAGE_SIZE;
+    renderResources();
+}
+
 /* =========================================================
    PDF DOWNLOAD FROM SUPABASE STORAGE
    ========================================================= */
@@ -854,9 +812,7 @@ async function downloadResourceFile(storagePath, fileName) {
             .from("notes-bucket")
             .createSignedUrl(storagePath, 60);
 
-        if (error || !data?.signedUrl) {
-            throw error || new Error("Could not create signed download URL.");
-        }
+        if (error || !data?.signedUrl) throw error || new Error("Could not create signed download URL.");
 
         const link = document.createElement("a");
         link.href = data.signedUrl;
@@ -874,7 +830,7 @@ async function downloadResourceFile(storagePath, fileName) {
 }
 
 /* =========================================================
-   TEACHER PDF UPLOAD & MANAGEMENT
+   TEACHER PDF UPLOAD & PROGRESS BAR FEEDBACK
    ========================================================= */
 
 async function handleTeacherUpload(event) {
@@ -909,13 +865,31 @@ async function handleTeacherUpload(event) {
     const title = document.getElementById("uploadTitle").value.trim();
     const description = document.getElementById("uploadDescription").value.trim();
 
+    // Elements for progress feedback
+    const progressContainer = document.getElementById("uploadProgressContainer");
+    const progressBar = document.getElementById("uploadProgressBar");
+    const progressPercent = document.getElementById("uploadProgressPercent");
+    const uploadSubmitBtn = document.getElementById("uploadSubmitBtn");
+
     try {
-        showToast("Uploading PDF to Supabase Storage...");
+        if (progressContainer) progressContainer.classList.remove("hidden");
+        if (uploadSubmitBtn) uploadSubmitBtn.disabled = true;
+
+        // Simulate progress intervals for smoother UI feedback
+        let progress = 10;
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        if (progressPercent) progressPercent.textContent = `${progress}%`;
+
+        const progressInterval = setInterval(() => {
+            if (progress < 85) {
+                progress += 15;
+                if (progressBar) progressBar.style.width = `${progress}%`;
+                if (progressPercent) progressPercent.textContent = `${progress}%`;
+            }
+        }, 200);
 
         const { data: branchData } = await supabaseClient.from("branches").select("id").eq("code", branchCode).single();
         const { data: semData } = await supabaseClient.from("semesters").select("id").eq("semester_number", Number(semesterNumber)).single();
-
-        if (!branchData || !semData) throw new Error("Invalid branch or semester.");
 
         let { data: subjectData } = await supabaseClient
             .from("subjects")
@@ -927,12 +901,11 @@ async function handleTeacherUpload(event) {
 
         let subjectId = subjectData?.id;
         if (!subjectId) {
-            const { data: newSub, error: subErr } = await supabaseClient
+            const { data: newSub } = await supabaseClient
                 .from("subjects")
                 .insert({ branch_id: branchData.id, semester_id: semData.id, name: subjectName })
                 .select("id")
                 .single();
-            if (subErr) throw subErr;
             subjectId = newSub.id;
         }
 
@@ -943,6 +916,10 @@ async function handleTeacherUpload(event) {
         const { error: uploadError } = await supabaseClient.storage
             .from("notes-bucket")
             .upload(storagePath, file);
+
+        clearInterval(progressInterval);
+        if (progressBar) progressBar.style.width = `100%`;
+        if (progressPercent) progressPercent.textContent = `100%`;
 
         if (uploadError) throw uploadError;
 
@@ -966,13 +943,18 @@ async function handleTeacherUpload(event) {
         document.getElementById("fileName").textContent = "PDF up to 20 MB";
         
         updateTeacherUploadCount();
-        loadTeacherUploads(); // Refresh the uploads management list
-
+        loadTeacherUploads();
         showToast("PDF uploaded and published successfully!");
 
     } catch (err) {
         console.error("Upload failed:", err);
         showToast(err.message || "File upload failed.");
+    } finally {
+        if (uploadSubmitBtn) uploadSubmitBtn.disabled = false;
+        setTimeout(() => {
+            if (progressContainer) progressContainer.classList.add("hidden");
+            if (progressBar) progressBar.style.width = `0%`;
+        }, 1200);
     }
 }
 
@@ -1027,24 +1009,13 @@ async function deleteTeacherNote(noteId, storagePath) {
         showToast("Deleting file from storage and database...");
 
         if (storagePath) {
-            const { error: storageError } = await supabaseClient.storage
-                .from("notes-bucket")
-                .remove([storagePath]);
-
-            if (storageError) {
-                console.error("Storage deletion warning:", storageError);
-            }
+            await supabaseClient.storage.from("notes-bucket").remove([storagePath]);
         }
 
-        const { error: dbError } = await supabaseClient
-            .from("notes")
-            .delete()
-            .eq("id", noteId);
-
+        const { error: dbError } = await supabaseClient.from("notes").delete().eq("id", noteId);
         if (dbError) throw dbError;
 
         showToast("File deleted successfully.");
-        
         updateTeacherUploadCount();
         loadTeacherUploads();
 
@@ -1073,7 +1044,7 @@ async function updateTeacherUploadCount() {
 }
 
 /* =========================================================
-   SUBJECTS DYNAMIC MAPPING HELPER
+   SUBJECTS MAPPINGS & NAVIGATION UTILITIES
    ========================================================= */
 
 function getSubjects(branch, semester) {
@@ -1095,10 +1066,6 @@ function updateTeacherSubjects() {
         <option value="${escapeHTML(subject)}">${escapeHTML(subject)}</option>
     `).join("");
 }
-
-/* =========================================================
-   NAVIGATION & UTILITIES
-   ========================================================= */
 
 async function switchProfile() {
     const confirmed = confirm("Do you want to sign out?");
