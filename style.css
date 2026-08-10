@@ -116,6 +116,39 @@ textarea:focus-visible {
   min-width: 0;
 }
 
+/* Workspace Return Banner Styles */
+.preview-banner {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 650;
+  box-shadow: var(--shadow-sm);
+}
+
+.preview-exit-btn {
+  background: #ffffff;
+  color: #92400e;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 750;
+  transition: var(--transition);
+}
+
+.preview-exit-btn:hover {
+  background: #fef3c7;
+}
+
 .brand-mark {
   width: 40px;
   height: 40px;
