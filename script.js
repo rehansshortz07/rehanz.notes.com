@@ -386,10 +386,6 @@ async function restoreStudentProfile(user) {
    TEACHER AUTHENTICATION & PROFILE CREATION
    ========================================================= */
 
-/* =========================================================
-   TEACHER AUTHENTICATION & PROFILE CREATION (FIXED)
-   ========================================================= */
-
 async function handleTeacherSubmit(event) {
     event.preventDefault();
 
@@ -407,7 +403,6 @@ async function handleTeacherSubmit(event) {
     try {
         let user = null;
 
-        // 1. Try signing up, fall back to sign in if user already exists
         let { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
 
         if (authError) {
@@ -422,7 +417,6 @@ async function handleTeacherSubmit(event) {
 
         if (!user) throw new Error("Faculty authentication failed.");
 
-        // 2. Fetch Branch ID
         const { data: branchData, error: branchError } = await supabaseClient
             .from("branches")
             .select("id, code, name")
@@ -431,7 +425,6 @@ async function handleTeacherSubmit(event) {
 
         if (branchError || !branchData) throw new Error("Invalid department branch.");
 
-        // 3. Upsert Teacher Profile
         const profilePayload = {
             auth_user_id: user.id,
             name: name,
@@ -574,6 +567,9 @@ function openTeacherDashboard() {
     updateTeacherSubjects();
     updateHeaderForRole("teacher");
     updateTeacherUploadCount();
+    
+    loadTeacherUploads(); // Populates files list immediately upon opening[cite: 11]
+    
     showView("teacherDashboardView");
 }
 
@@ -831,7 +827,7 @@ async function downloadResourceFile(storagePath, fileName) {
 }
 
 /* =========================================================
-   TEACHER PDF UPLOAD
+   TEACHER PDF UPLOAD & MANAGEMENT
    ========================================================= */
 
 async function handleTeacherUpload(event) {
@@ -921,13 +917,93 @@ async function handleTeacherUpload(event) {
 
         event.target.reset();
         document.getElementById("fileName").textContent = "PDF up to 20 MB";
+        
         updateTeacherUploadCount();
+        loadTeacherUploads(); // Refresh the uploads management list
 
         showToast("PDF uploaded and published successfully!");
 
     } catch (err) {
         console.error("Upload failed:", err);
         showToast(err.message || "File upload failed.");
+    }
+}
+
+async function loadTeacherUploads() {
+    const listContainer = document.getElementById("teacherUploadsList");
+    if (!listContainer || !currentProfile || currentRole !== "teacher") return;
+
+    try {
+        const { data: notesData, error } = await supabaseClient
+            .from("notes")
+            .select("*")
+            .eq("teacher_id", currentProfile.id)
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        if (!notesData || notesData.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <strong>No files uploaded yet</strong>
+                    <span>Your uploaded study materials will appear here.</span>
+                </div>
+            `;
+            return;
+        }
+
+        listContainer.innerHTML = notesData.map(note => `
+            <div class="resource-item">
+                <div class="file-icon">PDF</div>
+                <div class="resource-info">
+                    <strong title="${escapeHTML(note.title)}">${escapeHTML(note.title)}</strong>
+                    <div class="resource-meta">
+                        ${escapeHTML(note.file_name)} • ${(note.file_size / 1024 / 1024).toFixed(2)} MB
+                    </div>
+                </div>
+                <button type="button" class="download-btn" style="background: var(--danger, #f04438);" onclick="deleteTeacherNote('${note.id}', '${escapeHTML(note.storage_path)}')">
+                    Delete
+                </button>
+            </div>
+        `).join("");
+
+    } catch (err) {
+        console.error("Error loading teacher uploads:", err);
+    }
+}
+
+async function deleteTeacherNote(noteId, storagePath) {
+    const confirmed = confirm("Are you sure you want to permanently delete this file? This cannot be undone.");
+    if (!confirmed) return;
+
+    try {
+        showToast("Deleting file from storage and database...");
+
+        if (storagePath) {
+            const { error: storageError } = await supabaseClient.storage
+                .from("notes-bucket")
+                .remove([storagePath]);
+
+            if (storageError) {
+                console.error("Storage deletion warning:", storageError);
+            }
+        }
+
+        const { error: dbError } = await supabaseClient
+            .from("notes")
+            .delete()
+            .eq("id", noteId);
+
+        if (dbError) throw dbError;
+
+        showToast("File deleted successfully.");
+        
+        updateTeacherUploadCount();
+        loadTeacherUploads();
+
+    } catch (err) {
+        console.error("Delete failed:", err);
+        showToast(err.message || "Failed to delete resource.");
     }
 }
 
@@ -941,7 +1017,7 @@ async function updateTeacherUploadCount() {
             .eq("teacher_id", currentProfile.id);
 
         if (!error && count !== null) {
-            const countEl = document.getElementById("teacherUploadCount");
+            const countEl = document.getElementById("teacherUploadUploadCount") || document.getElementById("teacherUploadCount");
             if (countEl) countEl.textContent = count;
         }
     } catch (err) {
