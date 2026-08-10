@@ -385,6 +385,9 @@ async function restoreStudentProfile(user) {
 /* =========================================================
    TEACHER AUTHENTICATION & PROFILE CREATION
    ========================================================= */
+/* =========================================================
+   AUTHORIZED FACULTY VERIFICATION & PREVIEW UPDATES
+   ========================================================= */
 
 async function handleTeacherSubmit(event) {
     event.preventDefault();
@@ -401,21 +404,29 @@ async function handleTeacherSubmit(event) {
     }
 
     try {
-        let user = null;
+        // 1. Check against the authorized faculty JSON registry first
+        const response = await fetch("authorized_faculty.json");
+        if (!response.ok) throw new Error("Could not load authorization records.");
+        
+        const authorizedList = await response.json();
+        
+        const isAuthorized = authorizedList.some(teacher => 
+            teacher.universityId.toLowerCase() === universityId.toLowerCase() &&
+            teacher.branch === branchCode
+        );
 
-        // 1. Try signing up first
+        if (!isAuthorized) {
+            showToast("Access Denied: University ID or Branch does not match authorized faculty records.");
+            return;
+        }
+
+        let user = null;
         let { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
 
         if (authError) {
-            // Check if user already exists (handles 422 Unprocessable Content / already registered)
             if (authError.message?.toLowerCase().includes("already registered") || authError.status === 422) {
-                console.log("User already exists. Switching to sign in...");
-                
-                // 2. Fall back to signing in if account already exists
                 const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (loginError) {
-                    throw loginError;
-                }
+                if (loginError) throw loginError;
                 user = loginData?.user;
             } else {
                 throw authError;
@@ -481,11 +492,27 @@ async function handleTeacherSubmit(event) {
 
         saveLocalProfile();
         openTeacherDashboard();
-        showToast("Faculty portal opened successfully.");
+        showToast("Faculty portal unlocked successfully.");
 
     } catch (error) {
         console.error("Teacher setup error:", error);
-        showToast(error.message || "Failed to set up faculty account.");
+        showToast(error.message || "Failed to verify or set up faculty account.");
+    }
+}
+
+// Add a Preview Toggle function so faculty can view what students see
+function toggleStudentPreview() {
+    if (currentRole !== "teacher") return;
+    
+    // Temporarily switch view elements to the student portal layout for previewing
+    const isPreviewing = document.getElementById("teacherDashboardView").classList.contains("hidden");
+    
+    if (!isPreviewing) {
+        document.getElementById("teacherDashboardView").classList.remove("active");
+        document.getElementById("studentDashboardView").classList.add("active");
+        renderSubjects();
+        renderResources();
+        showToast("Switched to Student View Preview. Click 'Back to Workspace' to return.");
     }
 }
 
