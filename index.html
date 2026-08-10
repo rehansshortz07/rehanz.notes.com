@@ -308,13 +308,17 @@
             <input id="uploadFile" type="file" accept=".pdf,application/pdf">
             <span class="upload-symbol">↑</span>
             <strong>Choose PDF file</strong>
-            <small id="fileName">PDF up to 20 MB</small>
+            <small id="fileName">PDF up to 10 MB</small>
           </label>
 
           <button class="primary-btn" type="submit">Upload to Library <span>↑</span></button>
           <p class="security-note">🔒 Uploads are restricted by Supabase RLS to approved faculty accounts.</p>
         </form>
       </div>
+
+      <button class="primary-btn" type="button" onclick="toggleStudentPreview()" style="margin-bottom: 16px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border);">
+  👁 Preview What Students See
+</button>
 
       <!-- Added Manage your uploads section below the upload-card -->
       <div class="upload-card" style="margin-top: 16px;">
