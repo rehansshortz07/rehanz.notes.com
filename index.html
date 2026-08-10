@@ -254,65 +254,81 @@
   </div>
 
   <div class="faculty-layout">
-    <div class="upload-card">
-      <div class="card-heading">
-        <div class="heading-icon">↑</div>
-        <div>
-          <h3>Upload material</h3>
-          <p>Upload a PDF directly to Supabase Storage.</p>
+    <div>
+      <div class="upload-card">
+        <div class="card-heading">
+          <div class="heading-icon">↑</div>
+          <div>
+            <h3>Upload material</h3>
+            <p>Upload a PDF directly to Supabase Storage.</p>
+          </div>
         </div>
+
+        <form id="uploadForm" class="smart-form">
+          <div class="form-row">
+            <div class="field">
+              <label for="uploadBranch">Branch</label>
+              <select id="uploadBranch" required></select>
+            </div>
+            <div class="field">
+              <label for="uploadSemester">Semester</label>
+              <select id="uploadSemester" required></select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="uploadSubject">Subject</label>
+            <select id="uploadSubject" required></select>
+          </div>
+
+          <div class="field">
+            <label for="uploadType">Material type</label>
+            <select id="uploadType" required>
+              <option>Lecture Notes</option>
+              <option>Question Paper</option>
+              <option>Assignment</option>
+              <option>Lab Manual</option>
+              <option>Important Questions</option>
+              <option>Syllabus</option>
+              <option>Reference Material</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="uploadTitle">Resource title</label>
+            <input id="uploadTitle" type="text" placeholder="e.g. Thermodynamics — Unit 1 Notes" required>
+          </div>
+
+          <div class="field">
+            <label for="uploadDescription">Short description <span>(optional)</span></label>
+            <textarea id="uploadDescription" rows="3" placeholder="Briefly describe this material..."></textarea>
+          </div>
+
+          <label class="file-drop" for="uploadFile">
+            <input id="uploadFile" type="file" accept=".pdf,application/pdf">
+            <span class="upload-symbol">↑</span>
+            <strong>Choose PDF file</strong>
+            <small id="fileName">PDF up to 20 MB</small>
+          </label>
+
+          <button class="primary-btn" type="submit">Upload to Library <span>↑</span></button>
+          <p class="security-note">🔒 Uploads are restricted by Supabase RLS to approved faculty accounts.</p>
+        </form>
       </div>
 
-      <form id="uploadForm" class="smart-form">
-        <div class="form-row">
-          <div class="field">
-            <label for="uploadBranch">Branch</label>
-            <select id="uploadBranch" required></select>
-          </div>
-          <div class="field">
-            <label for="uploadSemester">Semester</label>
-            <select id="uploadSemester" required></select>
+      <!-- Added Manage your uploads section below the upload-card -->
+      <div class="upload-card" style="margin-top: 16px;">
+        <div class="card-heading">
+          <div class="heading-icon" style="color: var(--danger); background: var(--danger-soft, #fef2f2);">🗑</div>
+          <div>
+            <h3>Manage your uploads</h3>
+            <p>View, update, or permanently delete your uploaded files.</p>
           </div>
         </div>
-
-        <div class="field">
-          <label for="uploadSubject">Subject</label>
-          <select id="uploadSubject" required></select>
+        <div id="teacherUploadsList" class="resource-list" style="margin-top: 16px;">
+          <!-- Teacher uploads populated dynamically -->
         </div>
-
-        <div class="field">
-          <label for="uploadType">Material type</label>
-          <select id="uploadType" required>
-            <option>Lecture Notes</option>
-            <option>Question Paper</option>
-            <option>Assignment</option>
-            <option>Lab Manual</option>
-            <option>Important Questions</option>
-            <option>Syllabus</option>
-            <option>Reference Material</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="uploadTitle">Resource title</label>
-          <input id="uploadTitle" type="text" placeholder="e.g. Thermodynamics — Unit 1 Notes" required>
-        </div>
-
-        <div class="field">
-          <label for="uploadDescription">Short description <span>(optional)</span></label>
-          <textarea id="uploadDescription" rows="3" placeholder="Briefly describe this material..."></textarea>
-        </div>
-
-        <label class="file-drop" for="uploadFile">
-          <input id="uploadFile" type="file" accept=".pdf,application/pdf">
-          <span class="upload-symbol">↑</span>
-          <strong>Choose PDF file</strong>
-          <small id="fileName">PDF up to 20 MB</small>
-        </label>
-
-        <button class="primary-btn" type="submit">Upload to Library <span>↑</span></button>
-        <p class="security-note">🔒 Uploads are restricted by Supabase RLS to approved faculty accounts.</p>
-      </form>
+      </div>
     </div>
 
     <aside class="faculty-info-card">
