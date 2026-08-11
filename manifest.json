@@ -1,0 +1,21 @@
+{
+  "name": "UniNotes Academic Resource Hub",
+  "short_name": "UniNotes",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#5b5ce2",
+  "description": "Everything you need. In one place. Notes, question papers, and assignments.",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x192",
+      "type": "image/png"
+    }
+  ]
+}
