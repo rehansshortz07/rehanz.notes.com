@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#6366f1">
+  <link rel="manifest" href="manifest.json">
   <title>UniNotes — Academic Resource Hub</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -26,6 +27,13 @@
   </a>
 
   <div class="topbar-actions">
+
+    <!-- ADD THIS INSTALL BUTTON -->
+    <button class="icon-btn hidden" id="installBtn" type="button" aria-label="Install App" title="Install App">
+      <span>⬇</span>
+    </button>
+    <!-- END OF ADDITION -->
+
     <span id="roleBadge" class="role-badge hidden"></span>
     <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle theme">
       <span id="themeIcon">☾</span>
@@ -388,5 +396,16 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .then((reg) => console.log("Service Worker registered successfully:", reg.scope))
+        .catch((err) => console.error("Service Worker registration failed:", err));
+    });
+  }
+</script>
+
 </body>
 </html>
