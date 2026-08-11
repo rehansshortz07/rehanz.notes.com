@@ -98,6 +98,84 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /* =========================================================
+   PWA INSTALL PROMPT MANAGEMENT
+   ========================================================= */
+
+let deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Show the install button if the app is not running in standalone mode
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    const installBtn = document.getElementById("installBtn");
+    
+    if (installBtn && !isStandalone) {
+        installBtn.classList.remove("hidden");
+    }
+});
+
+function bindInstallButton() {
+    const installBtn = document.getElementById("installBtn");
+    if (!installBtn) return;
+
+    // Ensure state is correct on load
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    if (isStandalone) {
+        installBtn.classList.add("hidden");
+        return;
+    }
+
+    installBtn.addEventListener("click", async () => {
+        if (!deferredPrompt) {
+            showToast("App installation is not available right now or already installed.");
+            return;
+        }
+        
+        // Show the installation prompt
+        deferredPrompt.prompt();
+        
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+            console.log("User accepted the install prompt");
+        } else {
+            console.log("User dismissed the install prompt");
+        }
+        
+        deferredPrompt = null;
+        installBtn.classList.add("hidden");
+    });
+}
+
+// Check display mode on DOM content loaded across all pages
+window.addEventListener("DOMContentLoaded", () => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    const installBtn = document.getElementById("installBtn");
+    
+    if (installBtn) {
+        if (isStandalone) {
+            installBtn.classList.add("hidden");
+        } else {
+            // Keep visible if not installed so it shows on all views/pages
+            installBtn.classList.remove("hidden");
+            bindInstallButton();
+        }
+    }
+});
+
+window.addEventListener("appinstalled", () => {
+    const installBtn = document.getElementById("installBtn");
+    if (installBtn) {
+        installBtn.classList.add("hidden");
+    }
+    deferredPrompt = null;
+    showToast("UniNotes installed successfully!");
+});
+
+/* =========================================================
    INITIALIZE UNINOTES SESSION & PROFILES
    ========================================================= */
 
