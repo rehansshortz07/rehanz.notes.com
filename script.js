@@ -1,8 +1,14 @@
 /* =========================================================
-   UniNotes - Complete Supabase Integration & Enhancements
+   UniNotes - Complete Supabase & Backblaze B2 Integration
    ========================================================= */
 
 "use strict";
+
+/* =========================================================
+   CLOUDFLARE PDF STORAGE API CONFIGURATION
+   ========================================================= */
+
+const PDF_API_URL = "https://uninotes-pdf-api.rehanshaikh15288.workers.dev";
 
 /* =========================================================
    SUPABASE CONFIGURATION
@@ -104,11 +110,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 let deferredPrompt = null;
 
 window.addEventListener("beforeinstallprompt", (e) => {
-    // Prevent the mini-infobar from appearing on mobile
     e.preventDefault();
     deferredPrompt = e;
     
-    // Show the install button if the app is not running in standalone mode
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     const installBtn = document.getElementById("installBtn");
     
@@ -121,7 +125,6 @@ function bindInstallButton() {
     const installBtn = document.getElementById("installBtn");
     if (!installBtn) return;
 
-    // Ensure state is correct on load
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     if (isStandalone) {
         installBtn.classList.add("hidden");
@@ -134,10 +137,7 @@ function bindInstallButton() {
             return;
         }
         
-        // Show the installation prompt
         deferredPrompt.prompt();
-        
-        // Wait for the user to respond to the prompt
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === "accepted") {
             console.log("User accepted the install prompt");
@@ -150,7 +150,6 @@ function bindInstallButton() {
     });
 }
 
-// Check display mode on DOM content loaded across all pages
 window.addEventListener("DOMContentLoaded", () => {
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     const installBtn = document.getElementById("installBtn");
@@ -159,7 +158,6 @@ window.addEventListener("DOMContentLoaded", () => {
         if (isStandalone) {
             installBtn.classList.add("hidden");
         } else {
-            // Keep visible if not installed so it shows on all views/pages
             installBtn.classList.remove("hidden");
             bindInstallButton();
         }
@@ -600,7 +598,6 @@ async function logoutUser() {
     localStorage.removeItem("uninotes_profile");
     localStorage.removeItem("uninotes_role");
     
-    // Hide preview banner on logout
     const banner = document.getElementById("previewBanner");
     if (banner) banner.classList.add("hidden");
 
@@ -676,7 +673,7 @@ function setAvatar(elementId, name) {
 function selectBranch(branch) {
     selectedBranch = branch;
     selectedSubject = getSubjects(branch, selectedSemester)[0] || "";
-    displayedResourceLimit = RESOURCE_PAGE_SIZE; // Reset pagination limit on selection change
+    displayedResourceLimit = RESOURCE_PAGE_SIZE;
     updateSelectionButtons();
     renderSubjects();
     renderResources();
@@ -685,7 +682,7 @@ function selectBranch(branch) {
 function selectSemester(semester) {
     selectedSemester = String(semester);
     selectedSubject = getSubjects(selectedBranch, selectedSemester)[0] || "";
-    displayedResourceLimit = RESOURCE_PAGE_SIZE; // Reset pagination limit on selection change
+    displayedResourceLimit = RESOURCE_PAGE_SIZE;
     updateSelectionButtons();
     renderSubjects();
     renderResources();
@@ -737,7 +734,7 @@ function renderSubjects() {
 
 function selectSubject(subject) {
     selectedSubject = subject;
-    displayedResourceLimit = RESOURCE_PAGE_SIZE; // Reset pagination limit on subject change
+    displayedResourceLimit = RESOURCE_PAGE_SIZE;
     renderSubjects();
     renderResources();
     document.querySelector(".resources-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -825,7 +822,6 @@ async function renderResources() {
     const count = document.getElementById("resourceCount");
     if (count) count.textContent = resources.length;
 
-    // Apply pagination constraint limit
     const paginatedResources = resources.slice(0, displayedResourceLimit);
     const loadMoreContainer = document.getElementById("loadMoreContainer");
     if (loadMoreContainer) {
@@ -875,36 +871,104 @@ function loadMoreResources() {
 }
 
 /* =========================================================
-   PDF DOWNLOAD FROM SUPABASE STORAGE
+   PDF DOWNLOAD THROUGH CLOUDFLARE WORKER (BACKBLAZE B2)
    ========================================================= */
 
 async function downloadResourceFile(storagePath, fileName) {
     if (!storagePath) {
-        showToast(`Demo mode: Downloading "${fileName}"`);
+        showToast("File location is missing.");
         return;
     }
 
     try {
-        showToast("Generating download link...");
-        const { data, error } = await supabaseClient.storage
-            .from("notes-bucket")
-            .createSignedUrl(storagePath, 60);
+        showToast("Preparing download...");
 
-        if (error || !data?.signedUrl) throw error || new Error("Could not create signed download URL.");
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session?.access_token) {
+            throw new Error("Please sign in again to download this file.");
+        }
 
+        const url = `${PDF_API_URL}/download?file=${encodeURIComponent(storagePath)}`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${session.access_token}`
+            }
+        });
+
+        if (!response.ok) {
+            let message = `Download failed (${response.status})`;
+            try {
+                const errorData = await response.json();
+                message = errorData.error || errorData.message || message;
+            } catch {}
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = data.signedUrl;
-        link.download = fileName;
-        link.target = "_blank";
+
+        link.href = blobUrl;
+        link.download = fileName || "document.pdf";
         document.body.appendChild(link);
         link.click();
         link.remove();
 
-        showToast("Download started successfully.");
-    } catch (err) {
-        console.error("Download error:", err);
-        showToast("Unable to download file. Please try again.");
+        setTimeout(() => {
+            URL.revokeObjectURL(blobUrl);
+        }, 5000);
+
+        showToast("Download started.");
+
+    } catch (error) {
+        console.error("PDF download error:", error);
+        showToast(error.message || "Unable to download PDF.");
     }
+}
+
+/* =========================================================
+   CLOUDFLARE WORKER PDF UPLOAD (BACKBLAZE B2)
+   ========================================================= */
+
+async function uploadPDFToWorker(file, metadata) {
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+    if (sessionError) throw sessionError;
+    if (!session?.access_token) {
+        throw new Error("Your session has expired. Please sign in again.");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", metadata.title);
+    formData.append("description", metadata.description || "");
+    formData.append("branch", metadata.branch);
+    formData.append("semester", metadata.semester);
+    formData.append("subject", metadata.subject);
+
+    const response = await fetch(`${PDF_API_URL}/upload`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${session.access_token}`
+        },
+        body: formData
+    });
+
+    let result = {};
+    const responseText = await response.text();
+    
+    try {
+        result = JSON.parse(responseText);
+    } catch {
+        throw new Error(`Storage server error (HTTP ${response.status}): ${responseText.slice(0, 100)}`);
+    }
+
+    if (!response.ok) {
+        throw new Error(result.error || result.message || `Upload failed with HTTP ${response.status}`);
+    }
+
+    return result;
 }
 
 /* =========================================================
@@ -927,8 +991,14 @@ async function handleTeacherUpload(event) {
         return;
     }
 
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+    const isPDF = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPDF) {
         showToast("Only PDF files are allowed.");
+        return;
+    }
+
+    if (file.size <= 0) {
+        showToast("The selected PDF is empty.");
         return;
     }
 
@@ -937,39 +1007,58 @@ async function handleTeacherUpload(event) {
         return;
     }
 
-    const branchCode = document.getElementById("uploadBranch").value;
-    const semesterNumber = document.getElementById("uploadSemester").value;
-    const subjectName = document.getElementById("uploadSubject").value;
-    const title = document.getElementById("uploadTitle").value.trim();
-    const description = document.getElementById("uploadDescription").value.trim();
+    const branchCode = document.getElementById("uploadBranch")?.value?.trim() || "";
+    const semesterNumber = document.getElementById("uploadSemester")?.value?.trim() || "";
+    const subjectName = document.getElementById("uploadSubject")?.value?.trim() || "";
+    const title = document.getElementById("uploadTitle")?.value?.trim() || "";
+    const description = document.getElementById("uploadDescription")?.value?.trim() || "";
 
-    // Elements for progress feedback
+    if (!branchCode || !semesterNumber || !subjectName || !title) {
+        showToast("Please fill all required fields.");
+        return;
+    }
+
     const progressContainer = document.getElementById("uploadProgressContainer");
     const progressBar = document.getElementById("uploadProgressBar");
     const progressPercent = document.getElementById("uploadProgressPercent");
     const uploadSubmitBtn = document.getElementById("uploadSubmitBtn");
 
+    let progressInterval = null;
+
     try {
         if (progressContainer) progressContainer.classList.remove("hidden");
         if (uploadSubmitBtn) uploadSubmitBtn.disabled = true;
 
-        // Simulate progress intervals for smoother UI feedback
         let progress = 10;
         if (progressBar) progressBar.style.width = `${progress}%`;
         if (progressPercent) progressPercent.textContent = `${progress}%`;
 
-        const progressInterval = setInterval(() => {
+        progressInterval = setInterval(() => {
             if (progress < 85) {
-                progress += 15;
+                progress += 5;
+                if (progress > 85) progress = 85;
                 if (progressBar) progressBar.style.width = `${progress}%`;
                 if (progressPercent) progressPercent.textContent = `${progress}%`;
             }
-        }, 200);
+        }, 300);
 
-        const { data: branchData } = await supabaseClient.from("branches").select("id").eq("code", branchCode).single();
-        const { data: semData } = await supabaseClient.from("semesters").select("id").eq("semester_number", Number(semesterNumber)).single();
+        const { data: branchData, error: branchError } = await supabaseClient
+            .from("branches")
+            .select("id")
+            .eq("code", branchCode)
+            .single();
 
-        let { data: subjectData } = await supabaseClient
+        if (branchError || !branchData) throw new Error("Selected branch was not found.");
+
+        const { data: semData, error: semesterError } = await supabaseClient
+            .from("semesters")
+            .select("id")
+            .eq("semester_number", Number(semesterNumber))
+            .single();
+
+        if (semesterError || !semData) throw new Error("Selected semester was not found.");
+
+        let { data: subjectData, error: subjectError } = await supabaseClient
             .from("subjects")
             .select("id")
             .eq("branch_id", branchData.id)
@@ -977,29 +1066,49 @@ async function handleTeacherUpload(event) {
             .eq("name", subjectName)
             .maybeSingle();
 
-        let subjectId = subjectData?.id;
+        if (subjectError) throw new Error(`Unable to find subject: ${subjectError.message}`);
+
+        let subjectId = subjectData?.id || null;
         if (!subjectId) {
-            const { data: newSub } = await supabaseClient
+            const { data: newSubject, error: newSubjectError } = await supabaseClient
                 .from("subjects")
-                .insert({ branch_id: branchData.id, semester_id: semData.id, name: subjectName })
+                .insert({
+                    branch_id: branchData.id,
+                    semester_id: semData.id,
+                    name: subjectName
+                })
                 .select("id")
                 .single();
-            subjectId = newSub.id;
+
+            if (newSubjectError || !newSubject) throw new Error("Subject could not be created.");
+            subjectId = newSubject.id;
         }
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-        const storagePath = `${branchCode}/${semesterNumber}/${fileName}`;
+        console.log("📤 Uploading PDF to Backblaze B2 via Worker...");
+        const uploadResult = await uploadPDFToWorker(file, {
+            title,
+            description,
+            branch: branchCode,
+            semester: semesterNumber,
+            subject: subjectName
+        });
 
-        const { error: uploadError } = await supabaseClient.storage
-            .from("notes-bucket")
-            .upload(storagePath, file);
+        if (!uploadResult || uploadResult.success !== true) {
+            throw new Error(uploadResult?.error || "PDF upload failed.");
+        }
 
-        clearInterval(progressInterval);
-        if (progressBar) progressBar.style.width = `100%`;
-        if (progressPercent) progressPercent.textContent = `100%`;
+        const storagePath = uploadResult.storage_path;
+        if (!storagePath) {
+            throw new Error("Storage server did not return a storage path.");
+        }
 
-        if (uploadError) throw uploadError;
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+
+        if (progressBar) progressBar.style.width = "100%";
+        if (progressPercent) progressPercent.textContent = "100%";
 
         const notePayload = {
             title: title,
@@ -1014,27 +1123,47 @@ async function handleTeacherUpload(event) {
             status: "published"
         };
 
-        const { error: noteError } = await supabaseClient.from("notes").insert(notePayload);
-        if (noteError) throw noteError;
+        const { error: noteError } = await supabaseClient
+            .from("notes")
+            .insert(notePayload);
 
-        event.target.reset();
-        document.getElementById("fileName").textContent = "PDF up to 20 MB";
-        
-        updateTeacherUploadCount();
-        loadTeacherUploads();
+        if (noteError) {
+            throw new Error(`PDF uploaded, but note record could not be saved: ${noteError.message}`);
+        }
+
+        if (event.target) event.target.reset();
+        const fileNameElement = document.getElementById("fileName");
+        if (fileNameElement) fileNameElement.textContent = "PDF up to 20 MB";
+
+        try {
+            await updateTeacherUploadCount();
+            await loadTeacherUploads();
+        } catch (error) {
+            console.warn("Could not refresh dashboard records:", error);
+        }
+
         showToast("PDF uploaded and published successfully!");
 
     } catch (err) {
-        console.error("Upload failed:", err);
-        showToast(err.message || "File upload failed.");
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+        console.error("❌ Upload failed:", err);
+        showToast(err?.message || "File upload failed.");
     } finally {
         if (uploadSubmitBtn) uploadSubmitBtn.disabled = false;
         setTimeout(() => {
             if (progressContainer) progressContainer.classList.add("hidden");
-            if (progressBar) progressBar.style.width = `0%`;
+            if (progressBar) progressBar.style.width = "0%";
+            if (progressPercent) progressPercent.textContent = "0%";
         }, 1200);
     }
 }
+
+/* =========================================================
+   LOAD & DELETE TEACHER UPLOADS (BACKBLAZE WORKER CLEANUP)
+   ========================================================= */
 
 async function loadTeacherUploads() {
     const listContainer = document.getElementById("teacherUploadsList");
@@ -1079,29 +1208,51 @@ async function loadTeacherUploads() {
     }
 }
 
-async function deleteTeacherNote(noteId, storagePath) {
-    const confirmed = confirm("Are you sure you want to permanently delete this file? This cannot be undone.");
+window.deleteTeacherNote = async function(noteId, storagePath) {
+    const confirmed = confirm("Are you sure you want to permanently delete this material?");
     if (!confirmed) return;
 
     try {
-        showToast("Deleting file from storage and database...");
+        showToast("Deleting resource...");
 
-        if (storagePath) {
-            await supabaseClient.storage.from("notes-bucket").remove([storagePath]);
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session?.access_token) {
+            throw new Error("Authentication session expired. Please sign in again.");
         }
 
-        const { error: dbError } = await supabaseClient.from("notes").delete().eq("id", noteId);
-        if (dbError) throw dbError;
+        // 1. Delete file from Backblaze B2 via Cloudflare Worker delete route
+        if (storagePath) {
+            const deleteUrl = `${PDF_API_URL}/delete?file=${encodeURIComponent(storagePath)}`;
+            const deleteResponse = await fetch(deleteUrl, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${session.access_token}`
+                }
+            });
 
-        showToast("File deleted successfully.");
-        updateTeacherUploadCount();
+            if (!deleteResponse.ok) {
+                console.warn("Worker deletion warning, proceeding with record removal.");
+            }
+        }
+
+        // 2. Delete database entry from Supabase
+        const { error } = await supabaseClient
+            .from("notes")
+            .delete()
+            .eq("id", noteId);
+
+        if (error) throw error;
+
+        showToast("Resource deleted successfully.");
+        
         loadTeacherUploads();
+        updateTeacherUploadCount();
 
     } catch (err) {
         console.error("Delete failed:", err);
         showToast(err.message || "Failed to delete resource.");
     }
-}
+};
 
 async function updateTeacherUploadCount() {
     if (!currentProfile || currentRole !== "teacher") return;
