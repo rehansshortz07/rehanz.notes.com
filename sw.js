@@ -42,8 +42,20 @@ self.addEventListener("fetch", (event) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => {
-        // Fallback or offline page handling could go here if needed
+      return fetch(event.request).then((networkResponse) => {
+        return networkResponse;
+      }).catch(() => {
+        // Safe fallback for optional files like favicon or manifest
+        if (event.request.url.includes("favicon.ico") || event.request.url.includes("manifest.json")) {
+          return new Response("", { status: 404, statusText: "Not Found" });
+        }
+        
+        // General offline fallback for other missing local assets
+        return new Response("Offline - resource unavailable", {
+          status: 503,
+          statusText: "Service Unavailable",
+          headers: { "Content-Type": "text/plain" }
+        });
       });
     })
   );
