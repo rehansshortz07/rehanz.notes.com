@@ -73,14 +73,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 let deferredPrompt = null;
 
+// Universal check for PWA standalone mode
+function isPWAStandalone() {
+    return window.matchMedia("(display-mode: standalone)").matches || 
+           window.matchMedia("(display-mode: fullscreen)").matches || 
+           window.navigator.standalone === true;
+}
+
 window.addEventListener("beforeinstallprompt", (e) => {
+    // Prevent the default mini-infobar from appearing on mobile
     e.preventDefault();
     deferredPrompt = e;
     
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     const installBtn = document.getElementById("installBtn");
-    
-    if (installBtn && !isStandalone) {
+    if (installBtn && !isPWAStandalone()) {
         installBtn.classList.remove("hidden");
     }
 });
@@ -89,8 +95,7 @@ function bindInstallButton() {
     const installBtn = document.getElementById("installBtn");
     if (!installBtn) return;
 
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-    if (isStandalone) {
+    if (isPWAStandalone()) {
         installBtn.classList.add("hidden");
         return;
     }
@@ -115,14 +120,12 @@ function bindInstallButton() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     const installBtn = document.getElementById("installBtn");
     
     if (installBtn) {
-        if (isStandalone) {
+        if (isPWAStandalone()) {
             installBtn.classList.add("hidden");
         } else {
-            installBtn.classList.remove("hidden");
             bindInstallButton();
         }
     }
@@ -134,9 +137,8 @@ window.addEventListener("appinstalled", () => {
         installBtn.classList.add("hidden");
     }
     deferredPrompt = null;
-    showToast("UniNotes installed successfully!");
+    showToast("Learn-Engineering installed successfully!");
 });
-
 /* =========================================================
    INITIALIZE UNINOTES SESSION & PROFILES
    ========================================================= */
