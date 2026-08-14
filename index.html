@@ -55,7 +55,7 @@
     <div class="hero-copy">
       <span class="eyebrow">COLLEGE RESOURCE PLATFORM</span>
       <h1>Everything you need.<br><span>In one place.</span></h1>
-      <p>Find notes, question papers, assignments and study materials organized by branch, semester and subject.</p>
+      <p>Find notes, question papers, assignments and study materials organized by branch and semester.</p>
     </div>
 
     <div class="role-grid">
@@ -210,14 +210,14 @@
     <div>
       <span class="eyebrow">STUDENT PORTAL</span>
       <h2 id="studentWelcome">Welcome back</h2>
-      <p>Choose a branch, semester and subject to find your materials.</p>
+      <p>Choose your branch and semester to find your materials.</p>
     </div>
     <div class="dashboard-avatar" id="dashboardAvatar">U</div>
   </div>
 
   <div class="search-box">
     <span>⌕</span>
-    <input id="resourceSearch" type="search" placeholder="Search subjects, notes, question papers..." oninput="renderResources()">
+    <input id="resourceSearch" type="search" placeholder="Search notes, question papers, materials..." oninput="renderResources()">
   </div>
 
   <div class="selection-panel">
@@ -237,22 +237,11 @@
     </div>
   </div>
 
-  <div class="subjects-section">
-    <div class="section-line">
-      <div>
-        <h3>Subjects</h3>
-        <p>Select a subject to view its resources.</p>
-      </div>
-      <span class="count-badge" id="subjectCount">0</span>
-    </div>
-    <div class="subject-grid" id="subjectGrid"></div>
-  </div>
-
   <div class="resources-section">
     <div class="section-line">
       <div>
         <h3 id="resourceHeading">Resources</h3>
-        <p id="resourceSubheading">Choose a subject above.</p>
+        <p id="resourceSubheading">Study materials for your selected branch and semester.</p>
       </div>
       <span class="count-badge" id="resourceCount">0</span>
     </div>
@@ -301,11 +290,6 @@
           </div>
 
           <div class="field">
-            <label for="uploadSubject">Subject</label>
-            <select id="uploadSubject" required></select>
-          </div>
-
-          <div class="field">
             <label for="uploadType">Material type</label>
             <select id="uploadType" required>
               <option>Lecture Notes</option>
@@ -320,12 +304,7 @@
 
           <div class="field">
             <label for="uploadTitle">Resource title</label>
-            <input id="uploadTitle" type="text" placeholder="e.g. Thermodynamics — Unit 1 Notes" required>
-          </div>
-
-          <div class="field">
-            <label for="uploadDescription">Short description <span>(optional)</span></label>
-            <textarea id="uploadDescription" rows="3" placeholder="Briefly describe this material..."></textarea>
+            <input id="uploadTitle" type="text" placeholder="e.g. Thermodynamics Unit 1 Notes" required>
           </div>
 
           <label class="file-drop" for="uploadFile">
@@ -374,7 +353,7 @@
       <h3>Keep materials organized</h3>
       <ul class="check-list">
         <li><span>✓</span> Select the correct branch</li>
-        <li><span>✓</span> Select semester and subject</li>
+        <li><span>✓</span> Select the target semester</li>
         <li><span>✓</span> Give every file a clear title</li>
         <li><span>✓</span> Upload PDF materials</li>
       </ul>
