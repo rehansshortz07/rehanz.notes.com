@@ -393,7 +393,6 @@ async function restoreStudentProfile(user) {
 /* =========================================================
    AUTHORIZED FACULTY VERIFICATION & PREVIEW UPDATES
    ========================================================= */
-
 async function handleTeacherSubmit(event) {
     event.preventDefault();
 
@@ -413,13 +412,16 @@ async function handleTeacherSubmit(event) {
         if (!response.ok) throw new Error("Could not load authorization records.");
         
         const authorizedList = await response.json();
+        
+        // Strict check: Both name and universityId must match an entry in authorized_faculty.json exactly
         const isAuthorized = authorizedList.some(teacher => 
-            teacher.universityId.toLowerCase() === universityId.toLowerCase() &&
+            teacher.universityId.trim().toLowerCase() === universityId.toLowerCase() &&
+            teacher.name.trim().toLowerCase() === name.toLowerCase() &&
             teacher.branch === branchCode
         );
 
         if (!isAuthorized) {
-            showToast("Access Denied: University ID or Branch does not match authorized faculty records.");
+            showToast("Access Denied: Name, University ID, or Branch does not match authorized faculty records.");
             return;
         }
 
