@@ -59,7 +59,7 @@ const RESOURCE_PAGE_SIZE = 5;
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("UniNotes starting...");
+    console.log("Learn-Engineering starting...");
     initializeTheme();
     buildStaticControls();
     bindForms();
