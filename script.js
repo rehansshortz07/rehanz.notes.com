@@ -38,41 +38,6 @@ const BRANCHES = [
     { code: "AE", name: "Aeronautical Engineering", short: "Aeronautical" }
 ];
 
-const SUBJECTS = {
-    CSE: {
-        1: ["Programming for Problem Solving", "Engineering Mathematics I", "Engineering Physics", "Engineering Chemistry"],
-        2: ["Data Structures", "Engineering Mathematics II", "Digital Logic", "Computer Organization"],
-        3: ["Database Management Systems", "Object Oriented Programming", "Operating Systems", "Computer Networks"],
-        4: ["Design & Analysis of Algorithms", "Software Engineering", "Microprocessors", "Web Technology"]
-    },
-    ECE: {
-        1: ["Programming for Problem Solving", "Engineering Mathematics I", "Engineering Physics", "Basic Electronics"],
-        2: ["Network Analysis", "Engineering Mathematics II", "Digital Electronics", "Signals & Systems"],
-        3: ["Analog Electronics", "Electromagnetic Theory", "Electronic Devices", "Microcontrollers"],
-        4: ["Communication Systems", "Digital Signal Processing", "VLSI Design", "Control Systems"]
-    },
-    ME: {
-        1: ["Engineering Mathematics I", "Engineering Physics", "Engineering Chemistry", "Programming for Problem Solving"],
-        2: ["Engineering Mathematics II", "Engineering Mechanics", "Manufacturing Processes", "Material Science"],
-        3: ["Thermodynamics", "Automobile Engineering", "Fluid Mechanics", "Manufacturing Technology", "Machine Design"],
-        4: ["Heat Transfer", "Dynamics of Machinery", "Metrology", "Design of Machine Elements"],
-        5: ["Internal Combustion Engines", "Refrigeration & Air Conditioning", "CAD/CAM", "Industrial Engineering"],
-        6: ["Finite Element Analysis", "Advanced Manufacturing", "Mechatronics", "Automobile Engineering II"]
-    },
-    CE: {
-        1: ["Engineering Mathematics I", "Engineering Physics", "Engineering Chemistry", "Engineering Drawing"],
-        2: ["Surveying", "Engineering Mathematics II", "Building Materials", "Strength of Materials"],
-        3: ["Structural Analysis", "Fluid Mechanics", "Geotechnical Engineering", "Concrete Technology"],
-        4: ["Design of RCC Structures", "Transportation Engineering", "Environmental Engineering", "Hydrology"]
-    },
-    AE: {
-        1: ["Engineering Mathematics I", "Engineering Physics", "Engineering Chemistry", "Engineering Drawing"],
-        2: ["Engineering Mathematics II", "Engineering Mechanics", "Thermodynamics", "Materials Science"],
-        3: ["Aerodynamics I", "Aircraft Structures I", "Aircraft Propulsion", "Flight Mechanics"],
-        4: ["Aerodynamics II", "Aircraft Structures II", "Avionics", "Aerospace Manufacturing"]
-    }
-};
-
 /* =========================================================
    APPLICATION STATE
    ========================================================= */
@@ -82,7 +47,6 @@ let currentProfile = null;
 
 let selectedBranch = "ME";
 let selectedSemester = "3";
-let selectedSubject = "";
 
 let toastTimer = null;
 
@@ -276,17 +240,14 @@ function buildStaticControls() {
         uploadBranch.innerHTML = BRANCHES.map(branch => `
             <option value="${escapeHTML(branch.code)}">${escapeHTML(branch.name)}</option>
         `).join("");
-        uploadBranch.addEventListener("change", updateTeacherSubjects);
     }
 
     if (uploadSemester) {
         uploadSemester.innerHTML = Array.from({ length: 8 }, (_, index) => `
             <option value="${index + 1}">Semester ${index + 1}</option>
         `).join("");
-        uploadSemester.addEventListener("change", updateTeacherSubjects);
     }
 
-    updateTeacherSubjects();
     updateSelectionButtons();
     bindThemeButton();
 }
@@ -388,7 +349,6 @@ async function handleStudentSubmit(event) {
         saveLocalProfile();
         selectedBranch = branchCode;
         selectedSemester = String(semesterNumber);
-        selectedSubject = getSubjects(selectedBranch, selectedSemester)[0] || "";
 
         openStudentDashboard();
         showToast("Student portal loaded successfully.");
@@ -422,7 +382,6 @@ async function restoreStudentProfile(user) {
 
     selectedBranch = currentProfile.branch;
     selectedSemester = currentProfile.semester;
-    selectedSubject = getSubjects(selectedBranch, selectedSemester)[0] || "";
 
     saveLocalProfile();
     openStudentDashboard();
@@ -540,7 +499,6 @@ window.toggleStudentPreview = function() {
         teacherView.classList.remove("active");
         studentView.classList.add("active");
         if (previewBanner) previewBanner.classList.remove("hidden");
-        renderSubjects();
         renderResources();
         showToast("Switched to Student View Preview.");
     } else {
@@ -620,7 +578,6 @@ function openStudentDashboard() {
 
     setAvatar("dashboardAvatar", name);
     updateHeaderForRole("student");
-    renderSubjects();
     renderResources();
     showView("studentDashboardView");
 }
@@ -636,7 +593,6 @@ function openTeacherDashboard() {
         uploadBranch.value = currentProfile.branch;
     }
 
-    updateTeacherSubjects();
     updateHeaderForRole("teacher");
     updateTeacherUploadCount();
     loadTeacherUploads();
@@ -672,19 +628,15 @@ function setAvatar(elementId, name) {
 
 function selectBranch(branch) {
     selectedBranch = branch;
-    selectedSubject = getSubjects(branch, selectedSemester)[0] || "";
     displayedResourceLimit = RESOURCE_PAGE_SIZE;
     updateSelectionButtons();
-    renderSubjects();
     renderResources();
 }
 
 function selectSemester(semester) {
     selectedSemester = String(semester);
-    selectedSubject = getSubjects(selectedBranch, selectedSemester)[0] || "";
     displayedResourceLimit = RESOURCE_PAGE_SIZE;
     updateSelectionButtons();
-    renderSubjects();
     renderResources();
 }
 
@@ -698,49 +650,6 @@ function updateSelectionButtons() {
 }
 
 /* =========================================================
-   SUBJECTS RENDERING
-   ========================================================= */
-
-function renderSubjects() {
-    const grid = document.getElementById("subjectGrid");
-    if (!grid) return;
-
-    const subjects = getSubjects(selectedBranch, selectedSemester);
-    const count = document.getElementById("subjectCount");
-    if (count) count.textContent = subjects.length;
-
-    if (!subjects.length) {
-        grid.innerHTML = `
-            <div class="empty-state" style="grid-column:1/-1">
-                <strong>No subjects found</strong>
-                <span>Select a valid branch and semester combination.</span>
-            </div>
-        `;
-        return;
-    }
-
-    grid.innerHTML = subjects.map((subject, index) => `
-        <button type="button" class="subject-card ${subject === selectedSubject ? "selected" : ""}" data-subject="${escapeHTML(subject)}">
-            <span class="subject-icon">${index % 2 === 0 ? "▣" : "◈"}</span>
-            <strong>${escapeHTML(subject)}</strong>
-            <small>View materials</small>
-        </button>
-    `).join("");
-
-    grid.querySelectorAll(".subject-card").forEach(button => {
-        button.addEventListener("click", () => selectSubject(button.dataset.subject));
-    });
-}
-
-function selectSubject(subject) {
-    selectedSubject = subject;
-    displayedResourceLimit = RESOURCE_PAGE_SIZE;
-    renderSubjects();
-    renderResources();
-    document.querySelector(".resources-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-/* =========================================================
    RESOURCES & PAGINATION SUPPORT
    ========================================================= */
 
@@ -751,22 +660,11 @@ async function getResourcesFromDatabase() {
 
         if (!branchData || !semData) return [];
 
-        const { data: subjectData } = await supabaseClient
-            .from("subjects")
-            .select("id, name")
-            .eq("branch_id", branchData.id)
-            .eq("semester_id", semData.id);
-
-        if (!subjectData || subjectData.length === 0) return [];
-
-        const subjectMap = {};
-        subjectData.forEach(sub => { subjectMap[sub.id] = sub.name; });
-        const subjectIds = subjectData.map(sub => sub.id);
-
         const { data: notesData, error } = await supabaseClient
             .from("notes")
             .select("*")
-            .in("subject_id", subjectIds)
+            .eq("branch_id", branchData.id)
+            .eq("semester_id", semData.id)
             .eq("status", "published");
 
         if (error || !notesData) return [];
@@ -775,7 +673,6 @@ async function getResourcesFromDatabase() {
             id: note.id,
             branch: selectedBranch,
             semester: selectedSemester,
-            subject: subjectMap[note.subject_id] || "General",
             type: "Lecture Notes",
             title: note.title,
             description: note.description || "",
@@ -801,13 +698,12 @@ async function renderResources() {
 
     let resources = allResources.filter(item =>
         item.branch === selectedBranch &&
-        String(item.semester) === String(selectedSemester) &&
-        item.subject === selectedSubject
+        String(item.semester) === String(selectedSemester)
     );
 
     if (search) {
-        resources = allResources.filter(item => {
-            const haystack = `${item.title} ${item.subject} ${item.type} ${item.description || ""}`.toLowerCase();
+        resources = resources.filter(item => {
+            const haystack = `${item.title} ${item.type} ${item.description || ""}`.toLowerCase();
             return haystack.includes(search);
         });
     }
@@ -817,7 +713,7 @@ async function renderResources() {
     if (summary) summary.textContent = `${branchName} • Semester ${selectedSemester}`;
 
     const heading = document.getElementById("resourceHeading");
-    if (heading) heading.textContent = search ? "Search results" : (selectedSubject || "Resources");
+    if (heading) heading.textContent = search ? "Search results" : `Resources for ${branchName} - Semester ${selectedSemester}`;
 
     const count = document.getElementById("resourceCount");
     if (count) count.textContent = resources.length;
@@ -836,7 +732,7 @@ async function renderResources() {
         list.innerHTML = `
             <div class="empty-state">
                 <strong>No resources found</strong>
-                <span>Faculty materials will appear here after they are uploaded.</span>
+                <span>Faculty materials for this branch and semester will appear here after they are uploaded.</span>
             </div>
         `;
         return;
@@ -942,10 +838,8 @@ async function uploadPDFToWorker(file, metadata) {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", metadata.title);
-    formData.append("description", metadata.description || "");
     formData.append("branch", metadata.branch);
     formData.append("semester", metadata.semester);
-    formData.append("subject", metadata.subject);
 
     const response = await fetch(`${PDF_API_URL}/upload`, {
         method: "POST",
@@ -1009,11 +903,9 @@ async function handleTeacherUpload(event) {
 
     const branchCode = document.getElementById("uploadBranch")?.value?.trim() || "";
     const semesterNumber = document.getElementById("uploadSemester")?.value?.trim() || "";
-    const subjectName = document.getElementById("uploadSubject")?.value?.trim() || "";
     const title = document.getElementById("uploadTitle")?.value?.trim() || "";
-    const description = document.getElementById("uploadDescription")?.value?.trim() || "";
 
-    if (!branchCode || !semesterNumber || !subjectName || !title) {
+    if (!branchCode || !semesterNumber || !title) {
         showToast("Please fill all required fields.");
         return;
     }
@@ -1058,39 +950,11 @@ async function handleTeacherUpload(event) {
 
         if (semesterError || !semData) throw new Error("Selected semester was not found.");
 
-        let { data: subjectData, error: subjectError } = await supabaseClient
-            .from("subjects")
-            .select("id")
-            .eq("branch_id", branchData.id)
-            .eq("semester_id", semData.id)
-            .eq("name", subjectName)
-            .maybeSingle();
-
-        if (subjectError) throw new Error(`Unable to find subject: ${subjectError.message}`);
-
-        let subjectId = subjectData?.id || null;
-        if (!subjectId) {
-            const { data: newSubject, error: newSubjectError } = await supabaseClient
-                .from("subjects")
-                .insert({
-                    branch_id: branchData.id,
-                    semester_id: semData.id,
-                    name: subjectName
-                })
-                .select("id")
-                .single();
-
-            if (newSubjectError || !newSubject) throw new Error("Subject could not be created.");
-            subjectId = newSubject.id;
-        }
-
         console.log("📤 Uploading PDF to Backblaze B2 via Worker...");
         const uploadResult = await uploadPDFToWorker(file, {
             title,
-            description,
             branch: branchCode,
-            semester: semesterNumber,
-            subject: subjectName
+            semester: semesterNumber
         });
 
         if (!uploadResult || uploadResult.success !== true) {
@@ -1112,10 +976,8 @@ async function handleTeacherUpload(event) {
 
         const notePayload = {
             title: title,
-            description: description || null,
             branch_id: branchData.id,
             semester_id: semData.id,
-            subject_id: subjectId,
             teacher_id: currentProfile.id,
             file_name: file.name,
             storage_path: storagePath,
@@ -1134,6 +996,12 @@ async function handleTeacherUpload(event) {
         if (event.target) event.target.reset();
         const fileNameElement = document.getElementById("fileName");
         if (fileNameElement) fileNameElement.textContent = "PDF up to 20 MB";
+
+        // Reset branch selection back to faculty's own department if applicable
+        const uploadBranchSelect = document.getElementById("uploadBranch");
+        if (uploadBranchSelect && currentProfile?.branch) {
+            uploadBranchSelect.value = currentProfile.branch;
+        }
 
         try {
             await updateTeacherUploadCount();
@@ -1273,27 +1141,11 @@ async function updateTeacherUploadCount() {
 }
 
 /* =========================================================
-   SUBJECTS MAPPINGS & NAVIGATION UTILITIES
+   NAVIGATION UTILITIES
    ========================================================= */
-
-function getSubjects(branch, semester) {
-    return SUBJECTS?.[branch]?.[semester] || ["General Subject"];
-}
 
 function getBranchName(code) {
     return BRANCHES.find(branch => branch.code === code)?.name || code;
-}
-
-function updateTeacherSubjects() {
-    const branch = document.getElementById("uploadBranch")?.value;
-    const semester = document.getElementById("uploadSemester")?.value;
-    const select = document.getElementById("uploadSubject");
-    if (!select) return;
-
-    const subjects = getSubjects(branch, semester);
-    select.innerHTML = subjects.map(subject => `
-        <option value="${escapeHTML(subject)}">${escapeHTML(subject)}</option>
-    `).join("");
 }
 
 async function switchProfile() {
