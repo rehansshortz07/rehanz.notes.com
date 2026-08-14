@@ -1,6 +1,6 @@
 {
-  "name": "UniNotes Academic Resource Hub",
-  "short_name": "UniNotes",
+  "name": "Learn Engineering",
+  "short_name": "Learn Engg",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b1020",
@@ -8,13 +8,13 @@
   "description": "Everything you need. In one place. Notes, question papers, and assignments.",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
-      "sizes": "512x192",
+      "src": "logo.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
