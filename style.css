@@ -107,6 +107,14 @@ textarea:focus-visible {
   z-index: 20;
 }
 
+/* Add this to your style.css */
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain; /* Keeps your logo proportions intact */
+  border-radius: 12px;
+}
+
 .brand {
   color: var(--text);
   text-decoration: none;
