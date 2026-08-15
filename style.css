@@ -1038,10 +1038,35 @@ textarea:focus {
   padding: 12px 4px;
   display: flex;
   justify-content: space-between;
-  gap: 15px;
-  color: var(--text); /* Automatically switches to black in light mode and white in dark mode */
-  font-size: 13px;   /* Increased font size so it's easily readable */
+  align-items: center;
+  flex-wrap: nowrap; /* Forces everything to stay on one single line */
+  gap: 10px;
+  color: var(--text);
+  font-size: 13px;
   font-weight: 500;
+}
+
+.footer span {
+  white-space: nowrap;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+/* Specific compact rules for tiny devices (300px - 450px) */
+@media (max-width: 480px) {
+  .footer {
+    font-size: 9.5px; /* Scales text down so all links and copyright text fit */
+    gap: 6px;
+  }
+  
+  .footer-links {
+    gap: 8px; /* Tighter spacing between About, Developer, Privacy, and Terms */
+  }
 }
 
 /* Toast */
