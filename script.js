@@ -408,17 +408,14 @@ async function handleTeacherSubmit(event) {
     }
 
     try {
-        const response = await fetch("authorized_faculty.json");
-        if (!response.ok) throw new Error("Could not load authorization records.");
-        
-        const authorizedList = await response.json();
-        
-        // Strict check: Both name and universityId must match an entry in authorized_faculty.json exactly
-        const isAuthorized = authorizedList.some(teacher => 
-            teacher.universityId.trim().toLowerCase() === universityId.toLowerCase() &&
-            teacher.name.trim().toLowerCase() === name.toLowerCase() &&
-            teacher.branch === branchCode
-        );
+        // Securely check authorization via Supabase backend function (RPC)
+        const { data: isAuthorized, error: rpcError } = await supabaseClient.rpc("verify_faculty", {
+            input_university_id: universityId,
+            input_name: name,
+            input_branch: branchCode
+        });
+
+        if (rpcError) throw rpcError;
 
         if (!isAuthorized) {
             showToast("Access Denied: Name, University ID, or Branch does not match authorized faculty records.");
@@ -483,7 +480,6 @@ async function handleTeacherSubmit(event) {
         showToast(error.message || "Failed to verify or set up faculty account.");
     }
 }
-
 /* =========================================================
    WORKSPACE RETURN BANNER & PREVIEW TOGGLE
    ========================================================= */
