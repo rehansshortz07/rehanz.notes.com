@@ -1226,11 +1226,13 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
-  .footer {
-    width: calc(100% - 20px);
-    flex-direction: column;
-    text-align: center;
-    gap: 3px;
+   .footer {
+    font-size: 9px; /* Scales text down so all links and copyright text fit */
+    gap: 6px;
+  }
+  
+  .footer-links {
+    gap: 4px; /* Tighter spacing between About, Developer, Privacy, and Terms */
   }
 }
 
@@ -1420,6 +1422,15 @@ textarea:focus {
 
   .section-line p {
     font-size: 8px;
+  }
+
+   .footer {
+    font-size: 9px; /* Scales text down so all links and copyright text fit */
+    gap: 6px;
+  }
+  
+  .footer-links {
+    gap: 4px; /* Tighter spacing between About, Developer, Privacy, and Terms */
   }
 }
 
