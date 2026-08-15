@@ -2,8 +2,7 @@ const CACHE_NAME = "uninotes-cache-v1";
 const ASSETS_TO_CACHE = [
   "./index.html",
   "./style.css",
-  "./script.js",
-  "./authorized_faculty.json"
+  "./script.js"
 ];
 
 // Install Event - Caching Core Assets
