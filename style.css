@@ -1057,18 +1057,6 @@ textarea:focus {
   white-space: nowrap;
 }
 
-/* Specific compact rules for tiny devices (300px - 450px) */
-@media (max-width: 430px) {
-  .footer {
-    font-size: 8px; /* Scales text down so all links and copyright text fit */
-    gap: 3px;
-  }
-  
-  .footer-links {
-    gap: 1px; /* Tighter spacing between About, Developer, Privacy, and Terms */
-  }
-}
-
 /* Toast */
 .toast {
   position: fixed;
