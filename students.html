@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <title>Student Management - Learn-Engineering</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .management-container {
+            max-width: 1100px;
+            margin: 20px auto;
+        }
+        .student-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        .student-table th, .student-table td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .student-table th {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--muted, #64748b);
+        }
+        .student-table td {
+            font-size: 14px;
+        }
+        .filter-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .action-row {
+            display: flex;
+            gap: 8px;
+        }
+        .secondary-btn {
+            border: 1px solid var(--border);
+            cursor: pointer;
+            padding: 7px 11px;
+            border-radius: 8px;
+            background: var(--surface-2);
+            color: var(--text);
+            font-weight: 600;
+        }
+        .secondary-btn:hover {
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+<div class="app-shell">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+        <a class="brand" href="dean.html">
+            <span class="brand-text">
+                <strong>Learn-Engineering</strong>
+                <small>Student Management Portal</small>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <a href="dean.html" class="profile-btn" style="text-decoration:none;">
+                <span>← Back to Management Dashboard</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="management-container">
+
+            <!-- ADD STUDENT FORM CARD -->
+            <div class="form-card" style="max-width:100%; margin-bottom: 25px;">
+                <div class="section-heading">
+                    <span class="section-icon faculty">👨‍🎓</span>
+                    <div>
+                        <span class="eyebrow">RESTRICTED ENROLLMENT</span>
+                        <h2>Add University Student</h2>
+                        <p>Register verified students belonging exclusively to your university.</p>
+                    </div>
+                </div>
+
+                <form id="addStudentForm" class="smart-form">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                        
+                        <!-- STUDENT NAME -->
+                        <div class="field">
+                            <label for="studentNameInput">Full Name</label>
+                            <input id="studentNameInput" type="text" placeholder="e.g. John Smith" required>
+                        </div>
+
+                        <!-- UNIVERSITY NUMBER -->
+                        <div class="field">
+                            <label for="studentUniNumInput">University Number</label>
+                            <input id="studentUniNumInput" type="text" placeholder="e.g. UNI2026001" required>
+                        </div>
+
+                        <!-- BRANCH -->
+                        <div class="field">
+                            <label for="studentBranchInput">Branch</label>
+                            <select id="studentBranchInput" required>
+                                <option value="">Select Branch</option>
+                                <option value="COMMON">Common (1st & 2nd Sem)</option>
+                                <option value="CSE">Computer Science Engineering</option>
+                                <option value="ECE">Electronics & Communication</option>
+                                <option value="ME">Mechanical Engineering</option>
+                                <option value="CE">Civil Engineering</option>
+                                <option value="AE">Aeronautical Engineering</option>
+                            </select>
+                        </div>
+
+                        <!-- SEMESTER -->
+                        <div class="field">
+                            <label for="studentSemInput">Semester</label>
+                            <select id="studentSemInput" required>
+                                <option value="">Select Semester</option>
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option>
+                                <option value="4">Semester 4</option>
+                                <option value="5">Semester 5</option>
+                                <option value="6">Semester 6</option>
+                                <option value="7">Semester 7</option>
+                                <option value="8">Semester 8</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <button class="primary-btn" type="submit" style="margin-top:16px;">
+                        Save Student to Database <span>→</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- STUDENT DIRECTORY / TABLE CARD -->
+            <div class="faculty-management-card" style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px;">
+                <div class="faculty-management-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:18px;">
+                    <div>
+                        <span class="eyebrow">ENROLLED DIRECTORY</span>
+                        <h3 style="margin:4px 0 0;">University Students</h3>
+                    </div>
+
+                    <div class="filter-toolbar" style="margin:0;">
+                        <div class="filter-group">
+                            <select id="filterBranch" class="faculty-search" style="max-width:180px; min-height:41px;">
+                                <option value="">All Branches</option>
+                                <option value="COMMON">Common</option>
+                                <option value="CSE">CSE</option>
+                                <option value="ECE">ECE</option>
+                                <option value="ME">Mechanical</option>
+                                <option value="CE">Civil</option>
+                                <option value="AE">Aeronautical</option>
+                            </select>
+                            
+                            <select id="filterSemester" class="faculty-search" style="max-width:140px; min-height:41px;">
+                                <option value="">All Semesters</option>
+                                <option value="1">Sem 1</option>
+                                <option value="2">Sem 2</option>
+                                <option value="3">Sem 3</option>
+                                <option value="4">Sem 4</option>
+                                <option value="5">Sem 5</option>
+                                <option value="6">Sem 6</option>
+                                <option value="7">Sem 7</option>
+                                <option value="8">Sem 8</option>
+                            </select>
+                        </div>
+
+                        <div style="display:flex; gap:10px;">
+                            <button type="button" class="danger-btn" id="deleteSelectedBtn" onclick="deleteSelectedStudents()">Delete Selected</button>
+                            <input id="studentSearch" class="faculty-search" type="search" placeholder="Search name or ID..." style="max-width:240px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="studentLoading" style="padding:20px; text-align:center;">Loading student records...</div>
+
+                <div class="student-table-wrapper">
+                    <table class="student-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"></th>
+                                <th>Name</th>
+                                <th>University ID</th>
+                                <th>Branch</th>
+                                <th>Semester</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast" role="status"></div>
+
+<!-- SUPABASE & SCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Validate Management Session
+    const savedDean = localStorage.getItem("dean_session");
+    if (!savedDean) {
+        showToast("Access Denied: Management login required.");
+        setTimeout(() => { window.location.href = "dean.html"; }, 1200);
+        return;
+    }
+
+    loadStudentsTable();
+
+    // 2. Add Student Handler
+    const addStudentForm = document.getElementById("addStudentForm");
+    if (addStudentForm) {
+        addStudentForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById("studentNameInput").value.trim();
+            const university_number = document.getElementById("studentUniNumInput").value.trim();
+            const branchCode = document.getElementById("studentBranchInput").value;
+            const semesterNum = Number(document.getElementById("studentSemInput").value);
+
+            if (!name || !university_number || !branchCode || !semesterNum) {
+                showToast("Please complete all fields.");
+                return;
+            }
+
+            try {
+                showToast("Saving student record...");
+
+                // Fetch foreign keys for branch and semester IDs based on your schema
+                const { data: branchData, error: bErr } = await supabaseClient.from("branches").select("id").eq("code", branchCode).single();
+                if (bErr || !branchData) throw new Error("Invalid branch selection.");
+
+                const { data: semData, error: sErr } = await supabaseClient.from("semesters").select("id").eq("semester_number", semesterNum).single();
+                if (sErr || !semData) throw new Error("Invalid semester selection.");
+
+                const payload = {
+                    name,
+                    university_number,
+                    branch_id: branchData.id,
+                    current_semester_id: semData.id
+                };
+
+                const { error: insertErr } = await supabaseClient.from("student_profiles").insert(payload);
+                if (insertErr) throw insertErr;
+
+                showToast(`Student ${name} successfully added!`);
+                addStudentForm.reset();
+                loadStudentsTable();
+
+            } catch (err) {
+                console.error("Student insert error:", err);
+                showToast(err.message || "Failed to add student.");
+            }
+        });
+    }
+
+    // Search and filter listeners
+    document.getElementById("studentSearch")?.addEventListener("input", loadStudentsTable);
+    document.getElementById("filterBranch")?.addEventListener("change", loadStudentsTable);
+    document.getElementById("filterSemester")?.addEventListener("change", loadStudentsTable);
+});
+
+async function loadStudentsTable() {
+    const loading = document.getElementById("studentLoading");
+    const tbody = document.getElementById("studentTableBody");
+    if (!tbody) return;
+
+    if (loading) loading.style.display = "block";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("student_profiles")
+            .select(`
+                id,
+                name,
+                university_number,
+                branches ( code, name ),
+                semesters ( semester_number )
+            `)
+            .order("name", { ascending: true });
+
+        if (error) throw error;
+
+        window.allStudentsCache = data || [];
+        renderFilteredStudents();
+
+    } catch (err) {
+        console.error("Load students error:", err);
+        if (loading) loading.textContent = "Unable to load student records.";
+        showToast("Failed to load students.");
+    }
+}
+
+function renderFilteredStudents() {
+    const tbody = document.getElementById("studentTableBody");
+    const loading = document.getElementById("studentLoading");
+    if (!tbody) return;
+    if (loading) loading.style.display = "none";
+
+    const search = document.getElementById("studentSearch")?.value.trim().toLowerCase() || "";
+    const branchFilter = document.getElementById("filterBranch")?.value || "";
+    const semFilter = document.getElementById("filterSemester")?.value || "";
+
+    const filtered = (window.allStudentsCache || []).filter(st => {
+        const branchCode = st.branches?.code || "";
+        const semNum = String(st.semesters?.semester_number || "");
+        
+        const matchesSearch = String(st.name || "").toLowerCase().includes(search) || 
+                              String(st.university_number || "").toLowerCase().includes(search);
+        
+        const matchesBranch = !branchFilter || branchCode === branchFilter;
+        const matchesSem = !semFilter || semNum === semFilter;
+
+        return matchesSearch && matchesBranch && matchesSem;
+    });
+
+    tbody.innerHTML = "";
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:25px;">No students found matching filters.</td></tr>`;
+        return;
+    }
+
+    filtered.forEach(st => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td><input type="checkbox" class="student-checkbox" value="${st.id}"></td>
+            <td><strong>${escapeHTML(st.name)}</strong></td>
+            <td>${escapeHTML(st.university_number)}</td>
+            <td><span class="branch-badge">${escapeHTML(st.branches?.code || "—")}</span></td>
+            <td>Sem ${escapeHTML(st.semesters?.semester_number || "—")}</td>
+            <td>
+                <div class="action-row">
+                    <button type="button" class="secondary-btn" style="padding:5px 9px; font-size:12px;" onclick="editStudentModal('${st.id}')">Edit</button>
+                    <button type="button" class="danger-btn" style="padding:5px 9px; font-size:12px;" onclick="deleteStudent('${st.id}', '${escapeHTML(st.name)}')">Delete</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function toggleSelectAll(master) {
+    document.querySelectorAll(".student-checkbox").forEach(cb => cb.checked = master.checked);
+}
+
+async function deleteStudent(id, name) {
+    if (!confirm(`Are you sure you want to delete student ${name}?`)) return;
+    try {
+        const { error } = await supabaseClient.from("student_profiles").delete().eq("id", id);
+        if (error) throw error;
+        showToast("Student deleted successfully.");
+        loadStudentsTable();
+    } catch (err) {
+        showToast("Failed to delete student.");
+    }
+}
+
+async function deleteSelectedStudents() {
+    const checked = Array.from(document.querySelectorAll(".student-checkbox:checked")).map(cb => cb.value);
+    if (checked.length === 0) {
+        showToast("Please select at least one student to delete.");
+        return;
+    }
+    if (!confirm(`Delete ${checked.length} selected student(s)?`)) return;
+
+    try {
+        const { error } = await supabaseClient.from("student_profiles").delete().in("id", checked);
+        if (error) throw error;
+        showToast("Selected students deleted successfully.");
+        loadStudentsTable();
+    } catch (err) {
+        showToast("Failed to delete selected students.");
+    }
+}
+
+async function editStudentModal(id) {
+    const student = (window.allStudentsCache || []).find(s => s.id === id);
+    if (!student) return;
+
+    const newName = prompt("Edit Student Name:", student.name);
+    if (newName === null) return;
+    const newUniNum = prompt("Edit University Number:", student.university_number);
+    if (newUniNum === null) return;
+
+    try {
+        const { error } = await supabaseClient.from("student_profiles").update({
+            name: newName.trim(),
+            university_number: newUniNum.trim()
+        }).eq("id", id);
+
+        if (error) throw error;
+        showToast("Student updated successfully.");
+        loadStudentsTable();
+    } catch (err) {
+        showToast("Failed to update student profile.");
+    }
+}
+</script>
+</body>
+</html>
