@@ -298,16 +298,29 @@ async function handleStudentSubmit(event) {
     const email = document.getElementById("studentEmail")?.value.trim();
     const password = document.getElementById("studentPassword")?.value;
     const name = document.getElementById("studentName")?.value.trim();
-    const universityNumber = document.getElementById("studentId")?.value.trim();
+    const universityNumber = document.getElementById("studentId")?.value.trim(); // Restored field requirement
     const branchCode = document.getElementById("studentBranch")?.value;
     const semesterNumber = document.getElementById("studentSemester")?.value;
 
     if (!email || !password || !name || !universityNumber || !branchCode || !semesterNumber) {
-        showToast("Please fill all required fields.");
+        showToast("Please fill all required fields, including University Number.");
         return;
     }
 
     try {
+        // Securely check if student is pre-registered/authorized by Dean or HOD
+        const { data: isAuthorized, error: rpcError } = await supabaseClient.rpc("verify_student", {
+            input_university_number: universityNumber,
+            input_name: name
+        });
+
+        if (rpcError) throw rpcError;
+
+        if (!isAuthorized) {
+            showToast("Access Denied: University Number or Name is not authorized by administration.");
+            return;
+        }
+
         let { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
         
         if (authError) {
@@ -326,6 +339,7 @@ async function handleStudentSubmit(event) {
         const { data: branchData } = await supabaseClient.from("branches").select("id, code, name").eq("code", branchCode).single();
         const { data: semesterData } = await supabaseClient.from("semesters").select("id, semester_number").eq("semester_number", Number(semesterNumber)).single();
 
+        // Update profile record linked via auth ID, storing/updating university number reference
         const profilePayload = {
             id: user.id,
             name: name,
@@ -364,7 +378,7 @@ async function handleStudentSubmit(event) {
 async function restoreStudentProfile(user) {
     const { data: profile, error } = await supabaseClient
         .from("student_profiles")
-        .select(`id, name, university_number, branch_id, current_semester_id, branches ( code, name ), semesters ( semester_number )`)
+        .select(`id, name, branch_id, current_semester_id, branches ( code, name ), semesters ( semester_number )`)
         .eq("id", user.id)
         .maybeSingle();
 
@@ -374,7 +388,6 @@ async function restoreStudentProfile(user) {
     currentProfile = {
         id: profile.id,
         name: profile.name,
-        university_number: profile.university_number,
         branch: profile.branches.code,
         semester: String(profile.semesters.semester_number),
         branch_id: profile.branch_id,
