@@ -420,26 +420,6 @@
                     </div>
 
 
-                    <!-- ROLL NUMBER -->
-
-                    <div class="field">
-
-                        <label
-                            for="deanLoginRoll"
-                        >
-                            Roll Number
-                        </label>
-
-                        <input
-                            id="deanLoginRoll"
-                            type="text"
-                            placeholder="e.g. 21001"
-                            required
-                        >
-
-                    </div>
-
-
                     <!-- ROLE / BRANCH -->
 
                     <div class="field">
@@ -1102,26 +1082,31 @@
 
                 </div>
 
-                <!-- =========================================
-                     STUDENT MANAGEMENT NAVIGATION CARD
-                     ========================================= -->
-                <div class="form-card" id="studentManagementNavCard" style="margin-top:20px; display:none;">
-                    <div class="section-heading" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span class="section-icon faculty" style="font-size: 24px;">👨‍🎓</span>
-                            <div>
-                                <span class="eyebrow">STUDENT DIRECTORY</span>
-                                <h3 style="margin:4px 0 0;">Manage Uploaded Students</h3>
-                                <p style="margin: 2px 0 0; color: var(--muted, #64748b);">
-                                    View, authorize, and upload student records securely.
-                                </p>
-                            </div>
-                        </div>
-                        <a href="students.html" class="primary-btn" style="text-decoration: none; width: auto; padding: 10px 18px;">
-                            Open Student Portal →
-                        </a>
-                    </div>
-                </div>
+                        <!-- =========================================
+     STUDENT MANAGEMENT NAVIGATION CARD
+     ========================================= -->
+<div class="form-card" id="studentManagementNavCard" style="margin-top:20px; display:none;">
+    <div class="section-heading" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="section-icon faculty" style="font-size: 24px;">👨‍🎓</span>
+            <div>
+                <span class="eyebrow">STUDENT DIRECTORY</span>
+                <h3 style="margin:4px 0 0;">Manage Uploaded Students</h3>
+                <p style="margin: 2px 0 0; color: var(--muted, #64748b);">
+                    View, authorize, and upload student records securely.
+                </p>
+            </div>
+        </div>
+        <a href="students.html" class="primary-btn" style="text-decoration: none; width: auto; padding: 10px 18px;">
+            Open Student Portal →
+        </a>
+    </div>
+</div>
+
+    </main>
+
+</div>
+
 
                 <!-- =========================================
                      FACULTY MANAGEMENT
@@ -1223,10 +1208,6 @@
             </div>
 
         </section>
-
-    </main>
-
-</div>
 
 
 <br>
@@ -1343,15 +1324,6 @@ document.addEventListener(
                             .trim() || "";
 
 
-                    const rollNumber =
-                        document
-                            .getElementById(
-                                "deanLoginRoll"
-                            )
-                            ?.value
-                            .trim() || "";
-
-
                     const branchCode =
                         document
                             .getElementById(
@@ -1376,16 +1348,6 @@ document.addEventListener(
 
                         showToast(
                             "Please enter your University ID."
-                        );
-
-                        return;
-                    }
-
-
-                    if (!rollNumber) {
-
-                        showToast(
-                            "Please enter your Roll Number."
                         );
 
                         return;
@@ -1418,8 +1380,7 @@ document.addEventListener(
                                     "verify_dean_hod_login",
                                     {
                                         p_university_id: universityId,
-                                        p_name: name,
-                                        p_roll: rollNumber
+                                        p_name: name
                                     }
                                 );
 
@@ -1444,7 +1405,7 @@ document.addEventListener(
                         if (!authData) {
 
                             showToast(
-                                "Access Denied: Credentials entered are not authorized."
+                                "Access Denied: This University ID or Name is not authorized."
                             );
 
                             return;
@@ -1574,9 +1535,6 @@ document.addEventListener(
 
                             university_id:
                                 authData.university_id,
-
-                            roll_number:
-                                rollNumber,
 
                             branch_code:
                                 databaseBranch,
