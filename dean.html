@@ -927,162 +927,6 @@
 
 
                 <!-- =========================================
-                     UPLOAD MATERIALS (DEAN / HOD)
-                     ========================================= -->
-
-                <div class="form-card" style="margin-top:20px;">
-
-                    <div class="section-heading">
-
-                        <span class="section-icon faculty">
-                            📁
-                        </span>
-
-                        <div>
-
-                            <span class="eyebrow">
-                                ACADEMIC RESOURCES
-                            </span>
-
-                            <h2>
-                                Upload Study Material
-                            </h2>
-
-                            <p>
-                                Upload notes, question papers, or assignments directly to the student portal.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <form id="deanUploadForm" class="smart-form">
-
-                        <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
-
-                            <!-- BRANCH -->
-                            <div class="field" style="flex: 1; min-width: 200px;">
-
-                                <label for="deanUploadBranch">
-                                    Target Branch
-                                </label>
-
-                                <select id="deanUploadBranch" required>
-                                    <option value="">Select Branch</option>
-                                    <option value="COMMON">Common (1st & 2nd Sem)</option>
-                                    <option value="CSE">Computer Science Engineering</option>
-                                    <option value="ECE">Electronics & Communication</option>
-                                    <option value="ME">Mechanical Engineering</option>
-                                    <option value="CE">Civil Engineering</option>
-                                    <option value="AE">Aeronautical Engineering</option>
-                                </select>
-
-                            </div>
-
-                            <!-- SEMESTER -->
-                            <div class="field" style="flex: 1; min-width: 200px;">
-
-                                <label for="deanUploadSemester">
-                                    Target Semester
-                                </label>
-
-                                <select id="deanUploadSemester" required>
-                                    <option value="">Select Semester</option>
-                                    <option value="1">Semester 1</option>
-                                    <option value="2">Semester 2</option>
-                                    <option value="3">Semester 3</option>
-                                    <option value="4">Semester 4</option>
-                                    <option value="5">Semester 5</option>
-                                    <option value="6">Semester 6</option>
-                                    <option value="7">Semester 7</option>
-                                    <option value="8">Semester 8</option>
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                        <!-- TITLE -->
-                        <div class="field">
-
-                            <label for="deanUploadTitle">
-                                Resource Title
-                            </label>
-
-                            <input
-                                id="deanUploadTitle"
-                                type="text"
-                                placeholder="e.g. Data Structures Unit 1 Notes"
-                                required
-                            >
-
-                        </div>
-
-                        <!-- DESCRIPTION -->
-                        <div class="field">
-
-                            <label for="deanUploadDescription">
-                                Description (Optional)
-                            </label>
-
-                            <input
-                                id="deanUploadDescription"
-                                type="text"
-                                placeholder="e.g. Unit 1 lecture notes with handwritten solutions"
-                            >
-
-                        </div>
-
-                        <!-- FILE -->
-                        <div class="field">
-
-                            <label for="deanUploadFile">
-                                Resource File
-                            </label>
-
-                            <input
-                                id="deanUploadFile"
-                                type="file"
-                                accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg"
-                                required
-                                style="padding: 10px; border: 1px dashed var(--border); width: 100%; border-radius: 8px; background: var(--input, #f8fafc);"
-                            >
-
-                            <small id="deanFileName" style="display: block; margin-top: 5px; color: var(--muted, #64748b);">
-                                Supported: PDF, Word, PPT, Excel, PNG, JPG (Max 20 MB)
-                            </small>
-
-                        </div>
-
-                        <!-- PROGRESS BAR -->
-                        <div id="deanUploadProgressContainer" style="display: none; margin-top: 12px;">
-
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
-                                <span id="deanUploadProgressLabel">Uploading...</span>
-                                <span id="deanUploadProgressPercent">0%</span>
-                            </div>
-
-                            <div style="width: 100%; height: 8px; background: var(--input, #f8fafc); border-radius: 4px; overflow: hidden; border: 1px solid var(--border);">
-                                <div id="deanUploadProgressBar" style="width: 0%; height: 100%; background: var(--primary, #6366f1); transition: width 100ms ease;"></div>
-                            </div>
-
-                        </div>
-
-                        <button
-                            class="primary-btn"
-                            id="deanUploadSubmitBtn"
-                            type="submit"
-                            style="margin-top:14px;"
-                        >
-                            Upload & Publish Material <span>↑</span>
-                        </button>
-
-                    </form>
-
-                </div>
-
-                <!-- =========================================
                      STUDENT MANAGEMENT NAVIGATION CARD
                      ========================================= -->
                 <div class="form-card" id="studentManagementNavCard" style="margin-top:20px; display:none;">
@@ -1370,33 +1214,23 @@ document.addEventListener(
                         );
 
 
-                        const {
-                            data: authDataList,
-                            error: authError
-                        } =
-                            await supabaseClient
-                                .from('dean_hod_auth')
-                                .select('*')
-                                .ilike('university_id', universityId)
-                                .ilike('name', name)
-                                .ilike('branch_code', branchCode);
+                       // Replace lines 1380 - 1410 with this updated lookup code:
+const { data: authDataList, error: authError } = await supabaseClient
+    .from('dean_hod_auth')
+    .select('*')
+    .ilike('university_id', universityId);
 
+if (authError) {
+    console.error("Management lookup error:", authError);
+    throw new Error("Unable to reach database. Check network or RLS policies.");
+}
 
-                        if (authError) {
+if (!authDataList || authDataList.length === 0) {
+    showToast("Access Denied: University ID not registered.");
+    return;
+}
 
-                            console.error(
-                                "Management lookup error:",
-                                authError
-                            );
-
-                            throw new Error(
-                                "Unable to verify management account."
-                            );
-                        }
-
-
-                        const authData =
-                            authDataList?.[0];
+const authData = authDataList[0];
 
 
                         if (!authData) {
