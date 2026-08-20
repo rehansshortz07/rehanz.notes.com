@@ -1081,6 +1081,719 @@ textarea:focus {
   transform: translate(-50%, 0);
 }
 
+/* ============================================================
+   CHATGPT-STYLE DARK MODE
+   Learn-Engineering Management Portals
+   ============================================================ */
+
+/*
+   IMPORTANT:
+   This block only affects dark mode.
+   Light mode is intentionally NOT modified.
+*/
+
+[data-theme="dark"] {
+
+    /* --------------------------------------------------------
+       CHATGPT-STYLE CORE COLORS
+       -------------------------------------------------------- */
+
+    --bg: #212121;
+
+    --surface: #2f2f2f;
+
+    --surface-2: #2f2f2f;
+
+    --surface-3: #424242;
+
+    --card: #2f2f2f;
+
+    --input: #2f2f2f;
+
+    --text: #ececec;
+
+    --muted: #b4b4b4;
+
+    --muted-2: #8e8e8e;
+
+    --border: #424242;
+
+    --primary: #8e8ea0;
+
+    --primary-hover: #acacbe;
+
+    --primary-soft: #3a3a3a;
+
+    --success: #10a37f;
+
+    --danger: #ef4444;
+
+    --shadow-sm:
+        0 1px 2px rgba(0, 0, 0, 0.25);
+
+    --shadow-md:
+        0 8px 30px rgba(0, 0, 0, 0.35);
+
+    color-scheme: dark;
+}
+
+
+/* ============================================================
+   PAGE BACKGROUND
+   ============================================================ */
+
+[data-theme="dark"] body {
+
+    background:
+        #212121;
+
+    color: #ececec;
+}
+
+
+/* ============================================================
+   MAIN APPLICATION AREA
+   ============================================================ */
+
+[data-theme="dark"] .app-shell {
+
+    background: #212121;
+
+    color: #ececec;
+}
+
+
+/* ============================================================
+   TOP NAVIGATION
+   ============================================================ */
+
+[data-theme="dark"] .topbar {
+
+    background: #171717;
+
+    border-color: #2f2f2f;
+
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.25);
+
+    backdrop-filter: none;
+}
+
+[data-theme="dark"] .brand {
+
+    color: #ececec;
+}
+
+[data-theme="dark"] .brand-text strong {
+
+    color: #ececec;
+}
+
+[data-theme="dark"] .brand-text small {
+
+    color: #8e8e8e;
+}
+
+
+/* ============================================================
+   TOPBAR BUTTONS
+   ============================================================ */
+
+[data-theme="dark"] .profile-btn,
+[data-theme="dark"] .icon-btn {
+
+    background: #2f2f2f;
+
+    border-color: #424242;
+
+    color: #ececec;
+}
+
+[data-theme="dark"] .profile-btn:hover,
+[data-theme="dark"] .icon-btn:hover {
+
+    background: #424242;
+
+    border-color: #565656;
+}
+
+
+/* ============================================================
+   FORM CARDS
+   ============================================================ */
+
+[data-theme="dark"] .form-card {
+
+    background: #2f2f2f;
+
+    border-color: #424242;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.30);
+}
+
+
+/* ============================================================
+   MANAGEMENT CARDS
+   ============================================================ */
+
+[data-theme="dark"] .faculty-management-card {
+
+    background: #2f2f2f !important;
+
+    border-color: #424242 !important;
+
+    color: #ececec;
+}
+
+
+[data-theme="dark"] .management-stat {
+
+    background: #2f2f2f !important;
+
+    border-color: #424242 !important;
+
+    color: #ececec;
+}
+
+
+[data-theme="dark"] .branch-stat {
+
+    background: #2f2f2f !important;
+
+    border-color: #424242 !important;
+
+    color: #ececec;
+}
+
+
+/* ============================================================
+   STUDENT MANAGEMENT CARD
+   ============================================================ */
+
+[data-theme="dark"] #studentManagementNavCard {
+
+    background: #2f2f2f !important;
+
+    border-color: #424242 !important;
+}
+
+
+/* ============================================================
+   SECTION HEADINGS
+   ============================================================ */
+
+[data-theme="dark"] .section-heading h2,
+[data-theme="dark"] .section-heading h3,
+[data-theme="dark"] .faculty-management-card h3,
+[data-theme="dark"] .form-card h3 {
+
+    color: #ececec;
+}
+
+
+[data-theme="dark"] .section-heading p {
+
+    color: #b4b4b4;
+}
+
+
+[data-theme="dark"] .eyebrow {
+
+    color: #8e8ea0;
+}
+
+
+/* ============================================================
+   MANAGEMENT USER LABEL
+   ============================================================ */
+
+[data-theme="dark"] #loggedInDeanLabel {
+
+    color: #8e8ea0 !important;
+}
+
+
+/* ============================================================
+   FORM FIELDS
+   ============================================================ */
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .faculty-search {
+
+    background: #2f2f2f !important;
+
+    color: #ececec !important;
+
+    border-color: #424242 !important;
+}
+
+
+[data-theme="dark"] input:hover,
+[data-theme="dark"] select:hover,
+[data-theme="dark"] textarea:hover {
+
+    border-color: #565656 !important;
+}
+
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+
+    background: #2f2f2f !important;
+
+    border-color: #8e8ea0 !important;
+
+    box-shadow:
+        0 0 0 2px rgba(142, 142, 160, 0.18) !important;
+}
+
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+
+    color: #8e8e8e !important;
+}
+
+
+/* ============================================================
+   SELECT DROPDOWN
+   ============================================================ */
+
+[data-theme="dark"] select {
+
+    color: #ececec !important;
+
+    color-scheme: dark;
+}
+
+
+[data-theme="dark"] select option {
+
+    background: #2f2f2f;
+
+    color: #ececec;
+}
+
+
+/* ============================================================
+   FORM LABELS
+   ============================================================ */
+
+[data-theme="dark"] .field label {
+
+    color: #ececec;
+}
+
+
+[data-theme="dark"] .field label span {
+
+    color: #8e8e8e;
+}
+
+
+/* ============================================================
+   PRIMARY BUTTON
+   ============================================================ */
+
+[data-theme="dark"] .primary-btn {
+
+    background: #8e8ea0;
+
+    color: #ffffff;
+
+    border-color: transparent;
+
+    box-shadow: none;
+}
+
+
+[data-theme="dark"] .primary-btn:hover {
+
+    background: #acacbe;
+
+    color: #171717;
+}
+
+
+[data-theme="dark"] .primary-btn:active {
+
+    background: #7d7d8e;
+}
+
+
+/* ============================================================
+   LOGOUT / DANGER BUTTON
+   ============================================================ */
+
+[data-theme="dark"] .danger-btn {
+
+    background: #ef4444;
+
+    color: #ffffff;
+}
+
+
+[data-theme="dark"] .danger-btn:hover {
+
+    background: #dc2626;
+
+    opacity: 1;
+}
+
+
+/* ============================================================
+   DOWNLOAD BUTTON
+   ============================================================ */
+
+[data-theme="dark"] .download-btn {
+
+    color: #ffffff;
+}
+
+
+/* ============================================================
+   SECONDARY BUTTON
+   ============================================================ */
+
+[data-theme="dark"] .secondary-btn {
+
+    background: #2f2f2f;
+
+    color: #ececec;
+
+    border-color: #424242;
+}
+
+
+[data-theme="dark"] .secondary-btn:hover {
+
+    background: #424242;
+
+    border-color: #565656;
+}
+
+
+/* ============================================================
+   FACULTY TABLE
+   ============================================================ */
+
+[data-theme="dark"] .faculty-table {
+
+    color: #ececec;
+}
+
+
+[data-theme="dark"] .faculty-table th {
+
+    color: #8e8e8e;
+
+    border-color: #424242;
+}
+
+
+[data-theme="dark"] .faculty-table td {
+
+    color: #ececec;
+
+    border-color: #424242;
+}
+
+
+[data-theme="dark"] .faculty-table tbody tr:hover {
+
+    background: #2a2a2a;
+}
+
+
+/* ============================================================
+   STUDENT TABLE
+   ============================================================ */
+
+[data-theme="dark"] .student-table {
+
+    color: #ececec;
+}
+
+
+[data-theme="dark"] .student-table th {
+
+    color: #8e8e8e;
+
+    border-color: #424242;
+}
+
+
+[data-theme="dark"] .student-table td {
+
+    color: #ececec;
+
+    border-color: #424242;
+}
+
+
+[data-theme="dark"] .student-table tbody tr:hover {
+
+    background: #2a2a2a;
+}
+
+
+/* ============================================================
+   TABLE WRAPPERS
+   ============================================================ */
+
+[data-theme="dark"] .faculty-table-wrapper,
+[data-theme="dark"] .student-table-wrapper {
+
+    background: transparent;
+}
+
+
+/* ============================================================
+   BRANCH BADGES
+   ============================================================ */
+
+[data-theme="dark"] .branch-badge {
+
+    background: #3a3a3a;
+
+    color: #c4c4d4;
+
+    border: 1px solid #4a4a4a;
+}
+
+
+/* ============================================================
+   BRANCH STATISTICS
+   ============================================================ */
+
+[data-theme="dark"] .branch-stat-code {
+
+    color: #c4c4d4;
+}
+
+
+[data-theme="dark"] .branch-stat-count {
+
+    color: #ececec;
+}
+
+
+[data-theme="dark"] .management-stat-label {
+
+    color: #b4b4b4;
+}
+
+
+[data-theme="dark"] .management-stat-value {
+
+    color: #ececec !important;
+}
+
+
+/* ============================================================
+   SECTION ICONS
+   ============================================================ */
+
+[data-theme="dark"] .section-icon {
+
+    background: #3a3a3a;
+}
+
+
+[data-theme="dark"] .section-icon.faculty {
+
+    background: #19382f;
+}
+
+
+/* ============================================================
+   LINKS
+   ============================================================ */
+
+[data-theme="dark"] a {
+
+    color: #ececec;
+}
+
+
+[data-theme="dark"] a:hover {
+
+    color: #ffffff;
+}
+
+
+/* ============================================================
+   SEARCH BOXES
+   ============================================================ */
+
+[data-theme="dark"] .faculty-search {
+
+    background: #2f2f2f !important;
+
+    color: #ececec !important;
+}
+
+
+/* ============================================================
+   LOADING STATE
+   ============================================================ */
+
+[data-theme="dark"] #studentLoading {
+
+    color: #b4b4b4;
+}
+
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+
+[data-theme="dark"] .toast {
+
+    background: #2f2f2f !important;
+
+    color: #ececec !important;
+
+    border: 1px solid #424242;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+
+/* ============================================================
+   MANAGEMENT NAVIGATION CARD
+   ============================================================ */
+
+[data-theme="dark"] .management-container .form-card {
+
+    background: #2f2f2f;
+}
+
+
+/* ============================================================
+   INLINE WHITE BACKGROUND OVERRIDES
+   These protect existing old HTML code without deleting it.
+   ============================================================ */
+
+[data-theme="dark"] [style*="background: white"],
+[data-theme="dark"] [style*="background:white"],
+[data-theme="dark"] [style*="background: #fff"],
+[data-theme="dark"] [style*="background:#fff"],
+[data-theme="dark"] [style*="background: #ffffff"],
+[data-theme="dark"] [style*="background:#ffffff"] {
+
+    background: #2f2f2f !important;
+
+    color: #ececec !important;
+}
+
+
+/* ============================================================
+   INLINE DARK-TEXT OVERRIDES
+   Protect old components that explicitly specify dark text.
+   ============================================================ */
+
+[data-theme="dark"] [style*="color: #111"],
+[data-theme="dark"] [style*="color:#111"],
+[data-theme="dark"] [style*="color: #111827"],
+[data-theme="dark"] [style*="color:#111827"],
+[data-theme="dark"] [style*="color: #101828"],
+[data-theme="dark"] [style*="color:#101828"] {
+
+    color: #ececec !important;
+}
+
+
+/* ============================================================
+   BORDERS
+   ============================================================ */
+
+[data-theme="dark"] hr {
+
+    border-color: #424242;
+}
+
+
+[data-theme="dark"] [style*="border-bottom"] {
+
+    border-color: #424242 !important;
+}
+
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+[data-theme="dark"] ::-webkit-scrollbar {
+
+    width: 10px;
+
+    height: 10px;
+}
+
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+
+    background: #212121;
+}
+
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+
+    background: #424242;
+
+    border-radius: 10px;
+}
+
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+
+    background: #565656;
+}
+
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+
+[data-theme="dark"] ::selection {
+
+    background: #676767;
+
+    color: #ffffff;
+}
+
+
+/* ============================================================
+   MOBILE DARK MODE
+   ============================================================ */
+
+@media (max-width: 700px) {
+
+    [data-theme="dark"] .topbar {
+
+        background: #171717;
+
+        border-color: #2f2f2f;
+    }
+
+    [data-theme="dark"] .form-card {
+
+        border-radius: 16px;
+    }
+
+    [data-theme="dark"] .faculty-management-card {
+
+        border-radius: 14px !important;
+    }
+
+}
+
 /* 550px */
 @media (max-width: 550px) {
   .topbar {
