@@ -39,6 +39,211 @@ const BRANCHES = [
 ];
 
 /* =========================================================
+   LEARN-ENGINEERING SUPPORTED RESOURCE FILES
+   Production file-type configuration
+   ========================================================= */
+
+const SUPPORTED_RESOURCE_FILES = Object.freeze({
+
+    pdf: {
+        extensions: [".pdf"],
+        mimeTypes: [
+            "application/pdf"
+        ],
+        label: "PDF",
+        icon: "PDF"
+    },
+
+    doc: {
+        extensions: [".doc"],
+        mimeTypes: [
+            "application/msword"
+        ],
+        label: "Word Document",
+        icon: "DOC"
+    },
+
+    docx: {
+        extensions: [".docx"],
+        mimeTypes: [
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ],
+        label: "Word Document",
+        icon: "DOCX"
+    },
+
+    ppt: {
+        extensions: [".ppt"],
+        mimeTypes: [
+            "application/vnd.ms-powerpoint"
+        ],
+        label: "PowerPoint",
+        icon: "PPT"
+    },
+
+    pptx: {
+        extensions: [".pptx"],
+        mimeTypes: [
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        ],
+        label: "PowerPoint",
+        icon: "PPTX"
+    },
+
+    xls: {
+        extensions: [".xls"],
+        mimeTypes: [
+            "application/vnd.ms-excel"
+        ],
+        label: "Excel Spreadsheet",
+        icon: "XLS"
+    },
+
+    xlsx: {
+        extensions: [".xlsx"],
+        mimeTypes: [
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ],
+        label: "Excel Spreadsheet",
+        icon: "XLSX"
+    },
+
+    png: {
+        extensions: [".png"],
+        mimeTypes: [
+            "image/png"
+        ],
+        label: "PNG Image",
+        icon: "PNG"
+    },
+
+    jpg: {
+        extensions: [".jpg", ".jpeg"],
+        mimeTypes: [
+            "image/jpeg"
+        ],
+        label: "JPEG Image",
+        icon: "JPG"
+    }
+
+});
+
+
+const SUPPORTED_RESOURCE_EXTENSIONS = Object.freeze([
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".ppt",
+    ".pptx",
+    ".xls",
+    ".xlsx",
+    ".png",
+    ".jpg",
+    ".jpeg"
+]);
+
+
+/*
+ * Keep your existing 20 MB limit.
+ * This applies to every supported resource.
+ */
+const MAX_RESOURCE_FILE_SIZE =
+    20 * 1024 * 1024;
+
+    /* =========================================================
+   RESOURCE FILE HELPERS
+   ========================================================= */
+
+function getResourceFileExtension(fileName) {
+
+    if (!fileName) {
+        return "";
+    }
+
+    const lowerName =
+        String(fileName)
+            .trim()
+            .toLowerCase();
+
+    const lastDot =
+        lowerName.lastIndexOf(".");
+
+    if (lastDot === -1) {
+        return "";
+    }
+
+    return lowerName.substring(lastDot);
+}
+
+
+function isSupportedResourceFile(file) {
+
+    if (!file) {
+        return false;
+    }
+
+    const extension =
+        getResourceFileExtension(file.name);
+
+    return SUPPORTED_RESOURCE_EXTENSIONS.includes(
+        extension
+    );
+}
+
+
+function getResourceFileType(file) {
+
+    if (!file) {
+        return null;
+    }
+
+    const extension =
+        getResourceFileExtension(file.name);
+
+    for (
+        const [key, config]
+        of Object.entries(SUPPORTED_RESOURCE_FILES)
+    ) {
+
+        if (
+            config.extensions.includes(extension)
+        ) {
+
+            return {
+                key,
+                extension,
+                mimeType:
+                    file.type ||
+                    config.mimeTypes[0],
+                label:
+                    config.label,
+                icon:
+                    config.icon
+            };
+        }
+    }
+
+    return null;
+}
+
+
+function formatResourceFileSize(bytes) {
+
+    if (!Number.isFinite(bytes)) {
+        return "0 KB";
+    }
+
+    if (bytes < 1024) {
+        return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+        return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+/* =========================================================
    APPLICATION STATE
    ========================================================= */
 
@@ -1154,6 +1359,110 @@ async function updateTeacherUploadCount() {
 }
 
 /* =========================================================
+   MULTI-FORMAT FILE INPUT HANDLER
+   Added without removing legacy bindFileInput()
+   ========================================================= */
+
+function bindMultiFormatResourceInput() {
+
+    const uploadFile =
+        document.getElementById("uploadFile");
+
+    if (!uploadFile) {
+        return;
+    }
+
+    /*
+     * Prevent duplicate listeners if this function
+     * is accidentally called more than once.
+     */
+    if (
+        uploadFile.dataset.multiFormatBound === "true"
+    ) {
+        return;
+    }
+
+    uploadFile.dataset.multiFormatBound = "true";
+
+    uploadFile.addEventListener(
+        "change",
+        event => {
+
+            const file =
+                event.target.files?.[0];
+
+            const fileName =
+                document.getElementById("fileName");
+
+            if (!fileName) {
+                return;
+            }
+
+            if (!file) {
+
+                fileName.textContent =
+                    "PDF, Word, PowerPoint, Excel, PNG or JPG • Up to 20 MB";
+
+                return;
+            }
+
+            const fileType =
+                getResourceFileType(file);
+
+            if (!fileType) {
+
+                fileName.textContent =
+                    "Unsupported file type";
+
+                showToast(
+                    "This file type is not supported."
+                );
+
+                event.target.value = "";
+
+                return;
+            }
+
+            if (file.size <= 0) {
+
+                fileName.textContent =
+                    "The selected file is empty.";
+
+                showToast(
+                    "The selected file is empty."
+                );
+
+                event.target.value = "";
+
+                return;
+            }
+
+            if (
+                file.size >
+                MAX_RESOURCE_FILE_SIZE
+            ) {
+
+                fileName.textContent =
+                    "File exceeds 20 MB limit.";
+
+                showToast(
+                    "Please keep the file below 20 MB."
+                );
+
+                event.target.value = "";
+
+                return;
+            }
+
+            fileName.textContent =
+                `${file.name} • ${formatResourceFileSize(file.size)}`;
+
+        }
+    );
+}
+
+
+/* =========================================================
    NAVIGATION UTILITIES
    ========================================================= */
 
@@ -1206,4 +1515,549 @@ function escapeHTML(value) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+}
+
+/* =========================================================
+   PRODUCTION MULTI-FORMAT FACULTY UPLOAD
+   Supports:
+   PDF / DOC / DOCX / PPT / PPTX /
+   XLS / XLSX / PNG / JPG / JPEG
+   ========================================================= */
+
+async function handleTeacherUpload(event) {
+
+    event.preventDefault();
+
+    /*
+     * ---------------------------------------------------------
+     * 1. FACULTY AUTHORIZATION
+     * ---------------------------------------------------------
+     */
+
+    if (
+        !currentProfile ||
+        currentRole !== "teacher"
+    ) {
+
+        showToast(
+            "Unauthorized: Faculty login required."
+        );
+
+        return;
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * 2. GET FILE
+     * ---------------------------------------------------------
+     */
+
+    const fileInput =
+        document.getElementById("uploadFile");
+
+    const file =
+        fileInput?.files?.[0];
+
+
+    if (!file) {
+
+        showToast(
+            "Please choose a file."
+        );
+
+        return;
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * 3. VALIDATE FILE TYPE
+     * ---------------------------------------------------------
+     *
+     * Extension is checked because browsers can sometimes
+     * provide an empty or inconsistent MIME type.
+     */
+
+    const fileType =
+        getResourceFileType(file);
+
+
+    if (!fileType) {
+
+        showToast(
+            "Unsupported file type. Allowed: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, PNG and JPG."
+        );
+
+        fileInput.value = "";
+
+        return;
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * 4. VALIDATE EMPTY FILE
+     * ---------------------------------------------------------
+     */
+
+    if (file.size <= 0) {
+
+        showToast(
+            "The selected file is empty."
+        );
+
+        fileInput.value = "";
+
+        return;
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * 5. VALIDATE FILE SIZE
+     * ---------------------------------------------------------
+     */
+
+    if (
+        file.size >
+        MAX_RESOURCE_FILE_SIZE
+    ) {
+
+        showToast(
+            "File is too large. Maximum allowed size is 20 MB."
+        );
+
+        fileInput.value = "";
+
+        return;
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * 6. GET FORM DATA
+     * ---------------------------------------------------------
+     */
+
+    const branchCode =
+        document
+            .getElementById("uploadBranch")
+            ?.value
+            ?.trim() || "";
+
+
+    const semesterNumber =
+        document
+            .getElementById("uploadSemester")
+            ?.value
+            ?.trim() || "";
+
+
+    const title =
+        document
+            .getElementById("uploadTitle")
+            ?.value
+            ?.trim() || "";
+
+
+    if (
+        !branchCode ||
+        !semesterNumber ||
+        !title
+    ) {
+
+        showToast(
+            "Please fill all required fields."
+        );
+
+        return;
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * 7. PROGRESS UI
+     * ---------------------------------------------------------
+     */
+
+    const progressContainer =
+        document.getElementById(
+            "uploadProgressContainer"
+        );
+
+    const progressBar =
+        document.getElementById(
+            "uploadProgressBar"
+        );
+
+    const progressPercent =
+        document.getElementById(
+            "uploadProgressPercent"
+        );
+
+    const uploadSubmitBtn =
+        document.getElementById(
+            "uploadSubmitBtn"
+        );
+
+
+    let progressInterval =
+        null;
+
+
+    try {
+
+        if (progressContainer) {
+            progressContainer.classList.remove(
+                "hidden"
+            );
+        }
+
+
+        if (uploadSubmitBtn) {
+            uploadSubmitBtn.disabled = true;
+        }
+
+
+        let progress = 10;
+
+
+        if (progressBar) {
+            progressBar.style.width =
+                `${progress}%`;
+        }
+
+
+        if (progressPercent) {
+            progressPercent.textContent =
+                `${progress}%`;
+        }
+
+
+        progressInterval =
+            setInterval(
+                () => {
+
+                    if (progress < 85) {
+
+                        progress += 5;
+
+                        if (progress > 85) {
+                            progress = 85;
+                        }
+
+                        if (progressBar) {
+                            progressBar.style.width =
+                                `${progress}%`;
+                        }
+
+                        if (progressPercent) {
+                            progressPercent.textContent =
+                                `${progress}%`;
+                        }
+                    }
+
+                },
+                250
+            );
+
+
+        /*
+         * -----------------------------------------------------
+         * 8. LOAD BRANCH
+         * -----------------------------------------------------
+         */
+
+        const {
+            data: branchData,
+            error: branchError
+        } =
+            await supabaseClient
+                .from("branches")
+                .select("id")
+                .eq(
+                    "code",
+                    branchCode
+                )
+                .single();
+
+
+        if (branchError) {
+            throw branchError;
+        }
+
+
+        if (!branchData) {
+            throw new Error(
+                "Selected branch was not found."
+            );
+        }
+
+
+        /*
+         * -----------------------------------------------------
+         * 9. LOAD SEMESTER
+         * -----------------------------------------------------
+         */
+
+        const {
+            data: semData,
+            error: semError
+        } =
+            await supabaseClient
+                .from("semesters")
+                .select("id")
+                .eq(
+                    "semester_number",
+                    Number(semesterNumber)
+                )
+                .single();
+
+
+        if (semError) {
+            throw semError;
+        }
+
+
+        if (!semData) {
+            throw new Error(
+                "Selected semester was not found."
+            );
+        }
+
+
+        /*
+         * -----------------------------------------------------
+         * 10. UPLOAD TO CLOUDFLARE / B2
+         * -----------------------------------------------------
+         */
+
+        const uploadResult =
+            await uploadPDFToWorker(
+                file,
+                {
+                    title:
+                        title,
+
+                    branch:
+                        branchCode,
+
+                    semester:
+                        semesterNumber
+                }
+            );
+
+
+        clearInterval(
+            progressInterval
+        );
+
+
+        if (progressBar) {
+            progressBar.style.width =
+                "100%";
+        }
+
+
+        if (progressPercent) {
+            progressPercent.textContent =
+                "100%";
+        }
+
+
+        console.log(
+            "✅ Resource uploaded:",
+            uploadResult
+        );
+
+
+        /*
+         * -----------------------------------------------------
+         * 11. VERIFY STORAGE RESPONSE
+         * -----------------------------------------------------
+         */
+
+        const storagePath =
+            uploadResult?.storage_path;
+
+        const fileUrl =
+            uploadResult?.file_url;
+
+
+        if (!storagePath) {
+
+            throw new Error(
+                "Storage server did not return a file path."
+            );
+        }
+
+
+        /*
+         * -----------------------------------------------------
+         * 12. SAVE DATABASE RECORD
+         * -----------------------------------------------------
+         *
+         * We keep your existing notes schema.
+         * No database migration is required for this step.
+         */
+
+        const notePayload = {
+
+            title:
+                title,
+
+            description:
+                null,
+
+            branch_id:
+                branchData.id,
+
+            semester_id:
+                semData.id,
+
+            /*
+             * Your existing application may already
+             * have subject support elsewhere.
+             * Keep this nullable for multi-format upload.
+             */
+            subject_id:
+                null,
+
+            teacher_id:
+                currentProfile.id,
+
+            file_name:
+                file.name,
+
+            storage_path:
+                storagePath,
+
+            file_url:
+                fileUrl || null,
+
+            file_size:
+                file.size,
+
+            status:
+                "published"
+        };
+
+
+        const {
+            error: noteError
+        } =
+            await supabaseClient
+                .from("notes")
+                .insert(
+                    notePayload
+                );
+
+
+        if (noteError) {
+            throw noteError;
+        }
+
+
+        /*
+         * -----------------------------------------------------
+         * 13. RESET UI
+         * -----------------------------------------------------
+         */
+
+        event.target.reset();
+
+
+        const fileNameElement =
+            document.getElementById(
+                "fileName"
+            );
+
+
+        if (fileNameElement) {
+
+            fileNameElement.textContent =
+                "PDF, Word, PowerPoint, Excel, PNG or JPG • Up to 20 MB";
+
+        }
+
+
+        /*
+         * -----------------------------------------------------
+         * 14. REFRESH FACULTY DASHBOARD
+         * -----------------------------------------------------
+         */
+
+        if (
+            typeof updateTeacherUploadCount ===
+            "function"
+        ) {
+
+            updateTeacherUploadCount();
+
+        }
+
+
+        if (
+            typeof loadTeacherUploads ===
+            "function"
+        ) {
+
+            loadTeacherUploads();
+
+        }
+
+
+        showToast(
+            `${fileType.label} uploaded and published successfully!`
+        );
+
+
+    } catch (err) {
+
+        if (progressInterval) {
+            clearInterval(
+                progressInterval
+            );
+        }
+
+
+        console.error(
+            "❌ Resource upload failed:",
+            err
+        );
+
+
+        showToast(
+            err?.message ||
+            "File upload failed."
+        );
+
+
+    } finally {
+
+        if (uploadSubmitBtn) {
+            uploadSubmitBtn.disabled =
+                false;
+        }
+
+
+        setTimeout(
+            () => {
+
+                if (progressContainer) {
+                    progressContainer.classList.add(
+                        "hidden"
+                    );
+                }
+
+                if (progressBar) {
+                    progressBar.style.width =
+                        "0%";
+                }
+
+            },
+            1200
+        );
+    }
 }
