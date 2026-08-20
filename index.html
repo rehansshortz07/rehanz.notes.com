@@ -304,11 +304,42 @@
           </div>
 
           <label class="file-drop" for="uploadFile">
-            <input id="uploadFile" type="file" accept=".pdf,application/pdf">
-            <span class="upload-symbol">↑</span>
-            <strong>Choose PDF file</strong>
-            <small id="fileName">PDF up to 10 MB</small>
-          </label>
+
+  <input
+    id="uploadFile"
+    type="file"
+    accept="
+      .pdf,
+      .doc,
+      .docx,
+      .ppt,
+      .pptx,
+      .xls,
+      .xlsx,
+      .png,
+      .jpg,
+      .jpeg,
+      application/pdf,
+      application/msword,
+      application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+      application/vnd.ms-powerpoint,
+      application/vnd.openxmlformats-officedocument.presentationml.presentation,
+      application/vnd.ms-excel,
+      application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+      image/png,
+      image/jpeg
+    "
+  >
+
+  <span class="upload-symbol">↑</span>
+
+  <strong>Choose file</strong>
+
+  <small id="fileName">
+    PDF, Word, PowerPoint, Excel, PNG or JPG • Up to 20 MB
+  </small>
+
+</label>
 
           <div id="uploadProgressContainer" class="hidden" style="margin-top: 12px;">
             <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 4px;">
