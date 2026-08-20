@@ -379,46 +379,6 @@
                     class="smart-form"
                 >
 
-                    <!-- EMAIL -->
-
-                    <div class="field">
-
-                        <label
-                            for="deanLoginEmail"
-                        >
-                            Email Address
-                        </label>
-
-                        <input
-                            id="deanLoginEmail"
-                            type="email"
-                            placeholder="e.g. dean@university.edu"
-                            autocomplete="email"
-                            required
-                        >
-
-                    </div>
-
-                    <!-- PASSWORD -->
-
-                    <div class="field">
-
-                        <label
-                            for="deanLoginPassword"
-                        >
-                            Password
-                        </label>
-
-                        <input
-                            id="deanLoginPassword"
-                            type="password"
-                            placeholder="Enter your password"
-                            autocomplete="current-password"
-                            required
-                        >
-
-                    </div>
-
                     <!-- NAME -->
 
                     <div class="field">
@@ -454,6 +414,26 @@
                             id="deanLoginId"
                             type="text"
                             placeholder="e.g. DEAN001"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- ROLL NUMBER -->
+
+                    <div class="field">
+
+                        <label
+                            for="deanLoginRoll"
+                        >
+                            Roll Number
+                        </label>
+
+                        <input
+                            id="deanLoginRoll"
+                            type="text"
+                            placeholder="e.g. 21001"
                             required
                         >
 
@@ -1239,6 +1219,7 @@
 
                 </div>
 
+
             </div>
 
         </section>
@@ -1284,7 +1265,7 @@
 
 document.addEventListener(
     "DOMContentLoaded",
-    async () => {
+    () => {
 
         console.log(
             "🏛️ Dean/HOD Management Portal starting..."
@@ -1327,7 +1308,7 @@ document.addEventListener(
 
 
         /* =====================================================
-           DEAN / HOD LOGIN (WITH EMAIL & PASSWORD)
+           DEAN / HOD LOGIN
            ===================================================== */
 
         const deanLoginForm =
@@ -1343,20 +1324,6 @@ document.addEventListener(
 
                     e.preventDefault();
 
-                    const email =
-                        document
-                            .getElementById(
-                                "deanLoginEmail"
-                            )
-                            ?.value
-                            .trim() || "";
-
-                    const password =
-                        document
-                            .getElementById(
-                                "deanLoginPassword"
-                            )
-                            ?.value || "";
 
                     const name =
                         document
@@ -1366,6 +1333,7 @@ document.addEventListener(
                             ?.value
                             .trim() || "";
 
+
                     const universityId =
                         document
                             .getElementById(
@@ -1373,6 +1341,16 @@ document.addEventListener(
                             )
                             ?.value
                             .trim() || "";
+
+
+                    const rollNumber =
+                        document
+                            .getElementById(
+                                "deanLoginRoll"
+                            )
+                            ?.value
+                            .trim() || "";
+
 
                     const branchCode =
                         document
@@ -1383,48 +1361,54 @@ document.addEventListener(
                             .trim()
                             .toUpperCase() || "";
 
-                    if (!email) {
-                        showToast("Please enter your email address.");
-                        return;
-                    }
-
-                    if (!password) {
-                        showToast("Please enter your password.");
-                        return;
-                    }
 
                     if (!name) {
-                        showToast("Please enter your full name.");
+
+                        showToast(
+                            "Please enter your full name."
+                        );
+
                         return;
                     }
+
 
                     if (!universityId) {
-                        showToast("Please enter your University ID.");
+
+                        showToast(
+                            "Please enter your University ID."
+                        );
+
                         return;
                     }
 
-                    if (!branchCode) {
-                        showToast("Please select your role / branch.");
+
+                    if (!rollNumber) {
+
+                        showToast(
+                            "Please enter your Roll Number."
+                        );
+
                         return;
                     }
+
+
+                    if (!branchCode) {
+
+                        showToast(
+                            "Please select your role / branch."
+                        );
+
+                        return;
+                    }
+
 
                     try {
 
-                        showToast("Verifying credentials...");
+                        showToast(
+                            "Verifying management credentials..."
+                        );
 
-                        // 1. Authenticate with Supabase Auth
-                        const { data: authSession, error: signInError } =
-                            await supabaseClient.auth.signInWithPassword({
-                                email: email,
-                                password: password
-                            });
 
-                        if (signInError) {
-                            console.error("Supabase Auth Error:", signInError);
-                            throw new Error("Invalid email or password.");
-                        }
-
-                        // 2. RPC lookup against dean_hod_auth table
                         const {
                             data: authDataList,
                             error: authError
@@ -1433,12 +1417,15 @@ document.addEventListener(
                                 .rpc(
                                     "verify_dean_hod_login",
                                     {
-                                        p_email: email,
-                                        p_university_id: universityId
+                                        p_university_id: universityId,
+                                        p_name: name,
+                                        p_roll: rollNumber
                                     }
                                 );
 
+
                         if (authError) {
+
                             console.error(
                                 "Management lookup error:",
                                 authError
@@ -1449,104 +1436,179 @@ document.addEventListener(
                             );
                         }
 
-                        const authData = authDataList?.[0];
+
+                        const authData =
+                            authDataList?.[0];
+
 
                         if (!authData) {
-                            await supabaseClient.auth.signOut();
+
                             showToast(
-                                "Access Denied: Email or University ID is not authorized."
+                                "Access Denied: Credentials entered are not authorized."
                             );
+
                             return;
                         }
+
 
                         /* ======================================
                            VERIFY NAME
                            ====================================== */
 
                         const databaseName =
-                            String(authData.name)
+                            String(
+                                authData.name
+                            )
                                 .trim()
                                 .toLowerCase();
+
 
                         const enteredName =
                             String(name)
                                 .trim()
                                 .toLowerCase();
 
-                        if (databaseName !== enteredName) {
-                            await supabaseClient.auth.signOut();
+
+                        if (
+                            databaseName !==
+                            enteredName
+                        ) {
+
                             showToast(
                                 "Access Denied: Name does not match."
                             );
+
                             return;
                         }
+
 
                         /* ======================================
                            DATABASE ROLE
                            ====================================== */
 
                         const databaseBranch =
-                            String(authData.branch_code)
+                            String(
+                                authData.branch_code
+                            )
                                 .trim()
                                 .toUpperCase();
 
-                        const isDean = databaseBranch === "DEAN";
-                        const isHOD = !isDean && databaseBranch.length > 0;
 
-                        if (!isDean && !isHOD) {
-                            await supabaseClient.auth.signOut();
+                        const isDean =
+                            databaseBranch ===
+                            "DEAN";
+
+
+                        const isHOD =
+                            !isDean &&
+                            databaseBranch.length >
+                                0;
+
+
+                        if (
+                            !isDean &&
+                            !isHOD
+                        ) {
+
                             showToast(
                                 "Access Denied: Invalid management role."
                             );
+
                             return;
                         }
 
+
                         /* ======================================
                            VERIFY BRANCH
+
+                           Dean can choose DEAN.
+
+                           HOD must select the same branch
+                           registered in Supabase.
                            ====================================== */
 
                         if (isDean) {
-                            if (branchCode !== "DEAN") {
-                                await supabaseClient.auth.signOut();
+
+                            if (
+                                branchCode !==
+                                "DEAN"
+                            ) {
+
                                 showToast(
                                     "Please select Dean in the role / branch field."
                                 );
+
                                 return;
                             }
+
                         } else {
-                            if (databaseBranch !== branchCode) {
-                                await supabaseClient.auth.signOut();
+
+                            if (
+                                databaseBranch !==
+                                branchCode
+                            ) {
+
                                 showToast(
                                     `Access Denied: This HOD account is registered for ${databaseBranch}.`
                                 );
+
                                 return;
                             }
+
                         }
 
-                        const userRole = isDean ? "dean" : "hod";
+
+                        const userRole =
+                            isDean
+                                ? "dean"
+                                : "hod";
+
 
                         const managementUser = {
-                            id: authData.id,
-                            name: authData.name,
-                            email: authData.email,
-                            university_id: authData.university_id,
-                            branch_code: databaseBranch,
-                            role: userRole
+
+                            id:
+                                authData.id,
+
+                            name:
+                                authData.name,
+
+                            university_id:
+                                authData.university_id,
+
+                            roll_number:
+                                rollNumber,
+
+                            branch_code:
+                                databaseBranch,
+
+                            role:
+                                userRole
+
                         };
+
 
                         console.log(
                             "✅ Authorized management user:",
                             managementUser
                         );
 
+
                         localStorage.setItem(
                             "dean_session",
-                            JSON.stringify(managementUser)
+                            JSON.stringify(
+                                managementUser
+                            )
                         );
 
-                        unlockDeanDashboard(managementUser);
 
-                        showToast(`Welcome ${authData.name}!`);
+                        unlockDeanDashboard(
+                            managementUser
+                        );
+
+
+                        showToast(
+                            `Welcome ${authData.name}!`
+                        );
 
                     } catch (err) {
 
@@ -1774,6 +1836,9 @@ document.addEventListener(
 
                         /* ======================================
                            PRIMARY BRANCH
+
+                           Keep branch_code because your
+                           existing faculty system uses it.
                            ====================================== */
 
                         const primaryBranch =
@@ -2068,6 +2133,7 @@ function unlockDeanDashboard(managementUser) {
     const loginView = document.getElementById("deanLoginView");
     const dashboardView = document.getElementById("deanDashboardView");
     
+    // Select the student management navigation card you just created
     const studentNavCard = document.getElementById("studentManagementNavCard");
 
     if (loginView) {
@@ -2078,6 +2144,7 @@ function unlockDeanDashboard(managementUser) {
         dashboardView.classList.add("active");
     }
 
+    // Reveal the button card after successful login approval
     if (studentNavCard) {
         studentNavCard.style.display = "block";
     }
@@ -2308,6 +2375,12 @@ function renderFacultyTable(
                     ? faculty.branches
                     : [];
 
+
+            /*
+             * Backward compatibility:
+             * If old record has no branches
+             * array, use branch_code.
+             */
 
             if (
                 branches.length === 0 &&
@@ -2740,13 +2813,7 @@ function escapeHTML(
 /* ============================================================
    LOGOUT
    ============================================================ */
-async function logoutDean() {
-    try {
-        await supabaseClient.auth.signOut();
-    } catch (e) {
-        console.error("Signout error:", e);
-    }
-
+function logoutDean() {
     localStorage.removeItem("dean_session");
 
     const loginView = document.getElementById("deanLoginView");
@@ -2761,6 +2828,7 @@ async function logoutDean() {
         loginView.classList.remove("hidden-panel");
     }
 
+    // Hide the student portal button on logout
     if (studentNavCard) {
         studentNavCard.style.display = "none";
     }
