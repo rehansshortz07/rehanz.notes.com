@@ -1375,13 +1375,11 @@ document.addEventListener(
                             error: authError
                         } =
                             await supabaseClient
-                                .rpc(
-                                    "verify_dean_hod_login",
-                                    {
-                                        p_university_id: universityId,
-                                        p_name: name
-                                    }
-                                );
+                                .from('dean_hod_auth')
+                                .select('*')
+                                .ilike('university_id', universityId)
+                                .ilike('name', name)
+                                .ilike('branch_code', branchCode);
 
 
                         if (authError) {
@@ -1404,7 +1402,7 @@ document.addEventListener(
                         if (!authData) {
 
                             showToast(
-                                "Access Denied: This University ID or Name is not authorized."
+                                "Access Denied: This University ID, Name, or Branch is not authorized."
                             );
 
                             return;
