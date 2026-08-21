@@ -23,7 +23,7 @@
         rel="stylesheet"
         href="style.css"
     >
- <link rel="icon" href="icon-512.png">
+
     <style>
 
         /* =====================================================
@@ -1141,23 +1141,57 @@ document.addEventListener(
 
         /* =====================================================
            RESTORE SESSION
+           Verify the real Supabase Auth session is alive
+           before trusting the localStorage snapshot.
+           If the auth session is gone, clear the stale
+           localStorage entry so the user sees the login form
+           instead of a blank dashboard.
            ===================================================== */
 
-        const savedDean =
-            localStorage.getItem(
-                "dean_session"
-            );
+        (async () => {
 
-        if (savedDean) {
+            const savedDean =
+                localStorage.getItem("dean_session");
+
+            if (!savedDean) return; // nothing to restore
 
             try {
 
-                const managementUser =
-                    JSON.parse(savedDean);
+                const { data: { session }, error: sessionError } =
+                    await supabaseClient.auth.getSession();
 
-                unlockDeanDashboard(
-                    managementUser
-                );
+                if (sessionError || !session) {
+                    // Auth session gone — clear stale snapshot
+                    console.warn(
+                        "Dean session snapshot found but no live auth session. Clearing."
+                    );
+                    localStorage.removeItem("dean_session");
+                    return;
+                }
+
+                // Auth session is alive — re-verify against the
+                // database so a tampered localStorage can't bypass
+                const managementUser = JSON.parse(savedDean);
+
+                const { data: rows, error: verifyError } =
+                    await supabaseClient.rpc("claim_dean_hod_account", {
+                        input_name: managementUser.name,
+                        input_university_id: managementUser.university_id,
+                        input_branch: managementUser.branch_code
+                    });
+
+                if (verifyError || !rows || rows.length === 0) {
+                    console.warn(
+                        "Dean session re-verification failed. Clearing.",
+                        verifyError
+                    );
+                    localStorage.removeItem("dean_session");
+                    await supabaseClient.auth.signOut();
+                    return;
+                }
+
+                // All good — restore the dashboard
+                unlockDeanDashboard(managementUser);
 
             } catch (error) {
 
@@ -1165,12 +1199,10 @@ document.addEventListener(
                     "Invalid saved management session:",
                     error
                 );
-
-                localStorage.removeItem(
-                    "dean_session"
-                );
+                localStorage.removeItem("dean_session");
             }
-        }
+
+        })();
 
 
 
