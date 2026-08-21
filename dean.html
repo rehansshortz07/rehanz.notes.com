@@ -30,23 +30,35 @@
            MANAGEMENT PORTAL VIEW CONTROL
            ===================================================== */
 
-        #deanLoginView {
-            display: block;
-        }
+    /* =====================================================
+   MANAGEMENT PORTAL VIEW CONTROL OVERRIDES
+   ===================================================== */
 
-        #deanLoginView.hidden-panel {
-            display: none !important;
-        }
-
-        /* CHANGE THIS: */
-#deanDashboardView {
-    display: none; /* Removed !important */
+/* Ensure main shell is visible */
+.app-shell, .main-content {
+    display: block !important;
+    min-height: 100vh;
 }
 
-#deanDashboardView.active {
+/* Default Login View State */
+#deanLoginView {
     display: block !important;
 }
 
+/* When Login View is Hidden */
+#deanLoginView.hidden-panel {
+    display: none !important;
+}
+
+/* Default Dashboard View State */
+#deanDashboardView {
+    display: none !important;
+}
+
+/* When Dashboard View is Unlocked */
+#deanDashboardView.active {
+    display: block !important;
+}
 
         /* =====================================================
            MANAGEMENT DASHBOARD
