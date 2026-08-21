@@ -272,10 +272,9 @@
         }
 
     </style>
-    
-     <link rel="icon" href="icon-512.png">
 
 </head>
+
 
 <body>
 
@@ -415,6 +414,49 @@
                             id="deanLoginId"
                             type="text"
                             placeholder="e.g. DEAN001"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- EMAIL (Supabase Auth) -->
+
+                    <div class="field">
+
+                        <label
+                            for="deanLoginEmail"
+                        >
+                            Email
+                        </label>
+
+                        <input
+                            id="deanLoginEmail"
+                            type="email"
+                            placeholder="you@university.edu"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- PASSWORD (Supabase Auth) -->
+
+                    <div class="field">
+
+                        <label
+                            for="deanLoginPassword"
+                        >
+                            Password
+                        </label>
+
+                        <input
+                            id="deanLoginPassword"
+                            type="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            minlength="6"
                             required
                         >
 
@@ -1178,6 +1220,33 @@ document.addEventListener(
                             .toUpperCase() || "";
 
 
+                    const email =
+                        document
+                            .getElementById(
+                                "deanLoginEmail"
+                            )
+                            ?.value
+                            .trim() || "";
+
+
+                    const password =
+                        document
+                            .getElementById(
+                                "deanLoginPassword"
+                            )
+                            ?.value || "";
+
+
+                    if (!email || !password) {
+
+                        showToast(
+                            "Please enter your email and password."
+                        );
+
+                        return;
+                    }
+
+
                     if (!name) {
 
                         showToast(
@@ -1215,30 +1284,74 @@ document.addEventListener(
                         );
 
 
-                       // Replace lines 1380 - 1410 with this updated lookup code:
-const { data: authDataList, error: authError } = await supabaseClient
-    .from('dean_hod_auth')
-    .select('*')
-    .ilike('university_id', universityId);
+                        /* ======================================
+                           SUPABASE AUTH (real session, not
+                           localStorage-only trust)
+                           ====================================== */
 
-if (authError) {
-    console.error("Management lookup error:", authError);
-    throw new Error("Unable to reach database. Check network or RLS policies.");
-}
+                        let authUser = null;
 
-if (!authDataList || authDataList.length === 0) {
-    showToast("Access Denied: University ID not registered.");
-    return;
-}
+                        let { data: signUpData, error: signUpError } =
+                            await supabaseClient.auth.signUp({ email, password });
 
-const authData = authDataList[0];
+                        if (signUpError) {
 
+                            if (
+                                signUpError.message?.toLowerCase().includes("already registered") ||
+                                signUpError.status === 422
+                            ) {
+
+                                const { data: signInData, error: signInError } =
+                                    await supabaseClient.auth.signInWithPassword({ email, password });
+
+                                if (signInError) throw signInError;
+
+                                authUser = signInData?.user;
+
+                            } else {
+                                throw signUpError;
+                            }
+
+                        } else {
+                            authUser = signUpData?.user;
+                        }
+
+                        if (!authUser) {
+                            throw new Error("Management authentication failed.");
+                        }
+
+
+                        /* ======================================
+                           CLAIM / VERIFY DEAN-HOD ROW
+                           Server-side RPC (security definer) —
+                           this is the real authorization check.
+                           Matches name + university_id + branch
+                           against dean_hod_auth, and links this
+                           auth account to that row (first login)
+                           or confirms it already owns that row.
+                           ====================================== */
+
+                        const { data: claimRows, error: claimError } =
+                            await supabaseClient.rpc("claim_dean_hod_account", {
+                                input_name: name,
+                                input_university_id: universityId,
+                                input_branch: branchCode
+                            });
+
+                        if (claimError) {
+                            console.error("Management claim error:", claimError);
+                            throw new Error("Unable to verify management credentials.");
+                        }
+
+                        const authData = claimRows?.[0];
 
                         if (!authData) {
 
                             showToast(
-                                "Access Denied: This University ID, Name, or Branch is not authorized."
+                                "Access Denied: This University ID, Name, or Branch is not authorized, or is already linked to a different login."
                             );
+
+                            await supabaseClient.auth.signOut();
 
                             return;
                         }
@@ -2605,6 +2718,7 @@ function escapeHTML(
    ============================================================ */
 function logoutDean() {
     localStorage.removeItem("dean_session");
+    supabaseClient.auth.signOut();
 
     const loginView = document.getElementById("deanLoginView");
     const dashboardView = document.getElementById("deanDashboardView");
