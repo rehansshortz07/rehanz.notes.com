@@ -30,35 +30,47 @@
            MANAGEMENT PORTAL VIEW CONTROL
            ===================================================== */
 
-    /* =====================================================
-   MANAGEMENT PORTAL VIEW CONTROL OVERRIDES
-   ===================================================== */
+        /* =====================================================
+           DATA-STATE DRIVEN VIEW CONTROL OVERRIDES
+           ===================================================== */
 
-/* Ensure main shell is visible */
-.app-shell, .main-content {
-    display: block !important;
-    min-height: 100vh;
-}
+        /* Ensure wrapper visibility */
+        .app-shell, .main-content {
+            display: block !important;
+            min-height: 100vh;
+        }
 
-/* Default Login View State */
-#deanLoginView {
-    display: block !important;
-}
+        /* Hide all view sections by default to prevent leaking */
+        .main-content > .view {
+            display: none !important;
+        }
 
-/* When Login View is Hidden */
-#deanLoginView.hidden-panel {
-    display: none !important;
-}
+        /* Unlocked State: Show Dashboard, Hide Login */
+        .main-content[data-state="dashboard"] #deanDashboardView {
+            display: block !important;
+        }
 
-/* Default Dashboard View State */
-#deanDashboardView {
-    display: none !important;
-}
+        .main-content[data-state="dashboard"] #deanLoginView {
+            display: none !important;
+        }
 
-/* When Dashboard View is Unlocked */
-#deanDashboardView.active {
-    display: block !important;
-}
+        /* Locked State: Show Login, Hide Dashboard */
+        .main-content[data-state="login"] #deanLoginView {
+            display: block !important;
+        }
+
+        .main-content[data-state="login"] #deanDashboardView {
+            display: none !important;
+        }
+
+        /* Legacy support overrides */
+        #deanLoginView.hidden-panel {
+            display: none !important;
+        }
+
+        #deanDashboardView.active {
+            display: block !important;
+        }
 
         /* =====================================================
            MANAGEMENT DASHBOARD
@@ -338,7 +350,7 @@
 
 
 
-    <main class="main-content">
+    <main class="main-content" data-state="login">
 
 
         <!-- =================================================
@@ -2078,12 +2090,19 @@ document.addEventListener(
    UNLOCK MANAGEMENT DASHBOARD
    ============================================================ */
 function unlockDeanDashboard(managementUser) {
+    const mainContent = document.querySelector(".main-content");
     const loginView = document.getElementById("deanLoginView");
     const dashboardView = document.getElementById("deanDashboardView");
     
-    // Select the student management navigation card you just created
+    // Select the student management navigation card
     const studentNavCard = document.getElementById("studentManagementNavCard");
 
+    // Primary: Toggle data attribute state
+    if (mainContent) {
+        mainContent.setAttribute("data-state", "dashboard");
+    }
+
+    // Secondary: Class manipulations for backward compatibility
     if (loginView) {
         loginView.classList.add("hidden-panel");
     }
@@ -2765,10 +2784,17 @@ function logoutDean() {
     localStorage.removeItem("dean_session");
     supabaseClient.auth.signOut();
 
+    const mainContent = document.querySelector(".main-content");
     const loginView = document.getElementById("deanLoginView");
     const dashboardView = document.getElementById("deanDashboardView");
     const studentNavCard = document.getElementById("studentManagementNavCard");
 
+    // Primary: Switch data state attribute back to login
+    if (mainContent) {
+        mainContent.setAttribute("data-state", "login");
+    }
+
+    // Secondary: Clear legacy classes
     if (dashboardView) {
         dashboardView.classList.remove("active");
     }
