@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <title>University Analytics - Dean & HOD Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="icon-512.png">
+    <style>
+        .analytics-container {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .stats-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: 14px;
+            background: var(--card, #ffffff);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted, #64748b);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text, #111827);
+        }
+
+        .section-card {
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: 16px;
+            background: var(--card, #ffffff);
+        }
+
+        .section-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            color: var(--text, #111827);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .branch-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .branch-card {
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border, #e2e8f0);
+            background: var(--input, #f8fafc);
+            text-align: center;
+        }
+
+        .branch-code {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary, #6366f1);
+        }
+
+        .branch-count {
+            margin-top: 6px;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        @media (max-width: 900px) {
+            .stats-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .branch-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid-4 { grid-template-columns: 1fr; }
+            .branch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <header class="topbar">
+        <a class="brand" href="index.html">
+            <span class="brand-text">
+                <strong>Learn-Engineering</strong>
+                <small>Analytics & Reports</small>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <a href="dean.html" class="profile-btn" style="text-decoration:none;">
+                <span>← Back to Control Panel</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="analytics-container">
+            
+            <!-- Access Guard Notice -->
+            <div id="authGuardMsg" style="text-align: center; padding: 40px; display: none;">
+                <h2>🔒 Restricted Access</h2>
+                <p>Checking Dean/HOD permissions...</p>
+            </div>
+
+            <!-- Analytics Dashboard Content -->
+            <div id="analyticsContent" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <span class="eyebrow" style="color: var(--primary, #6366f1); font-weight: 700; font-size: 12px;">SYSTEM INSIGHTS</span>
+                        <h2 style="margin: 4px 0 0;">Management Analytics</h2>
+                    </div>
+                    <button onclick="loadAnalyticsData()" class="primary-btn" style="width: auto; padding: 8px 16px;">🔄 Refresh Data</button>
+                </div>
+
+                <!-- OVERVIEW STATS -->
+                <div class="stats-grid-4">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Faculty</div>
+                        <div id="totalFacultyStat" class="stat-value">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Students</div>
+                        <div id="totalStudentStat" class="stat-value">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Notes & Resources</div>
+                        <div id="totalNotesStat" class="stat-value">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Branches</div>
+                        <div id="totalBranchesStat" class="stat-value">6</div>
+                    </div>
+                </div>
+
+                <!-- FACULTY BY BRANCH -->
+                <div class="section-card">
+                    <h3 class="section-card-title">👨‍🏫 Faculty Members by Branch</h3>
+                    <div class="branch-grid">
+                        <div class="branch-card"><div class="branch-code">COMMON</div><div id="fac_COMMON" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CSE</div><div id="fac_CSE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ECE</div><div id="fac_ECE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ME</div><div id="fac_ME" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CE</div><div id="fac_CE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">AE</div><div id="fac_AE" class="branch-count">0</div></div>
+                    </div>
+                </div>
+
+                <!-- STUDENTS BY BRANCH -->
+                <div class="section-card">
+                    <h3 class="section-card-title">👨‍🎓 Students Enrolled by Branch</h3>
+                    <div class="branch-grid">
+                        <div class="branch-card"><div class="branch-code">COMMON</div><div id="stu_COMMON" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CSE</div><div id="stu_CSE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ECE</div><div id="stu_ECE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ME</div><div id="stu_ME" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CE</div><div id="stu_CE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">AE</div><div id="stu_AE" class="branch-count">0</div></div>
+                    </div>
+                </div>
+
+                <!-- NOTES BY BRANCH -->
+                <div class="section-card">
+                    <h3 class="section-card-title">📚 Uploaded Resources & Notes by Branch</h3>
+                    <div class="branch-grid">
+                        <div class="branch-card"><div class="branch-code">COMMON</div><div id="note_COMMON" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CSE</div><div id="note_CSE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ECE</div><div id="note_ECE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ME</div><div id="note_ME" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CE</div><div id="note_CE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">AE</div><div id="note_AE" class="branch-count">0</div></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    const authGuardMsg = document.getElementById("authGuardMsg");
+    const analyticsContent = document.getElementById("analyticsContent");
+
+    // 1. Authenticate Dean/HOD Role
+    const savedDean = localStorage.getItem("dean_session");
+    if (!savedDean) {
+        window.location.href = "dean.html";
+        return;
+    }
+
+    try {
+        const managementUser = JSON.parse(savedDean);
+        if (managementUser.role !== "dean" && managementUser.role !== "hod") {
+            window.location.href = "dean.html";
+            return;
+        }
+
+        // Show Content
+        analyticsContent.style.display = "block";
+        await loadAnalyticsData();
+    } catch (err) {
+        console.error("Auth error:", err);
+        window.location.href = "dean.html";
+    }
+});
+
+async function loadAnalyticsData() {
+    try {
+        showToast("Fetching live system analytics...");
+
+        // Branches to track
+        const branches = ['COMMON', 'CSE', 'ECE', 'ME', 'CE', 'AE'];
+
+        // Data containers
+        const facCounts = { COMMON: 0, CSE: 0, ECE: 0, ME: 0, CE: 0, AE: 0 };
+        const stuCounts = { COMMON: 0, CSE: 0, ECE: 0, ME: 0, CE: 0, AE: 0 };
+        const noteCounts = { COMMON: 0, CSE: 0, ECE: 0, ME: 0, CE: 0, AE: 0 };
+
+        // 1. Fetch Authorized Faculty
+        const { data: facultyData, error: facErr } = await supabaseClient
+            .from("authorized_faculty")
+            .select("branch_code, branches");
+
+        if (!facErr && facultyData) {
+            document.getElementById("totalFacultyStat").textContent = facultyData.length;
+            facultyData.forEach(item => {
+                let itemBranches = Array.isArray(item.branches) && item.branches.length ? item.branches : [item.branch_code];
+                itemBranches.forEach(b => {
+                    let code = String(b).toUpperCase();
+                    if (facCounts[code] !== undefined) facCounts[code]++;
+                });
+            });
+        }
+
+  // 2. Fetch Students (joined with foreign key branch_id -> branches.code)
+let totalStudents = 0;
+const { data: studentData, error: stuErr } = await supabaseClient
+    .from("student_profiles")
+    .select("id, branch_id, branches(code)");
+
+if (!stuErr && studentData) {
+    totalStudents = studentData.length;
+    studentData.forEach(item => {
+        let code = item.branches?.code?.toUpperCase();
+        
+        // Map 'FY' (First Year Common) to 'COMMON' if needed
+        if (code === 'FY') code = 'COMMON';
+        
+        if (code && stuCounts[code] !== undefined) {
+            stuCounts[code]++;
+        }
+    });
+} else if (stuErr) {
+    console.error("Error fetching student analytics:", stuErr);
+}
+
+document.getElementById("totalStudentStat").textContent = totalStudents;
+
+        // 3. Fetch Uploaded Notes & Resources joined with branch code
+        const { data: notesData, error: noteErr } = await supabaseClient
+            .from("notes")
+            .select("id, branch_id, branches(code)");
+
+        if (!noteErr && notesData) {
+            document.getElementById("totalNotesStat").textContent = notesData.length;
+            notesData.forEach(item => {
+                const code = item.branches?.code?.toUpperCase();
+                if (code && noteCounts[code] !== undefined) {
+                    noteCounts[code]++;
+                }
+            });
+        }
+
+        // Render counts to DOM
+        branches.forEach(b => {
+            document.getElementById(`fac_${b}`).textContent = facCounts[b];
+            document.getElementById(`stu_${b}`).textContent = stuCounts[b];
+            document.getElementById(`note_${b}`).textContent = noteCounts[b];
+        });
+
+        showToast("Analytics updated!");
+    } catch (err) {
+        console.error("Error loading analytics:", err);
+        showToast("Error loading analytics data.");
+    }
+}
+</script>
+</body>
+</html>
