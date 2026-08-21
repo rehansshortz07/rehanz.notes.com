@@ -1,1580 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="theme-color"
-        content="#6366f1"
-    >
-
-    <title>
-        Dean & HOD Portal - Learn-Engineering
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
-  <link rel="icon" href="icon-512.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <title>University Analytics - Dean & HOD Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="icon-512.png">
     <style>
-
-        /* =====================================================
-           MANAGEMENT PORTAL VIEW CONTROL
-           ===================================================== */
-
-        /* Ensure wrapper visibility */
-        .app-shell, .main-content {
-            display: block !important;
-            min-height: 100vh;
-        }
-
-        /* Hide all view sections by default to prevent leaking */
-        .main-content > .view {
-            display: none !important;
-        }
-
-        /* Unlocked State: Show Dashboard, Hide Login */
-        .main-content[data-state="dashboard"] #deanDashboardView {
-            display: block !important;
-        }
-
-        .main-content[data-state="dashboard"] #deanLoginView {
-            display: none !important;
-        }
-
-        /* Locked State: Show Login, Hide Dashboard */
-        .main-content[data-state="login"] #deanLoginView {
-            display: block !important;
-        }
-
-        .main-content[data-state="login"] #deanDashboardView {
-            display: none !important;
-        }
-
-        /* Legacy support overrides */
-        #deanLoginView.hidden-panel {
-            display: none !important;
-        }
-
-        #deanDashboardView.active {
-            display: block !important;
-        }
-
-        /* =====================================================
-           MANAGEMENT DASHBOARD
-           ===================================================== */
-
-        .management-container {
+        .analytics-container {
             max-width: 1100px;
             margin: 20px auto;
+            padding: 0 15px;
         }
 
-        /* =====================================================
-           FACULTY TABLE
-           ===================================================== */
+        .stats-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
 
-        .faculty-management-card {
-            padding: 22px;
-            margin-top: 20px;
-            border: 1px solid var(--border);
+        .stat-card {
+            padding: 20px;
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: 14px;
+            background: var(--card, #ffffff);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted, #64748b);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text, #111827);
+        }
+
+        .section-card {
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border, #e2e8f0);
             border-radius: 16px;
             background: var(--card, #ffffff);
         }
 
-        .faculty-management-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
-        }
-
-        .faculty-search {
-            width: 100%;
-            max-width: 350px;
-            padding: 11px 14px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            background: var(--input, #f8fafc);
-            color: inherit;
-        }
-
-        .faculty-table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .faculty-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 750px;
-        }
-
-        .faculty-table th,
-        .faculty-table td {
-            padding: 12px 10px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .faculty-table th {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            color: var(--muted, #64748b);
-        }
-
-        .faculty-table td {
-            font-size: 14px;
-        }
-
-
-        /* =====================================================
-           BRANCH BADGES
-           ===================================================== */
-
-        .branch-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        .branch-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 8px;
-            border-radius: 999px;
-            background: rgba(99, 102, 241, .1);
-            color: var(--primary, #6366f1);
-            font-size: 11px;
+        .section-card-title {
+            font-size: 18px;
             font-weight: 700;
+            margin: 0 0 16px 0;
+            color: var(--text, #111827);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-
-        /* =====================================================
-           DELETE BUTTON
-           ===================================================== */
-
-        .danger-btn {
-            border: none;
-            cursor: pointer;
-            padding: 7px 11px;
-            border-radius: 8px;
-            background: #ef4444;
-            color: white;
-            font-weight: 600;
+        .branch-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
         }
 
-        .danger-btn:hover {
-            opacity: .88;
+        .branch-card {
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border, #e2e8f0);
+            background: var(--input, #f8fafc);
+            text-align: center;
         }
 
+        .branch-code {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary, #6366f1);
+        }
 
-        /* =====================================================
-           MULTI BRANCH SELECT
-           ===================================================== */
-
-        .branch-help {
+        .branch-count {
             margin-top: 6px;
-            font-size: 12px;
-            color: var(--muted, #64748b);
+            font-size: 22px;
+            font-weight: 800;
         }
 
-        #newFacultyBranch {
-            min-height: 150px;
+        @media (max-width: 900px) {
+            .stats-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .branch-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
 
+        @media (max-width: 600px) {
+            .stats-grid-4 { grid-template-columns: 1fr; }
+            .branch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
     </style>
-
 </head>
-
-
 <body>
 
 <div class="app-shell">
-
-
-    <!-- =====================================================
-         TOP BAR
-         ===================================================== -->
-
     <header class="topbar">
-
-        <a
-            class="brand"
-            href="index.html"
-        >
-
+        <a class="brand" href="index.html">
             <span class="brand-text">
-
-                <strong>
-                    Learn-Engineering
-                </strong>
-
-                <small>
-                    Dean & HOD Management Portal
-                </small>
-
+                <strong>Learn-Engineering</strong>
+                <small>Analytics & Reports</small>
             </span>
-
         </a>
-
-
         <div class="topbar-actions">
-
-            <a
-                href="index.html"
-                class="profile-btn"
-                style="text-decoration:none;"
-            >
-                <span>
-                    ← Back to App
-                </span>
+            <a href="dean.html" class="profile-btn" style="text-decoration:none;">
+                <span>← Back to Control Panel</span>
             </a>
-
         </div>
-
     </header>
 
+    <main class="main-content">
+        <div class="analytics-container">
+            
+            <!-- Access Guard Notice -->
+            <div id="authGuardMsg" style="text-align: center; padding: 40px; display: none;">
+                <h2>🔒 Restricted Access</h2>
+                <p>Checking Dean/HOD permissions...</p>
+            </div>
 
-
-    <main class="main-content" data-state="login">
-
-
-        <!-- =================================================
-             VIEW 1
-             DEAN / HOD LOGIN
-             ================================================= -->
-
-        <section
-            id="deanLoginView"
-            class="view"
-        >
-
-            <div
-                class="form-card"
-                style="
-                    max-width:520px;
-                    margin:40px auto;
-                "
-            >
-
-                <div class="section-heading">
-
-                    <span class="section-icon faculty">
-                        🔒
-                    </span>
-
+            <!-- Analytics Dashboard Content -->
+            <div id="analyticsContent" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <div>
-
-                        <span class="eyebrow">
-                            RESTRICTED ACCESS
-                        </span>
-
-                        <h2>
-                            Dean & HOD Login
-                        </h2>
-
-                        <p>
-                            Only management accounts
-                            registered by the university
-                            can access this portal.
-                        </p>
-
+                        <span class="eyebrow" style="color: var(--primary, #6366f1); font-weight: 700; font-size: 12px;">SYSTEM INSIGHTS</span>
+                        <h2 style="margin: 4px 0 0;">Management Analytics</h2>
                     </div>
-
+                    <button onclick="loadAnalyticsData()" class="primary-btn" style="width: auto; padding: 8px 16px;">🔄 Refresh Data</button>
                 </div>
 
-
-
-                <form
-                    id="deanLoginForm"
-                    class="smart-form"
-                >
-
-                    <!-- NAME -->
-
-                    <div class="field">
-
-                        <label
-                            for="deanLoginName"
-                        >
-                            Full Name
-                        </label>
-
-                        <input
-                            id="deanLoginName"
-                            type="text"
-                            placeholder="e.g. Dr. Administrator"
-                            autocomplete="name"
-                            required
-                        >
-
+                <!-- OVERVIEW STATS -->
+                <div class="stats-grid-4">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Faculty</div>
+                        <div id="totalFacultyStat" class="stat-value">0</div>
                     </div>
-
-
-                    <!-- UNIVERSITY ID -->
-
-                    <div class="field">
-
-                        <label
-                            for="deanLoginId"
-                        >
-                            University / Admin ID
-                        </label>
-
-                        <input
-                            id="deanLoginId"
-                            type="text"
-                            placeholder="e.g. DEAN001"
-                            required
-                        >
-
+                    <div class="stat-card">
+                        <div class="stat-label">Total Students</div>
+                        <div id="totalStudentStat" class="stat-value">0</div>
                     </div>
-
-
-                    <!-- EMAIL (Supabase Auth) -->
-
-                    <div class="field">
-
-                        <label
-                            for="deanLoginEmail"
-                        >
-                            Email
-                        </label>
-
-                        <input
-                            id="deanLoginEmail"
-                            type="email"
-                            placeholder="you@university.edu"
-                            autocomplete="email"
-                            required
-                        >
-
+                    <div class="stat-card">
+                        <div class="stat-label">Notes & Resources</div>
+                        <div id="totalNotesStat" class="stat-value">0</div>
                     </div>
-
-
-                    <!-- PASSWORD (Supabase Auth) -->
-
-                    <div class="field">
-
-                        <label
-                            for="deanLoginPassword"
-                        >
-                            Password
-                        </label>
-
-                        <input
-                            id="deanLoginPassword"
-                            type="password"
-                            placeholder="Enter your password"
-                            autocomplete="current-password"
-                            minlength="6"
-                            required
-                        >
-
+                    <div class="stat-card">
+                        <div class="stat-label">Active Branches</div>
+                        <div id="totalBranchesStat" class="stat-value">6</div>
                     </div>
+                </div>
 
-
-                    <!-- ROLE / BRANCH -->
-
-                    <div class="field">
-
-                        <label
-                            for="deanLoginBranch"
-                        >
-                            Role / Assigned Branch
-                        </label>
-
-                        <select
-                            id="deanLoginBranch"
-                            required
-                        >
-
-                            <option value="">
-                                Select role / branch
-                            </option>
-
-                            <option value="DEAN">
-                                Dean
-                            </option>
-
-                            <option value="COMMON">
-                                Common (1st & 2nd Sem)
-                            </option>
-
-                            <option value="CSE">
-                                CSE
-                            </option>
-
-                            <option value="ECE">
-                                ECE
-                            </option>
-
-                            <option value="ME">
-                                Mechanical Engineering
-                            </option>
-
-                            <option value="CE">
-                                Civil Engineering
-                            </option>
-
-                            <option value="AE">
-                                Aeronautical Engineering
-                            </option>
-
-                        </select>
-
+                <!-- FACULTY BY BRANCH -->
+                <div class="section-card">
+                    <h3 class="section-card-title">👨‍🏫 Faculty Members by Branch</h3>
+                    <div class="branch-grid">
+                        <div class="branch-card"><div class="branch-code">COMMON</div><div id="fac_COMMON" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CSE</div><div id="fac_CSE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ECE</div><div id="fac_ECE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ME</div><div id="fac_ME" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CE</div><div id="fac_CE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">AE</div><div id="fac_AE" class="branch-count">0</div></div>
                     </div>
+                </div>
 
+                <!-- STUDENTS BY BRANCH -->
+                <div class="section-card">
+                    <h3 class="section-card-title">👨‍🎓 Students Enrolled by Branch</h3>
+                    <div class="branch-grid">
+                        <div class="branch-card"><div class="branch-code">COMMON</div><div id="stu_COMMON" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CSE</div><div id="stu_CSE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ECE</div><div id="stu_ECE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ME</div><div id="stu_ME" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CE</div><div id="stu_CE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">AE</div><div id="stu_AE" class="branch-count">0</div></div>
+                    </div>
+                </div>
 
-                    <button
-                        class="primary-btn"
-                        type="submit"
-                        style="margin-top:14px;"
-                    >
-
-                        Authenticate Dean / HOD
-
-                        <span>
-                            →
-                        </span>
-
-                    </button>
-
-                </form>
+                <!-- NOTES BY BRANCH -->
+                <div class="section-card">
+                    <h3 class="section-card-title">📚 Uploaded Resources & Notes by Branch</h3>
+                    <div class="branch-grid">
+                        <div class="branch-card"><div class="branch-code">COMMON</div><div id="note_COMMON" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CSE</div><div id="note_CSE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ECE</div><div id="note_ECE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">ME</div><div id="note_ME" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">CE</div><div id="note_CE" class="branch-count">0</div></div>
+                        <div class="branch-card"><div class="branch-code">AE</div><div id="note_AE" class="branch-count">0</div></div>
+                    </div>
+                </div>
 
             </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             VIEW 2
-             MANAGEMENT DASHBOARD
-             ================================================= -->
-
-        <section
-            id="deanDashboardView"
-            class="view"
-        >
-
-            <div class="management-container">
-
-
-                <!-- =========================================
-                     DASHBOARD HEADER
-                     ========================================= -->
-
-                <div
-                    class="form-card"
-                    style="margin-bottom:20px;"
-                >
-
-                    <div
-                        style="
-                            display:flex;
-                            
-                            align-items:center;
-                            gap:15px;
-                            flex-wrap:wrap;
-                            border-bottom:1px solid var(--border);
-                            padding-bottom:14px;
-                        "
-                    >
-
-                        <div>
-
-                            <span
-                                style="
-                                    font-size:12px;
-                                    color:var(--primary);
-                                    font-weight:600;
-                                "
-                                id="loggedInDeanLabel"
-                            >
-                                Authenticated Management
-                            </span>
-
-                            <h3
-                                style="
-                                    margin:4px 0 0;
-                                    font-size:20px;
-                                "
-                            >
-                                University Management Control Panel
-                            </h3>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="download-btn"
-                            style="
-                                background:var(--danger,#f04438);
-                                padding:8px 14px;
-                            "
-                            onclick="logoutDean()"
-                        >
-                            Log Out
-                        </button>
-
-                    </div>
-
-                </div>
-
-               
-
-                <!-- =========================================
-                     ADD FACULTY
-                     ========================================= -->
-
-                <div
-                    class="form-card"
-                    style="margin-top:20px;"
-                >
-
-                    <div class="section-heading">
-
-                        <span class="section-icon faculty">
-                            👔
-                        </span>
-
-                        <div>
-
-                            <span class="eyebrow">
-                                FACULTY AUTHORIZATION
-                            </span>
-
-                            <h2>
-                                Add Authorized Faculty
-                            </h2>
-
-                            <p>
-                                Add a faculty member without
-                                opening the Supabase dashboard.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <form
-                        id="addFacultyForm"
-                        class="smart-form"
-                    >
-
-                        <!-- FACULTY NAME -->
-
-                        <div class="field">
-
-                            <label
-                                for="newFacultyName"
-                            >
-                                Faculty Full Name
-                            </label>
-
-                            <input
-                                id="newFacultyName"
-                                type="text"
-                                placeholder="e.g. Dr. Jane Doe"
-                                required
-                            >
-
-                        </div>
-
-
-                        <!-- FACULTY ID -->
-
-                        <div class="field">
-
-                            <label
-                                for="newFacultyId"
-                            >
-                                University / Faculty ID
-                            </label>
-
-                            <input
-                                id="newFacultyId"
-                                type="text"
-                                placeholder="e.g. FAC001"
-                                required
-                            >
-
-                        </div>
-
-
-                        <!-- MULTIPLE BRANCHES -->
-
-                        <div class="field">
-
-                            <label
-                                for="newFacultyBranch"
-                            >
-                                Teaching Branches
-                            </label>
-
-                            <select
-                                id="newFacultyBranch"
-                                multiple
-                                required
-                            >
-
-                                <option value="COMMON">
-                                    Common (1st & 2nd Sem)
-                                </option>
-
-                                <option value="CSE">
-                                    CSE
-                                </option>
-
-                                <option value="ECE">
-                                    ECE
-                                </option>
-
-                                <option value="ME">
-                                    Mechanical Engineering
-                                </option>
-
-                                <option value="CE">
-                                    Civil Engineering
-                                </option>
-
-                                <option value="AE">
-                                    Aeronautical Engineering
-                                </option>
-
-                            </select>
-
-                            <div class="branch-help">
-                                Hold Ctrl / Command to select
-                                multiple branches.
-                            </div>
-
-                        </div>
-
-
-                        <button
-                            class="primary-btn"
-                            type="submit"
-                            style="margin-top:10px;"
-                        >
-
-                            Save Faculty to Database
-
-                            <span>
-                                →
-                            </span>
-
-                        </button>
-
-                    </form>
-
-                </div>
-
-
-                <!-- =========================================
-                     STUDENT MANAGEMENT NAVIGATION CARD
-                     ========================================= -->
-                <div class="form-card" id="studentManagementNavCard" style="margin-top:20px; display:none;">
-                    <div class="section-heading" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span class="section-icon faculty" style="font-size: 24px;">👨‍🎓</span>
-                            <div>
-                                <span class="eyebrow">STUDENT DIRECTORY</span>
-                                <h3 style="margin:4px 0 0;">Manage Uploaded Students</h3>
-                                <p style="margin: 2px 0 0; color: var(--muted, #64748b);">
-                                    View, authorize, and upload student records securely.
-                                </p>
-                            </div>
-                        </div>
-                        <a href="students.html" class="primary-btn" style="text-decoration: none; width: auto; padding: 10px 18px;">
-                            Open Student Portal →
-                        </a>
-                    </div>
-                </div>
-
-                 <!-- =========================================
-                     ANALYTICS CARD (NEW DEDICATED LINK)
-                     ========================================= -->
-                <div class="form-card" id="analyticsNavCard" style="margin-bottom:20px;">
-                    <div class="section-heading" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span class="section-icon faculty" style="font-size: 24px;">📊</span>
-                            <div>
-                                <span class="eyebrow">UNIVERSITY OVERVIEW</span>
-                                <h3 style="margin:4px 0 0;">Management Analytics & Insights</h3>
-                                <p style="margin: 2px 0 0; color: var(--muted, #64748b);">
-                                    View live metrics on faculty members, student enrollments, and uploaded resources.
-                                </p>
-                            </div>
-                        </div>
-                        <a href="analytics.html" class="primary-btn" style="text-decoration: none; width: auto; padding: 10px 18px; background: #6366f1;">
-                            View Analytics Page →
-                        </a>
-                    </div>
-                </div>
-
-                <!-- =========================================
-                     FACULTY MANAGEMENT
-                     ========================================= -->
-
-                <div
-                    class="faculty-management-card"
-                >
-
-                    <div
-                        class="faculty-management-header"
-                    >
-
-                        <div>
-
-                            <span class="eyebrow">
-                                FACULTY MANAGEMENT
-                            </span>
-
-                            <h3
-                                style="margin:4px 0 0;"
-                            >
-                                Authorized Faculty Members
-                            </h3>
-
-                        </div>
-
-
-                        <input
-                            id="facultySearch"
-                            class="faculty-search"
-                            type="search"
-                            placeholder="Search name or University ID..."
-                        >
-
-                    </div>
-
-
-                    <div
-                        id="facultyLoading"
-                        style="
-                            padding:20px;
-                            text-align:center;
-                        "
-                    >
-                        Loading faculty records...
-                    </div>
-
-
-                    <div
-                        class="faculty-table-wrapper"
-                    >
-
-                        <table
-                            class="faculty-table"
-                        >
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        Name
-                                    </th>
-
-                                    <th>
-                                        University ID
-                                    </th>
-
-                                    <th>
-                                        Branches
-                                    </th>
-
-                                    <th>
-                                        Added By
-                                    </th>
-
-                                    <th>
-                                        Action
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-                            <tbody
-                                id="facultyTableBody"
-                            >
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-        </section>
-
+        </div>
     </main>
-
 </div>
 
-
-<br>
-<br>
-<br>
-
-
-<!-- =========================================================
-     TOAST
-     ========================================================= -->
-
-<div
-    id="toast"
-    class="toast"
-    role="status"
->
-</div>
-
-
-
-<!-- =========================================================
-     SUPABASE
-     ========================================================= -->
+<div id="toast" class="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="script.js"></script>
 
-
-
 <script>
-
-/* ============================================================
-   DEAN / HOD MANAGEMENT PORTAL
-   ============================================================ */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        console.log(
-            "🏛️ Dean/HOD Management Portal starting..."
-        );
-
-
-        /* =====================================================
-           RESTORE SESSION
-           Verify the real Supabase Auth session is alive
-           before trusting the localStorage snapshot.
-           If the auth session is gone, clear the stale
-           localStorage entry so the user sees the login form
-           instead of a blank dashboard.
-           ===================================================== */
-
-        (async () => {
-
-            const savedDean =
-                localStorage.getItem("dean_session");
-
-            if (!savedDean) return; // nothing to restore
-
-            try {
-
-                const { data: { session }, error: sessionError } =
-                    await supabaseClient.auth.getSession();
-
-                if (sessionError || !session) {
-                    console.warn(
-                        "Dean session snapshot found but no live auth session. Clearing."
-                    );
-                    localStorage.removeItem("dean_session");
-                    return;
-                }
-
-                const managementUser = JSON.parse(savedDean);
-
-                const { data: rows, error: verifyError } =
-                    await supabaseClient.rpc("claim_dean_hod_account", {
-                        input_name: managementUser.name,
-                        input_university_id: managementUser.university_id,
-                        input_branch: managementUser.branch_code
-                    });
-
-                if (verifyError || !rows || rows.length === 0) {
-                    console.warn(
-                        "Dean session re-verification failed. Clearing.",
-                        verifyError
-                    );
-                    localStorage.removeItem("dean_session");
-                    await supabaseClient.auth.signOut();
-                    return;
-                }
-
-                unlockDeanDashboard(managementUser);
-
-            } catch (error) {
-
-                console.error(
-                    "Invalid saved management session:",
-                    error
-                );
-                localStorage.removeItem("dean_session");
-            }
-
-        })();
-
-
-
-        /* =====================================================
-           DEAN / HOD LOGIN
-           ===================================================== */
-
-        const deanLoginForm =
-            document.getElementById(
-                "deanLoginForm"
-            );
-
-        if (deanLoginForm) {
-
-            deanLoginForm.addEventListener(
-                "submit",
-                async (e) => {
-
-                    e.preventDefault();
-
-                    const name =
-                        document
-                            .getElementById(
-                                "deanLoginName"
-                            )
-                            ?.value
-                            .trim() || "";
-
-                    const universityId =
-                        document
-                            .getElementById(
-                                "deanLoginId"
-                            )
-                            ?.value
-                            .trim() || "";
-
-                    const branchCode =
-                        document
-                            .getElementById(
-                                "deanLoginBranch"
-                            )
-                            ?.value
-                            .trim()
-                            .toUpperCase() || "";
-
-                    const email =
-                        document
-                            .getElementById(
-                                "deanLoginEmail"
-                            )
-                            ?.value
-                            .trim() || "";
-
-                    const password =
-                        document
-                            .getElementById(
-                                "deanLoginPassword"
-                            )
-                            ?.value || "";
-
-                    if (!email || !password) {
-                        showToast("Please enter your email and password.");
-                        return;
-                    }
-
-                    if (!name) {
-                        showToast("Please enter your full name.");
-                        return;
-                    }
-
-                    if (!universityId) {
-                        showToast("Please enter your University ID.");
-                        return;
-                    }
-
-                    if (!branchCode) {
-                        showToast("Please select your role / branch.");
-                        return;
-                    }
-
-                    try {
-
-                        showToast("Verifying management credentials...");
-
-                        let authUser = null;
-
-                        let { data: signUpData, error: signUpError } =
-                            await supabaseClient.auth.signUp({ email, password });
-
-                        if (signUpError) {
-
-                            if (
-                                signUpError.message?.toLowerCase().includes("already registered") ||
-                                signUpError.status === 422
-                            ) {
-
-                                const { data: signInData, error: signInError } =
-                                    await supabaseClient.auth.signInWithPassword({ email, password });
-
-                                if (signInError) throw signInError;
-
-                                authUser = signInData?.user;
-
-                            } else {
-                                throw signUpError;
-                            }
-
-                        } else {
-                            authUser = signUpData?.user;
-                        }
-
-                        if (!authUser) {
-                            throw new Error("Management authentication failed.");
-                        }
-
-                        const { data: claimRows, error: claimError } =
-                            await supabaseClient.rpc("claim_dean_hod_account", {
-                                input_name: name,
-                                input_university_id: universityId,
-                                input_branch: branchCode
-                            });
-
-                        if (claimError) {
-                            console.error("Management claim error:", claimError);
-                            throw new Error("Unable to verify management credentials.");
-                        }
-
-                        const authData = claimRows?.[0];
-
-                        if (!authData) {
-
-                            showToast(
-                                "Access Denied: This University ID, Name, or Branch is not authorized, or is already linked to a different login."
-                            );
-
-                            await supabaseClient.auth.signOut();
-
-                            return;
-                        }
-
-                        const databaseName =
-                            String(authData.name)
-                                .trim()
-                                .toLowerCase();
-
-                        const enteredName =
-                            String(name)
-                                .trim()
-                                .toLowerCase();
-
-                        if (databaseName !== enteredName) {
-                            showToast("Access Denied: Name does not match.");
-                            return;
-                        }
-
-                        const databaseBranch =
-                            String(authData.branch_code)
-                                .trim()
-                                .toUpperCase();
-
-                        const isDean = databaseBranch === "DEAN";
-
-                        const isHOD = !isDean && databaseBranch.length > 0;
-
-                        if (!isDean && !isHOD) {
-                            showToast("Access Denied: Invalid management role.");
-                            return;
-                        }
-
-                        if (isDean) {
-                            if (branchCode !== "DEAN") {
-                                showToast("Please select Dean in the role / branch field.");
-                                return;
-                            }
-                        } else {
-                            if (databaseBranch !== branchCode) {
-                                showToast(`Access Denied: This HOD account is registered for ${databaseBranch}.`);
-                                return;
-                            }
-                        }
-
-                        const userRole = isDean ? "dean" : "hod";
-
-                        const managementUser = {
-                            id: authData.id,
-                            name: authData.name,
-                            university_id: authData.university_id,
-                            branch_code: databaseBranch,
-                            role: userRole
-                        };
-
-                        console.log("✅ Authorized management user:", managementUser);
-
-                        localStorage.setItem("dean_session", JSON.stringify(managementUser));
-
-                        unlockDeanDashboard(managementUser);
-
-                        showToast(`Welcome ${authData.name}!`);
-
-                    } catch (err) {
-
-                        console.error("❌ Management login error:", err);
-
-                        showToast(err?.message || "Authentication failed.");
-                    }
-
-                }
-            );
-
+document.addEventListener("DOMContentLoaded", async () => {
+    const authGuardMsg = document.getElementById("authGuardMsg");
+    const analyticsContent = document.getElementById("analyticsContent");
+
+    // 1. Authenticate Dean/HOD Role
+    const savedDean = localStorage.getItem("dean_session");
+    if (!savedDean) {
+        window.location.href = "dean.html";
+        return;
+    }
+
+    try {
+        const managementUser = JSON.parse(savedDean);
+        if (managementUser.role !== "dean" && managementUser.role !== "hod") {
+            window.location.href = "dean.html";
+            return;
         }
 
+        // Show Content
+        analyticsContent.style.display = "block";
+        await loadAnalyticsData();
+    } catch (err) {
+        console.error("Auth error:", err);
+        window.location.href = "dean.html";
+    }
+});
 
+async function loadAnalyticsData() {
+    try {
+        showToast("Fetching live system analytics...");
 
-        /* =====================================================
-           ADD FACULTY
-           ===================================================== */
+        // Branches to track
+        const branches = ['COMMON', 'CSE', 'ECE', 'ME', 'CE', 'AE'];
 
-        const addForm =
-            document.getElementById(
-                "addFacultyForm"
-            );
+        // Data containers
+        const facCounts = { COMMON: 0, CSE: 0, ECE: 0, ME: 0, CE: 0, AE: 0 };
+        const stuCounts = { COMMON: 0, CSE: 0, ECE: 0, ME: 0, CE: 0, AE: 0 };
+        const noteCounts = { COMMON: 0, CSE: 0, ECE: 0, ME: 0, CE: 0, AE: 0 };
 
+        // 1. Fetch Authorized Faculty
+        const { data: facultyData, error: facErr } = await supabaseClient
+            .from("authorized_faculty")
+            .select("branch_code, branches");
 
-        if (addForm) {
-
-            addForm.addEventListener(
-                "submit",
-                async (e) => {
-
-                    e.preventDefault();
-
-                    const savedDean =
-                        localStorage.getItem("dean_session");
-
-                    if (!savedDean) {
-                        showToast("Access Denied: Please login as Dean or HOD.");
-                        return;
-                    }
-
-                    let managementUser;
-
-                    try {
-                        managementUser = JSON.parse(savedDean);
-                    } catch (error) {
-                        localStorage.removeItem("dean_session");
-                        showToast("Session expired. Please login again.");
-                        return;
-                    }
-
-                    if (managementUser.role !== "dean" && managementUser.role !== "hod") {
-                        showToast("Access Denied: Management access required.");
-                        return;
-                    }
-
-                    const name =
-                        document.getElementById("newFacultyName")?.value.trim() || "";
-
-                    const universityId =
-                        document.getElementById("newFacultyId")?.value.trim() || "";
-
-                    const branchSelect =
-                        document.getElementById("newFacultyBranch");
-
-                    const selectedBranches =
-                        Array.from(branchSelect?.selectedOptions || [])
-                        .map(option => option.value.trim().toUpperCase())
-                        .filter(Boolean);
-
-                    if (!name) {
-                        showToast("Please enter the faculty name.");
-                        return;
-                    }
-
-                    if (!universityId) {
-                        showToast("Please enter the faculty University ID.");
-                        return;
-                    }
-
-                    if (selectedBranches.length === 0) {
-                        showToast("Please select at least one branch.");
-                        return;
-                    }
-
-                    try {
-
-                        showToast("Checking faculty record...");
-
-                        const { data: existingFaculty, error: existingError } =
-                            await supabaseClient
-                                .from("authorized_faculty")
-                                .select("id, university_id, name, branch_code, branches")
-                                .eq("university_id", universityId)
-                                .maybeSingle();
-
-                        if (existingError) {
-                            console.error(existingError);
-                            throw new Error("Unable to check existing faculty.");
-                        }
-
-                        if (existingFaculty) {
-                            showToast(`Faculty ID ${universityId} is already registered.`);
-                            return;
-                        }
-
-                        const primaryBranch = selectedBranches[0];
-
-                        showToast("Adding authorized faculty...");
-
-                        const { data: newFaculty, error: insertError } =
-                            await supabaseClient
-                                .from("authorized_faculty")
-                                .insert({
-                                    university_id: universityId,
-                                    name: name,
-                                    branch_code: primaryBranch,
-                                    branches: selectedBranches,
-                                    added_by: managementUser.role,
-                                    added_by_name: managementUser.name
-                                })
-                                .select()
-                                .single();
-
-                        if (insertError) {
-                            console.error("Faculty insert error:", insertError);
-                            throw new Error(insertError.message);
-                        }
-
-                        console.log("✅ Faculty authorized:", newFaculty);
-
-                        showToast(`${name} successfully authorized!`);
-
-                        addForm.reset();
-
-                        await loadAuthorizedFaculty();
-
-                    } catch (err) {
-
-                        console.error("❌ Faculty authorization error:", err);
-                        showToast(err?.message || "Failed to add faculty.");
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           FACULTY SEARCH
-           ===================================================== */
-
-        const facultySearch = document.getElementById("facultySearch");
-
-        if (facultySearch) {
-            facultySearch.addEventListener("input", () => {
-                renderFacultyTable(window.authorizedFacultyCache || []);
+        if (!facErr && facultyData) {
+            document.getElementById("totalFacultyStat").textContent = facultyData.length;
+            facultyData.forEach(item => {
+                let itemBranches = Array.isArray(item.branches) && item.branches.length ? item.branches : [item.branch_code];
+                itemBranches.forEach(b => {
+                    let code = String(b).toUpperCase();
+                    if (facCounts[code] !== undefined) facCounts[code]++;
+                });
             });
         }
 
-        const savedSession = localStorage.getItem("dean_session");
-        if (savedSession) {
-            loadAuthorizedFaculty();
+  // 2. Fetch Students (joined with foreign key branch_id -> branches.code)
+let totalStudents = 0;
+const { data: studentData, error: stuErr } = await supabaseClient
+    .from("student_profiles")
+    .select("id, branch_id, branches(code)");
+
+if (!stuErr && studentData) {
+    totalStudents = studentData.length;
+    studentData.forEach(item => {
+        let code = item.branches?.code?.toUpperCase();
+        
+        // Map 'FY' (First Year Common) to 'COMMON' if needed
+        if (code === 'FY') code = 'COMMON';
+        
+        if (code && stuCounts[code] !== undefined) {
+            stuCounts[code]++;
         }
-
-    }
-);
-
-
-
-/* ============================================================
-   UNLOCK MANAGEMENT DASHBOARD
-   ============================================================ */
-function unlockDeanDashboard(managementUser) {
-    const mainContent = document.querySelector(".main-content");
-    const loginView = document.getElementById("deanLoginView");
-    const dashboardView = document.getElementById("deanDashboardView");
-    const studentNavCard = document.getElementById("studentManagementNavCard");
-
-    if (mainContent) {
-        mainContent.setAttribute("data-state", "dashboard");
-    }
-
-    if (loginView) {
-        loginView.classList.add("hidden-panel");
-    }
-
-    if (dashboardView) {
-        dashboardView.classList.add("active");
-    }
-
-    if (studentNavCard) {
-        studentNavCard.style.display = "block";
-    }
-
-    const label = document.getElementById("loggedInDeanLabel");
-    if (label) {
-        const roleText = managementUser.role === "dean" ? "Dean" : "HOD";
-        label.textContent = `Logged in as: ${managementUser.name} — ${roleText} — ${managementUser.branch_code}`;
-    }
-
-    console.log("🔓 Management dashboard unlocked:", managementUser);
-    loadAuthorizedFaculty();
-}
-
-/* ============================================================
-   LOAD AUTHORIZED FACULTY
-   ============================================================ */
-
-async function loadAuthorizedFaculty() {
-
-    const loading = document.getElementById("facultyLoading");
-
-    if (loading) {
-        loading.style.display = "block";
-        loading.textContent = "Loading faculty records...";
-    }
-
-    try {
-
-        const { data, error } =
-            await supabaseClient
-                .from("authorized_faculty")
-                .select("id, university_id, name, branch_code, branches, added_by, added_by_name")
-                .order("name", { ascending: true });
-
-        if (error) throw error;
-
-        window.authorizedFacultyCache = data || [];
-
-        renderFacultyTable(window.authorizedFacultyCache);
-
-    } catch (error) {
-
-        console.error("❌ Could not load faculty:", error);
-
-        if (loading) {
-            loading.textContent = "Unable to load faculty records.";
-        }
-
-        showToast("Could not load faculty records.");
-
-    }
-
-}
-
-
-
-/* ============================================================
-   RENDER FACULTY TABLE
-   ============================================================ */
-
-function renderFacultyTable(facultyList) {
-
-    const tbody = document.getElementById("facultyTableBody");
-    const loading = document.getElementById("facultyLoading");
-
-    if (!tbody) return;
-
-    const searchInput = document.getElementById("facultySearch");
-    const search = searchInput?.value?.trim().toLowerCase() || "";
-
-    const filtered = facultyList.filter(faculty => {
-        return (
-            String(faculty.name || "").toLowerCase().includes(search) ||
-            String(faculty.university_id || "").toLowerCase().includes(search)
-        );
     });
+} else if (stuErr) {
+    console.error("Error fetching student analytics:", stuErr);
+}
 
-    tbody.innerHTML = "";
+document.getElementById("totalStudentStat").textContent = totalStudents;
 
-    if (loading) loading.style.display = "none";
+        // 3. Fetch Uploaded Notes & Resources joined with branch code
+        const { data: notesData, error: noteErr } = await supabaseClient
+            .from("notes")
+            .select("id, branch_id, branches(code)");
 
-    if (filtered.length === 0) {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td colspan="5" style="text-align:center; padding:25px;">
-                No authorized faculty found.
-            </td>
-        `;
-        tbody.appendChild(row);
-        return;
-    }
-
-    filtered.forEach(faculty => {
-        const row = document.createElement("tr");
-        let branches = Array.isArray(faculty.branches) ? faculty.branches : [];
-
-        if (branches.length === 0 && faculty.branch_code) {
-            branches = [faculty.branch_code];
+        if (!noteErr && notesData) {
+            document.getElementById("totalNotesStat").textContent = notesData.length;
+            notesData.forEach(item => {
+                const code = item.branches?.code?.toUpperCase();
+                if (code && noteCounts[code] !== undefined) {
+                    noteCounts[code]++;
+                }
+            });
         }
 
-        const branchHTML = branches
-            .map(branch => `<span class="branch-badge">${escapeHTML(branch)}</span>`)
-            .join("");
+        // Render counts to DOM
+        branches.forEach(b => {
+            document.getElementById(`fac_${b}`).textContent = facCounts[b];
+            document.getElementById(`stu_${b}`).textContent = stuCounts[b];
+            document.getElementById(`note_${b}`).textContent = noteCounts[b];
+        });
 
-        const addedBy = faculty.added_by_name
-            ? `${escapeHTML(faculty.added_by_name)} (${escapeHTML(faculty.added_by || "")})`
-            : "—";
-
-        row.innerHTML = `
-            <td><strong>${escapeHTML(faculty.name)}</strong></td>
-            <td>${escapeHTML(faculty.university_id)}</td>
-            <td><div class="branch-badges">${branchHTML}</div></td>
-            <td>${addedBy}</td>
-            <td>
-                <button type="button" class="danger-btn" onclick="deleteAuthorizedFaculty('${faculty.id}', '${escapeHTML(faculty.name)}')">
-                    Delete
-                </button>
-            </td>
-        `;
-
-        tbody.appendChild(row);
-    });
-
-}
-
-
-
-/* ============================================================
-   DELETE FACULTY
-   ============================================================ */
-
-async function deleteAuthorizedFaculty(facultyId, facultyName) {
-
-    const savedDean = localStorage.getItem("dean_session");
-
-    if (!savedDean) {
-        showToast("Access Denied: Management login required.");
-        return;
-    }
-
-    let managementUser;
-
-    try {
-        managementUser = JSON.parse(savedDean);
-    } catch {
-        showToast("Invalid management session.");
-        return;
-    }
-
-    if (managementUser.role !== "dean" && managementUser.role !== "hod") {
-        showToast("Access Denied.");
-        return;
-    }
-
-    const confirmed = confirm(
-        `Delete authorization for ${facultyName}?\n\nThis will prevent this faculty member from accessing the faculty system.`
-    );
-
-    if (!confirmed) return;
-
-    try {
-
-        showToast("Removing faculty authorization...");
-
-        const { error } = await supabaseClient
-            .from("authorized_faculty")
-            .delete()
-            .eq("id", facultyId);
-
-        if (error) throw error;
-
-        showToast(`${facultyName} has been removed.`);
-
-        await loadAuthorizedFaculty();
-
-    } catch (error) {
-
-        console.error("❌ Faculty deletion failed:", error);
-        showToast(error?.message || "Failed to delete faculty.");
-
-    }
-
-}
-
-
-
-/* ============================================================
-   SMALL HELPERS
-   ============================================================ */
-
-function setText(elementId, value) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.textContent = String(value);
+        showToast("Analytics updated!");
+    } catch (err) {
+        console.error("Error loading analytics:", err);
+        showToast("Error loading analytics data.");
     }
 }
-
-function escapeHTML(value) {
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-
-/* ============================================================
-   LOGOUT
-   ============================================================ */
-function logoutDean() {
-    localStorage.removeItem("dean_session");
-    supabaseClient.auth.signOut();
-
-    const mainContent = document.querySelector(".main-content");
-    const loginView = document.getElementById("deanLoginView");
-    const dashboardView = document.getElementById("deanDashboardView");
-    const studentNavCard = document.getElementById("studentManagementNavCard");
-
-    if (mainContent) {
-        mainContent.setAttribute("data-state", "login");
-    }
-
-    if (dashboardView) {
-        dashboardView.classList.remove("active");
-    }
-
-    if (loginView) {
-        loginView.classList.remove("hidden-panel");
-    }
-
-    if (studentNavCard) {
-        studentNavCard.style.display = "none";
-    }
-
-    const loginForm = document.getElementById("deanLoginForm");
-    if (loginForm) {
-        loginForm.reset();
-    }
-
-    showToast("Logged out of management portal.");
-}
-
 </script>
-
 </body>
-
 </html>
