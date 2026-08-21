@@ -958,7 +958,7 @@ async function renderResources() {
 
     list.innerHTML = paginatedResources.map(resource => `
         <div class="resource-item">
-            <div class="file-icon">PDF</div>
+            <div class="file-icon">${escapeHTML((getResourceFileExtension(resource.file) || '.pdf').replace('.', '').toUpperCase())}</div>
             <div class="resource-info">
                 <strong title="${escapeHTML(resource.title)}">${escapeHTML(resource.title)}</strong>
                 <div class="resource-meta">
