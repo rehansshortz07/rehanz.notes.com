@@ -30,10 +30,6 @@
            MANAGEMENT PORTAL VIEW CONTROL
            ===================================================== */
 
-        /* =====================================================
-           DATA-STATE DRIVEN VIEW CONTROL OVERRIDES
-           ===================================================== */
-
         /* Ensure wrapper visibility */
         .app-shell, .main-content {
             display: block !important;
@@ -80,40 +76,6 @@
             max-width: 1100px;
             margin: 20px auto;
         }
-
-
-        /* =====================================================
-           STAT CARDS
-           ===================================================== */
-
-        .management-stats {
-            display: grid;
-            grid-template-columns:
-                repeat(4, minmax(0, 1fr));
-
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-
-        .management-stat {
-            padding: 18px;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            background: var(--card, #ffffff);
-        }
-
-        .management-stat-label {
-            font-size: 12px;
-            color: var(--muted, #64748b);
-            margin-bottom: 6px;
-        }
-
-        .management-stat-value {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--text, #111827);
-        }
-
 
         /* =====================================================
            FACULTY TABLE
@@ -229,71 +191,6 @@
 
         #newFacultyBranch {
             min-height: 150px;
-        }
-
-
-        /* =====================================================
-           BRANCH STATISTICS
-           ===================================================== */
-
-        .branch-stat-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(6, minmax(0, 1fr));
-
-            gap: 10px;
-        }
-
-        .branch-stat {
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--card, #ffffff);
-        }
-
-        .branch-stat-code {
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--primary, #6366f1);
-        }
-
-        .branch-stat-count {
-            margin-top: 4px;
-            font-size: 20px;
-            font-weight: 800;
-        }
-
-
-        /* =====================================================
-           RESPONSIVE
-           ===================================================== */
-
-        @media (max-width: 900px) {
-
-            .management-stats {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
-            .branch-stat-grid {
-                grid-template-columns:
-                    repeat(3, minmax(0, 1fr));
-            }
-
-        }
-
-        @media (max-width: 600px) {
-
-            .management-stats {
-                grid-template-columns:
-                    1fr;
-            }
-
-            .branch-stat-grid {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
         }
 
     </style>
@@ -587,7 +484,7 @@
                     <div
                         style="
                             display:flex;
-                            justify-content:space-between;
+                            
                             align-items:center;
                             gap:15px;
                             flex-wrap:wrap;
@@ -637,212 +534,26 @@
 
                 </div>
 
-
-
                 <!-- =========================================
-                     STATISTICS
+                     ANALYTICS CARD (NEW DEDICATED LINK)
                      ========================================= -->
-
-                <div class="management-stats">
-
-                    <div class="management-stat">
-
-                        <div class="management-stat-label">
-                            Total Authorized Faculty
+                <div class="form-card" id="analyticsNavCard" style="margin-bottom:20px;">
+                    <div class="section-heading" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="section-icon faculty" style="font-size: 24px;">📊</span>
+                            <div>
+                                <span class="eyebrow">UNIVERSITY OVERVIEW</span>
+                                <h3 style="margin:4px 0 0;">Management Analytics & Insights</h3>
+                                <p style="margin: 2px 0 0; color: var(--muted, #64748b);">
+                                    View live metrics on faculty members, student enrollments, and uploaded resources.
+                                </p>
+                            </div>
                         </div>
-
-                        <div
-                            id="totalFacultyCount"
-                            class="management-stat-value"
-                        >
-                            0
-                        </div>
-
+                        <a href="analytics.html" class="primary-btn" style="text-decoration: none; width: auto; padding: 10px 18px; background: #6366f1;">
+                            View Analytics Page →
+                        </a>
                     </div>
-
-
-                    <div class="management-stat">
-
-                        <div class="management-stat-label">
-                            CSE Faculty
-                        </div>
-
-                        <div
-                            id="cseFacultyCount"
-                            class="management-stat-value"
-                        >
-                            0
-                        </div>
-
-                    </div>
-
-
-                    <div class="management-stat">
-
-                        <div class="management-stat-label">
-                            ME Faculty
-                        </div>
-
-                        <div
-                            id="meFacultyCount"
-                            class="management-stat-value"
-                        >
-                            0
-                        </div>
-
-                    </div>
-
-
-                    <div class="management-stat">
-
-                        <div class="management-stat-label">
-                            CE Faculty
-                        </div>
-
-                        <div
-                            id="ceFacultyCount"
-                            class="management-stat-value"
-                        >
-                            0
-                        </div>
-
-                    </div>
-
                 </div>
-
-
-
-                <!-- =========================================
-                     BRANCH STATISTICS
-                     ========================================= -->
-
-                <div
-                    class="faculty-management-card"
-                >
-
-                    <div
-                        class="faculty-management-header"
-                    >
-
-                        <div>
-
-                            <span class="eyebrow">
-                                UNIVERSITY OVERVIEW
-                            </span>
-
-                            <h3
-                                style="margin:4px 0 0;"
-                            >
-                                Faculty by Branch
-                            </h3>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="branch-stat-grid">
-
-                        <div class="branch-stat">
-
-                            <div class="branch-stat-code">
-                                COMMON
-                            </div>
-
-                            <div
-                                id="commonBranchCount"
-                                class="branch-stat-count"
-                            >
-                                0
-                            </div>
-
-                        </div>
-
-
-                        <div class="branch-stat">
-
-                            <div class="branch-stat-code">
-                                CSE
-                            </div>
-
-                            <div
-                                id="branchCSECount"
-                                class="branch-stat-count"
-                            >
-                                0
-                            </div>
-
-                        </div>
-
-
-                        <div class="branch-stat">
-
-                            <div class="branch-stat-code">
-                                ECE
-                            </div>
-
-                            <div
-                                id="branchECECount"
-                                class="branch-stat-count"
-                            >
-                                0
-                            </div>
-
-                        </div>
-
-
-                        <div class="branch-stat">
-
-                            <div class="branch-stat-code">
-                                ME
-                            </div>
-
-                            <div
-                                id="branchMECount"
-                                class="branch-stat-count"
-                            >
-                                0
-                            </div>
-
-                        </div>
-
-
-                        <div class="branch-stat">
-
-                            <div class="branch-stat-code">
-                                CE
-                            </div>
-
-                            <div
-                                id="branchCECount"
-                                class="branch-stat-count"
-                            >
-                                0
-                            </div>
-
-                        </div>
-
-
-                        <div class="branch-stat">
-
-                            <div class="branch-stat-code">
-                                AE
-                            </div>
-
-                            <div
-                                id="branchAECount"
-                                class="branch-stat-count"
-                            >
-                                0
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
 
                 <!-- =========================================
                      ADD FACULTY
@@ -1186,7 +897,6 @@ document.addEventListener(
                     await supabaseClient.auth.getSession();
 
                 if (sessionError || !session) {
-                    // Auth session gone — clear stale snapshot
                     console.warn(
                         "Dean session snapshot found but no live auth session. Clearing."
                     );
@@ -1194,8 +904,6 @@ document.addEventListener(
                     return;
                 }
 
-                // Auth session is alive — re-verify against the
-                // database so a tampered localStorage can't bypass
                 const managementUser = JSON.parse(savedDean);
 
                 const { data: rows, error: verifyError } =
@@ -1215,7 +923,6 @@ document.addEventListener(
                     return;
                 }
 
-                // All good — restore the dashboard
                 unlockDeanDashboard(managementUser);
 
             } catch (error) {
@@ -1248,7 +955,6 @@ document.addEventListener(
 
                     e.preventDefault();
 
-
                     const name =
                         document
                             .getElementById(
@@ -1257,7 +963,6 @@ document.addEventListener(
                             ?.value
                             .trim() || "";
 
-
                     const universityId =
                         document
                             .getElementById(
@@ -1265,7 +970,6 @@ document.addEventListener(
                             )
                             ?.value
                             .trim() || "";
-
 
                     const branchCode =
                         document
@@ -1276,7 +980,6 @@ document.addEventListener(
                             .trim()
                             .toUpperCase() || "";
 
-
                     const email =
                         document
                             .getElementById(
@@ -1285,7 +988,6 @@ document.addEventListener(
                             ?.value
                             .trim() || "";
 
-
                     const password =
                         document
                             .getElementById(
@@ -1293,58 +995,29 @@ document.addEventListener(
                             )
                             ?.value || "";
 
-
                     if (!email || !password) {
-
-                        showToast(
-                            "Please enter your email and password."
-                        );
-
+                        showToast("Please enter your email and password.");
                         return;
                     }
-
 
                     if (!name) {
-
-                        showToast(
-                            "Please enter your full name."
-                        );
-
+                        showToast("Please enter your full name.");
                         return;
                     }
-
 
                     if (!universityId) {
-
-                        showToast(
-                            "Please enter your University ID."
-                        );
-
+                        showToast("Please enter your University ID.");
                         return;
                     }
-
 
                     if (!branchCode) {
-
-                        showToast(
-                            "Please select your role / branch."
-                        );
-
+                        showToast("Please select your role / branch.");
                         return;
                     }
-
 
                     try {
 
-                        showToast(
-                            "Verifying management credentials..."
-                        );
-
-
-                        /* ======================================
-                           SUPABASE AUTH (real session, not
-                           localStorage-only trust)
-                           ====================================== */
+                        showToast("Verifying management credentials...");
 
                         let authUser = null;
 
@@ -1377,17 +1050,6 @@ document.addEventListener(
                             throw new Error("Management authentication failed.");
                         }
 
-
-                        /* ======================================
-                           CLAIM / VERIFY DEAN-HOD ROW
-                           Server-side RPC (security definer) —
-                           this is the real authorization check.
-                           Matches name + university_id + branch
-                           against dean_hod_auth, and links this
-                           auth account to that row (first login)
-                           or confirms it already owns that row.
-                           ====================================== */
-
                         const { data: claimRows, error: claimError } =
                             await supabaseClient.rpc("claim_dean_hod_account", {
                                 input_name: name,
@@ -1413,174 +1075,70 @@ document.addEventListener(
                             return;
                         }
 
-
-                        /* ======================================
-                           VERIFY NAME
-                           ====================================== */
-
                         const databaseName =
-                            String(
-                                authData.name
-                            )
+                            String(authData.name)
                                 .trim()
                                 .toLowerCase();
-
 
                         const enteredName =
                             String(name)
                                 .trim()
                                 .toLowerCase();
 
-
-                        if (
-                            databaseName !==
-                            enteredName
-                        ) {
-
-                            showToast(
-                                "Access Denied: Name does not match."
-                            );
-
+                        if (databaseName !== enteredName) {
+                            showToast("Access Denied: Name does not match.");
                             return;
                         }
 
-
-                        /* ======================================
-                           DATABASE ROLE
-                           ====================================== */
-
                         const databaseBranch =
-                            String(
-                                authData.branch_code
-                            )
+                            String(authData.branch_code)
                                 .trim()
                                 .toUpperCase();
 
+                        const isDean = databaseBranch === "DEAN";
 
-                        const isDean =
-                            databaseBranch ===
-                            "DEAN";
+                        const isHOD = !isDean && databaseBranch.length > 0;
 
-
-                        const isHOD =
-                            !isDean &&
-                            databaseBranch.length >
-                                0;
-
-
-                        if (
-                            !isDean &&
-                            !isHOD
-                        ) {
-
-                            showToast(
-                                "Access Denied: Invalid management role."
-                            );
-
+                        if (!isDean && !isHOD) {
+                            showToast("Access Denied: Invalid management role.");
                             return;
                         }
 
-
-                        /* ======================================
-                           VERIFY BRANCH
-
-                           Dean can choose DEAN.
-
-                           HOD must select the same branch
-                           registered in Supabase.
-                           ====================================== */
-
                         if (isDean) {
-
-                            if (
-                                branchCode !==
-                                "DEAN"
-                            ) {
-
-                                showToast(
-                                    "Please select Dean in the role / branch field."
-                                );
-
+                            if (branchCode !== "DEAN") {
+                                showToast("Please select Dean in the role / branch field.");
                                 return;
                             }
-
                         } else {
-
-                            if (
-                                databaseBranch !==
-                                branchCode
-                            ) {
-
-                                showToast(
-                                    `Access Denied: This HOD account is registered for ${databaseBranch}.`
-                                );
-
+                            if (databaseBranch !== branchCode) {
+                                showToast(`Access Denied: This HOD account is registered for ${databaseBranch}.`);
                                 return;
                             }
-
                         }
 
-
-                        const userRole =
-                            isDean
-                                ? "dean"
-                                : "hod";
-
+                        const userRole = isDean ? "dean" : "hod";
 
                         const managementUser = {
-
-                            id:
-                                authData.id,
-
-                            name:
-                                authData.name,
-
-                            university_id:
-                                authData.university_id,
-
-                            branch_code:
-                                databaseBranch,
-
-                            role:
-                                userRole
-
+                            id: authData.id,
+                            name: authData.name,
+                            university_id: authData.university_id,
+                            branch_code: databaseBranch,
+                            role: userRole
                         };
 
+                        console.log("✅ Authorized management user:", managementUser);
 
-                        console.log(
-                            "✅ Authorized management user:",
-                            managementUser
-                        );
+                        localStorage.setItem("dean_session", JSON.stringify(managementUser));
 
+                        unlockDeanDashboard(managementUser);
 
-                        localStorage.setItem(
-                            "dean_session",
-                            JSON.stringify(
-                                managementUser
-                            )
-                        );
-
-
-                        unlockDeanDashboard(
-                            managementUser
-                        );
-
-
-                        showToast(
-                            `Welcome ${authData.name}!`
-                        );
+                        showToast(`Welcome ${authData.name}!`);
 
                     } catch (err) {
 
-                        console.error(
-                            "❌ Management login error:",
-                            err
-                        );
+                        console.error("❌ Management login error:", err);
 
-                        showToast(
-                            err?.message ||
-                            "Authentication failed."
-                        );
+                        showToast(err?.message || "Authentication failed.");
                     }
 
                 }
@@ -1608,432 +1166,119 @@ document.addEventListener(
 
                     e.preventDefault();
 
-
-                    /* ==========================================
-                       CHECK SESSION
-                       ========================================== */
-
                     const savedDean =
-                        localStorage.getItem(
-                            "dean_session"
-                        );
-
+                        localStorage.getItem("dean_session");
 
                     if (!savedDean) {
-
-                        showToast(
-                            "Access Denied: Please login as Dean or HOD."
-                        );
-
+                        showToast("Access Denied: Please login as Dean or HOD.");
                         return;
                     }
-
 
                     let managementUser;
 
-
                     try {
-
-                        managementUser =
-                            JSON.parse(
-                                savedDean
-                            );
-
+                        managementUser = JSON.parse(savedDean);
                     } catch (error) {
-
-                        localStorage.removeItem(
-                            "dean_session"
-                        );
-
-                        showToast(
-                            "Session expired. Please login again."
-                        );
-
+                        localStorage.removeItem("dean_session");
+                        showToast("Session expired. Please login again.");
                         return;
                     }
 
-
-                    if (
-                        managementUser.role !==
-                            "dean" &&
-                        managementUser.role !==
-                            "hod"
-                    ) {
-
-                        showToast(
-                            "Access Denied: Management access required."
-                        );
-
+                    if (managementUser.role !== "dean" && managementUser.role !== "hod") {
+                        showToast("Access Denied: Management access required.");
                         return;
                     }
-
-
-                    /* ==========================================
-                       READ FORM
-                       ========================================== */
 
                     const name =
-                        document
-                            .getElementById(
-                                "newFacultyName"
-                            )
-                            ?.value
-                            .trim() || "";
-
+                        document.getElementById("newFacultyName")?.value.trim() || "";
 
                     const universityId =
-                        document
-                            .getElementById(
-                                "newFacultyId"
-                            )
-                            ?.value
-                            .trim() || "";
-
+                        document.getElementById("newFacultyId")?.value.trim() || "";
 
                     const branchSelect =
-                        document.getElementById(
-                            "newFacultyBranch"
-                        );
-
+                        document.getElementById("newFacultyBranch");
 
                     const selectedBranches =
-                        Array.from(
-                            branchSelect?.selectedOptions ||
-                            []
-                        )
-                        .map(
-                            option =>
-                                option.value
-                                    .trim()
-                                    .toUpperCase()
-                        )
+                        Array.from(branchSelect?.selectedOptions || [])
+                        .map(option => option.value.trim().toUpperCase())
                         .filter(Boolean);
 
-
                     if (!name) {
-
-                        showToast(
-                            "Please enter the faculty name."
-                        );
-
+                        showToast("Please enter the faculty name.");
                         return;
                     }
-
 
                     if (!universityId) {
-
-                        showToast(
-                            "Please enter the faculty University ID."
-                        );
-
+                        showToast("Please enter the faculty University ID.");
                         return;
                     }
 
-
-                    if (
-                        selectedBranches.length ===
-                        0
-                    ) {
-
-                        showToast(
-                            "Please select at least one branch."
-                        );
-
+                    if (selectedBranches.length === 0) {
+                        showToast("Please select at least one branch.");
                         return;
                     }
-
 
                     try {
 
-                        showToast(
-                            "Checking faculty record..."
-                        );
+                        showToast("Checking faculty record...");
 
-
-                        /* ======================================
-                           CHECK DUPLICATE
-                           ====================================== */
-
-                        const {
-                            data: existingFaculty,
-                            error: existingError
-                        } =
+                        const { data: existingFaculty, error: existingError } =
                             await supabaseClient
-                                .from(
-                                    "authorized_faculty"
-                                )
-                                .select(
-                                    "id, university_id, name, branch_code, branches"
-                                )
-                                .eq(
-                                    "university_id",
-                                    universityId
-                                )
+                                .from("authorized_faculty")
+                                .select("id, university_id, name, branch_code, branches")
+                                .eq("university_id", universityId)
                                 .maybeSingle();
 
-
                         if (existingError) {
-
-                            console.error(
-                                existingError
-                            );
-
-                            throw new Error(
-                                "Unable to check existing faculty."
-                            );
+                            console.error(existingError);
+                            throw new Error("Unable to check existing faculty.");
                         }
 
-
                         if (existingFaculty) {
-
-                            showToast(
-                                `Faculty ID ${universityId} is already registered.`
-                            );
-
+                            showToast(`Faculty ID ${universityId} is already registered.`);
                             return;
                         }
 
+                        const primaryBranch = selectedBranches[0];
 
-                        /* ======================================
-                           PRIMARY BRANCH
+                        showToast("Adding authorized faculty...");
 
-                           Keep branch_code because your
-                           existing faculty system uses it.
-                           ====================================== */
-
-                        const primaryBranch =
-                            selectedBranches[0];
-
-
-                        /* ======================================
-                           INSERT
-                           ====================================== */
-
-                        showToast(
-                            "Adding authorized faculty..."
-                        );
-
-
-                        const {
-                            data: newFaculty,
-                            error: insertError
-                        } =
+                        const { data: newFaculty, error: insertError } =
                             await supabaseClient
-                                .from(
-                                    "authorized_faculty"
-                                )
+                                .from("authorized_faculty")
                                 .insert({
-
-                                    university_id:
-                                        universityId,
-
-                                    name:
-                                        name,
-
-                                    branch_code:
-                                        primaryBranch,
-
-                                    branches:
-                                        selectedBranches,
-
-                                    added_by:
-                                        managementUser.role,
-
-                                    added_by_name:
-                                        managementUser.name
-
+                                    university_id: universityId,
+                                    name: name,
+                                    branch_code: primaryBranch,
+                                    branches: selectedBranches,
+                                    added_by: managementUser.role,
+                                    added_by_name: managementUser.name
                                 })
                                 .select()
                                 .single();
 
-
                         if (insertError) {
-
-                            console.error(
-                                "Faculty insert error:",
-                                insertError
-                            );
-
-                            throw new Error(
-                                insertError.message
-                            );
+                            console.error("Faculty insert error:", insertError);
+                            throw new Error(insertError.message);
                         }
 
+                        console.log("✅ Faculty authorized:", newFaculty);
 
-                        console.log(
-                            "✅ Faculty authorized:",
-                            newFaculty
-                        );
-
-
-                        showToast(
-                            `${name} successfully authorized!`
-                        );
-
+                        showToast(`${name} successfully authorized!`);
 
                         addForm.reset();
-
 
                         await loadAuthorizedFaculty();
 
                     } catch (err) {
 
-                        console.error(
-                            "❌ Faculty authorization error:",
-                            err
-                        );
-
-                        showToast(
-                            err?.message ||
-                            "Failed to add faculty."
-                        );
+                        console.error("❌ Faculty authorization error:", err);
+                        showToast(err?.message || "Failed to add faculty.");
 
                     }
 
                 }
             );
-
-        }
-
-
-        /* =====================================================
-           DEAN / HOD FILE UPLOAD HANDLER
-           ===================================================== */
-
-        const deanUploadForm = document.getElementById("deanUploadForm");
-
-        if (deanUploadForm) {
-
-            deanUploadForm.addEventListener("submit", async (e) => {
-
-                e.preventDefault();
-
-                const savedDean = localStorage.getItem("dean_session");
-
-                if (!savedDean) {
-                    showToast("Access Denied: Please login as Dean or HOD.");
-                    return;
-                }
-
-                const fileInput = document.getElementById("deanUploadFile");
-                const file = fileInput?.files?.[0];
-
-                if (!file) {
-                    showToast("Please select a file to upload.");
-                    return;
-                }
-
-                if (file.size > 20 * 1024 * 1024) {
-                    showToast("File size exceeds 20 MB limit.");
-                    return;
-                }
-
-                const branchCode = document.getElementById("deanUploadBranch")?.value?.trim() || "";
-                const semesterNumber = document.getElementById("deanUploadSemester")?.value?.trim() || "";
-                const title = document.getElementById("deanUploadTitle")?.value?.trim() || "";
-                const description = document.getElementById("deanUploadDescription")?.value?.trim() || null;
-
-                if (!branchCode || !semesterNumber || !title) {
-                    showToast("Please fill in all required fields.");
-                    return;
-                }
-
-                const progressContainer = document.getElementById("deanUploadProgressContainer");
-                const progressBar = document.getElementById("deanUploadProgressBar");
-                const progressPercent = document.getElementById("deanUploadProgressPercent");
-                const submitBtn = document.getElementById("deanUploadSubmitBtn");
-
-                let progressInterval = null;
-
-                try {
-
-                    if (progressContainer) progressContainer.style.display = "block";
-                    if (submitBtn) submitBtn.disabled = true;
-
-                    let progress = 10;
-                    if (progressBar) progressBar.style.width = `${progress}%`;
-                    if (progressPercent) progressPercent.textContent = `${progress}%`;
-
-                    progressInterval = setInterval(() => {
-                        if (progress < 85) {
-                            progress += 5;
-                            if (progressBar) progressBar.style.width = `${progress}%`;
-                            if (progressPercent) progressPercent.textContent = `${progress}%`;
-                        }
-                    }, 250);
-
-                    // Fetch branch ID
-                    const { data: branchData, error: branchError } = await supabaseClient
-                        .from("branches")
-                        .select("id")
-                        .eq("code", branchCode)
-                        .single();
-
-                    if (branchError || !branchData) throw new Error("Branch not found in database.");
-
-                    // Fetch semester ID
-                    const { data: semData, error: semError } = await supabaseClient
-                        .from("semesters")
-                        .select("id")
-                        .eq("semester_number", Number(semesterNumber))
-                        .single();
-
-                    if (semError || !semData) throw new Error("Semester not found in database.");
-
-                    // Upload file via worker
-                    const uploadResult = await uploadPDFToWorker(file, {
-                        title: title,
-                        branch: branchCode,
-                        semester: semesterNumber
-                    });
-
-                    if (progressInterval) clearInterval(progressInterval);
-                    if (progressBar) progressBar.style.width = "100%";
-                    if (progressPercent) progressPercent.textContent = "100%";
-
-                    if (!uploadResult?.storage_path) {
-                        throw new Error("Failed to get storage path from worker.");
-                    }
-
-                    // Insert record into public.notes table
-                    const notePayload = {
-                        title: title,
-                        description: description,
-                        branch_id: branchData.id,
-                        semester_id: semData.id,
-                        subject_id: null,
-                        teacher_id: null,
-                        file_name: file.name,
-                        storage_path: uploadResult.storage_path,
-                        file_url: uploadResult.file_url || null,
-                        file_size: file.size,
-                        status: "published"
-                    };
-
-                    const { error: insertError } = await supabaseClient
-                        .from("notes")
-                        .insert(notePayload);
-
-                    if (insertError) {
-                        throw new Error(`Upload succeeded, but database entry failed: ${insertError.message}`);
-                    }
-
-                    showToast("Resource uploaded and published successfully!");
-                    deanUploadForm.reset();
-
-                } catch (err) {
-                    if (progressInterval) clearInterval(progressInterval);
-                    console.error("Dean upload error:", err);
-                    showToast(err?.message || "File upload failed.");
-                } finally {
-                    if (submitBtn) submitBtn.disabled = false;
-                    setTimeout(() => {
-                        if (progressContainer) progressContainer.style.display = "none";
-                        if (progressBar) progressBar.style.width = "0%";
-                    }, 1200);
-                }
-
-            });
 
         }
 
@@ -2042,43 +1287,17 @@ document.addEventListener(
            FACULTY SEARCH
            ===================================================== */
 
-        const facultySearch =
-            document.getElementById(
-                "facultySearch"
-            );
-
+        const facultySearch = document.getElementById("facultySearch");
 
         if (facultySearch) {
-
-            facultySearch.addEventListener(
-                "input",
-                () => {
-
-                    renderFacultyTable(
-                        window.authorizedFacultyCache ||
-                        []
-                    );
-
-                }
-            );
-
+            facultySearch.addEventListener("input", () => {
+                renderFacultyTable(window.authorizedFacultyCache || []);
+            });
         }
 
-
-
-        /* =====================================================
-           LOAD FACULTY
-           ===================================================== */
-
-        const savedSession =
-            localStorage.getItem(
-                "dean_session"
-            );
-
+        const savedSession = localStorage.getItem("dean_session");
         if (savedSession) {
-
             loadAuthorizedFaculty();
-
         }
 
     }
@@ -2093,16 +1312,12 @@ function unlockDeanDashboard(managementUser) {
     const mainContent = document.querySelector(".main-content");
     const loginView = document.getElementById("deanLoginView");
     const dashboardView = document.getElementById("deanDashboardView");
-    
-    // Select the student management navigation card
     const studentNavCard = document.getElementById("studentManagementNavCard");
 
-    // Primary: Toggle data attribute state
     if (mainContent) {
         mainContent.setAttribute("data-state", "dashboard");
     }
 
-    // Secondary: Class manipulations for backward compatibility
     if (loginView) {
         loginView.classList.add("hidden-panel");
     }
@@ -2111,7 +1326,6 @@ function unlockDeanDashboard(managementUser) {
         dashboardView.classList.add("active");
     }
 
-    // Reveal the button card after successful login approval
     if (studentNavCard) {
         studentNavCard.style.display = "block";
     }
@@ -2132,84 +1346,36 @@ function unlockDeanDashboard(managementUser) {
 
 async function loadAuthorizedFaculty() {
 
-    const loading =
-        document.getElementById(
-            "facultyLoading"
-        );
-
+    const loading = document.getElementById("facultyLoading");
 
     if (loading) {
-
-        loading.style.display =
-            "block";
-
-        loading.textContent =
-            "Loading faculty records...";
-
+        loading.style.display = "block";
+        loading.textContent = "Loading faculty records...";
     }
-
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const { data, error } =
             await supabaseClient
-                .from(
-                    "authorized_faculty"
-                )
-                .select(
-                    "id, university_id, name, branch_code, branches, added_by, added_by_name"
-                )
-                .order(
-                    "name",
-                    {
-                        ascending: true
-                    }
-                );
+                .from("authorized_faculty")
+                .select("id, university_id, name, branch_code, branches, added_by, added_by_name")
+                .order("name", { ascending: true });
 
+        if (error) throw error;
 
-        if (error) {
+        window.authorizedFacultyCache = data || [];
 
-            throw error;
-
-        }
-
-
-        window.authorizedFacultyCache =
-            data || [];
-
-
-        renderFacultyTable(
-            window.authorizedFacultyCache
-        );
-
-
-        updateFacultyStatistics(
-            window.authorizedFacultyCache
-        );
-
+        renderFacultyTable(window.authorizedFacultyCache);
 
     } catch (error) {
 
-        console.error(
-            "❌ Could not load faculty:",
-            error
-        );
-
+        console.error("❌ Could not load faculty:", error);
 
         if (loading) {
-
-            loading.textContent =
-                "Unable to load faculty records.";
-
+            loading.textContent = "Unable to load faculty records.";
         }
 
-
-        showToast(
-            "Could not load faculty records."
-        );
+        showToast("Could not load faculty records.");
 
     }
 
@@ -2221,220 +1387,68 @@ async function loadAuthorizedFaculty() {
    RENDER FACULTY TABLE
    ============================================================ */
 
-function renderFacultyTable(
-    facultyList
-) {
+function renderFacultyTable(facultyList) {
 
-    const tbody =
-        document.getElementById(
-            "facultyTableBody"
+    const tbody = document.getElementById("facultyTableBody");
+    const loading = document.getElementById("facultyLoading");
+
+    if (!tbody) return;
+
+    const searchInput = document.getElementById("facultySearch");
+    const search = searchInput?.value?.trim().toLowerCase() || "";
+
+    const filtered = facultyList.filter(faculty => {
+        return (
+            String(faculty.name || "").toLowerCase().includes(search) ||
+            String(faculty.university_id || "").toLowerCase().includes(search)
         );
-
-
-    const loading =
-        document.getElementById(
-            "facultyLoading"
-        );
-
-
-    if (!tbody) {
-
-        return;
-
-    }
-
-
-    const searchInput =
-        document.getElementById(
-            "facultySearch"
-        );
-
-
-    const search =
-        searchInput?.value
-            ?.trim()
-            .toLowerCase() || "";
-
-
-    const filtered =
-        facultyList.filter(
-            faculty => {
-
-                return (
-
-                    String(
-                        faculty.name ||
-                        ""
-                    )
-                        .toLowerCase()
-                        .includes(search)
-
-                    ||
-
-                    String(
-                        faculty.university_id ||
-                        ""
-                    )
-                        .toLowerCase()
-                        .includes(search)
-
-                );
-
-            }
-        );
-
+    });
 
     tbody.innerHTML = "";
 
-
-    if (loading) {
-
-        loading.style.display =
-            "none";
-
-    }
-
+    if (loading) loading.style.display = "none";
 
     if (filtered.length === 0) {
-
-        const row =
-            document.createElement(
-                "tr"
-            );
-
-
+        const row = document.createElement("tr");
         row.innerHTML = `
-            <td
-                colspan="5"
-                style="
-                    text-align:center;
-                    padding:25px;
-                "
-            >
+            <td colspan="5" style="text-align:center; padding:25px;">
                 No authorized faculty found.
             </td>
         `;
-
-
-        tbody.appendChild(
-            row
-        );
-
-
+        tbody.appendChild(row);
         return;
-
     }
 
+    filtered.forEach(faculty => {
+        const row = document.createElement("tr");
+        let branches = Array.isArray(faculty.branches) ? faculty.branches : [];
 
-    filtered.forEach(
-        faculty => {
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            let branches =
-                Array.isArray(
-                    faculty.branches
-                )
-                    ? faculty.branches
-                    : [];
-
-
-            /*
-             * Backward compatibility:
-             * If old record has no branches
-             * array, use branch_code.
-             */
-
-            if (
-                branches.length === 0 &&
-                faculty.branch_code
-            ) {
-
-                branches = [
-                    faculty.branch_code
-                ];
-
-            }
-
-
-            const branchHTML =
-                branches
-                    .map(
-                        branch =>
-                            `
-                            <span class="branch-badge">
-                                ${escapeHTML(branch)}
-                            </span>
-                            `
-                    )
-                    .join("");
-
-
-            const addedBy =
-                faculty.added_by_name
-                    ? `${escapeHTML(
-                        faculty.added_by_name
-                    )} (${escapeHTML(
-                        faculty.added_by || ""
-                    )})`
-                    : "—";
-
-
-            row.innerHTML = `
-
-                <td>
-                    <strong>
-                        ${escapeHTML(
-                            faculty.name
-                        )}
-                    </strong>
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        faculty.university_id
-                    )}
-                </td>
-
-                <td>
-
-                    <div class="branch-badges">
-
-                        ${branchHTML}
-
-                    </div>
-
-                </td>
-
-                <td>
-                    ${addedBy}
-                </td>
-
-                <td>
-
-                    <button
-                        type="button"
-                        class="danger-btn"
-                        onclick="deleteAuthorizedFaculty('${faculty.id}', '${escapeHTML(faculty.name)}')"
-                    >
-                        Delete
-                    </button>
-
-                </td>
-
-            `;
-
-
-            tbody.appendChild(
-                row
-            );
-
+        if (branches.length === 0 && faculty.branch_code) {
+            branches = [faculty.branch_code];
         }
-    );
+
+        const branchHTML = branches
+            .map(branch => `<span class="branch-badge">${escapeHTML(branch)}</span>`)
+            .join("");
+
+        const addedBy = faculty.added_by_name
+            ? `${escapeHTML(faculty.added_by_name)} (${escapeHTML(faculty.added_by || "")})`
+            : "—";
+
+        row.innerHTML = `
+            <td><strong>${escapeHTML(faculty.name)}</strong></td>
+            <td>${escapeHTML(faculty.university_id)}</td>
+            <td><div class="branch-badges">${branchHTML}</div></td>
+            <td>${addedBy}</td>
+            <td>
+                <button type="button" class="danger-btn" onclick="deleteAuthorizedFaculty('${faculty.id}', '${escapeHTML(faculty.name)}')">
+                    Delete
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
 
 }
 
@@ -2444,272 +1458,56 @@ function renderFacultyTable(
    DELETE FACULTY
    ============================================================ */
 
-async function deleteAuthorizedFaculty(
-    facultyId,
-    facultyName
-) {
+async function deleteAuthorizedFaculty(facultyId, facultyName) {
 
-    const savedDean =
-        localStorage.getItem(
-            "dean_session"
-        );
-
+    const savedDean = localStorage.getItem("dean_session");
 
     if (!savedDean) {
-
-        showToast(
-            "Access Denied: Management login required."
-        );
-
+        showToast("Access Denied: Management login required.");
         return;
-
     }
-
 
     let managementUser;
 
-
     try {
-
-        managementUser =
-            JSON.parse(
-                savedDean
-            );
-
+        managementUser = JSON.parse(savedDean);
     } catch {
-
-        showToast(
-            "Invalid management session."
-        );
-
+        showToast("Invalid management session.");
         return;
-
     }
 
-
-    if (
-        managementUser.role !==
-            "dean" &&
-        managementUser.role !==
-            "hod"
-    ) {
-
-        showToast(
-            "Access Denied."
-        );
-
+    if (managementUser.role !== "dean" && managementUser.role !== "hod") {
+        showToast("Access Denied.");
         return;
-
     }
 
+    const confirmed = confirm(
+        `Delete authorization for ${facultyName}?\n\nThis will prevent this faculty member from accessing the faculty system.`
+    );
 
-    const confirmed =
-        confirm(
-            `Delete authorization for ${facultyName}?\n\nThis will prevent this faculty member from accessing the faculty system.`
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
+    if (!confirmed) return;
 
     try {
 
-        showToast(
-            "Removing faculty authorization..."
-        );
+        showToast("Removing faculty authorization...");
 
+        const { error } = await supabaseClient
+            .from("authorized_faculty")
+            .delete()
+            .eq("id", facultyId);
 
-        const {
-            error
-        } =
-            await supabaseClient
-                .from(
-                    "authorized_faculty"
-                )
-                .delete()
-                .eq(
-                    "id",
-                    facultyId
-                );
+        if (error) throw error;
 
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-        showToast(
-            `${facultyName} has been removed.`
-        );
-
+        showToast(`${facultyName} has been removed.`);
 
         await loadAuthorizedFaculty();
 
-
     } catch (error) {
 
-        console.error(
-            "❌ Faculty deletion failed:",
-            error
-        );
-
-
-        showToast(
-            error?.message ||
-            "Failed to delete faculty."
-        );
+        console.error("❌ Faculty deletion failed:", error);
+        showToast(error?.message || "Failed to delete faculty.");
 
     }
-
-}
-
-
-
-/* ============================================================
-   FACULTY STATISTICS
-   ============================================================ */
-
-function updateFacultyStatistics(
-    facultyList
-) {
-
-    const branchCounts = {
-
-        COMMON: 0,
-
-        CSE: 0,
-
-        ECE: 0,
-
-        ME: 0,
-
-        CE: 0,
-
-        AE: 0
-
-    };
-
-
-    facultyList.forEach(
-        faculty => {
-
-            let branches =
-                Array.isArray(
-                    faculty.branches
-                )
-                    ? faculty.branches
-                    : [];
-
-
-            if (
-                branches.length === 0 &&
-                faculty.branch_code
-            ) {
-
-                branches = [
-                    faculty.branch_code
-                ];
-
-            }
-
-
-            branches.forEach(
-                branch => {
-
-                    const code =
-                        String(
-                            branch
-                        )
-                            .trim()
-                            .toUpperCase();
-
-
-                    if (
-                        Object.prototype
-                            .hasOwnProperty
-                            .call(
-                                branchCounts,
-                                code
-                            )
-                    ) {
-
-                        branchCounts[
-                            code
-                        ]++;
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-
-    setText(
-        "totalFacultyCount",
-        facultyList.length
-    );
-
-
-    setText(
-        "commonBranchCount",
-        branchCounts.COMMON
-    );
-
-
-    setText(
-        "branchCSECount",
-        branchCounts.CSE
-    );
-
-
-    setText(
-        "branchECECount",
-        branchCounts.ECE
-    );
-
-
-    setText(
-        "branchMECount",
-        branchCounts.ME
-    );
-
-
-    setText(
-        "branchCECount",
-        branchCounts.CE
-    );
-
-
-    setText(
-        "branchAECount",
-        branchCounts.AE
-    );
-
-
-    setText(
-        "cseFacultyCount",
-        branchCounts.CSE
-    );
-
-
-    setText(
-        "meFacultyCount",
-        branchCounts.ME
-    );
-
-
-    setText(
-        "ceFacultyCount",
-        branchCounts.CE
-    );
 
 }
 
@@ -2719,60 +1517,20 @@ function updateFacultyStatistics(
    SMALL HELPERS
    ============================================================ */
 
-function setText(
-    elementId,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            elementId
-        );
-
-
+function setText(elementId, value) {
+    const element = document.getElementById(elementId);
     if (element) {
-
-        element.textContent =
-            String(value);
-
+        element.textContent = String(value);
     }
-
 }
 
-
-
-/* ============================================================
-   BASIC HTML ESCAPE
-   ============================================================ */
-
-function escapeHTML(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
+function escapeHTML(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
@@ -2789,12 +1547,10 @@ function logoutDean() {
     const dashboardView = document.getElementById("deanDashboardView");
     const studentNavCard = document.getElementById("studentManagementNavCard");
 
-    // Primary: Switch data state attribute back to login
     if (mainContent) {
         mainContent.setAttribute("data-state", "login");
     }
 
-    // Secondary: Clear legacy classes
     if (dashboardView) {
         dashboardView.classList.remove("active");
     }
@@ -2803,7 +1559,6 @@ function logoutDean() {
         loginView.classList.remove("hidden-panel");
     }
 
-    // Hide the student portal button on logout
     if (studentNavCard) {
         studentNavCard.style.display = "none";
     }
