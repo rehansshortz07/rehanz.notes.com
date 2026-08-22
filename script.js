@@ -1531,16 +1531,25 @@ async function handleTeacherUpload(event) {
     /*
      * ---------------------------------------------------------
      * 1. FACULTY AUTHORIZATION
+     * (also allows a logged-in Dean/HOD, set by dean.html's
+     * unlockDeanDashboard() via window.currentManagementUser)
      * ---------------------------------------------------------
      */
 
+    const isTeacherSession =
+        Boolean(currentProfile) && currentRole === "teacher";
+
+    const isManagementSession =
+        typeof window !== "undefined" &&
+        Boolean(window.currentManagementUser);
+
     if (
-        !currentProfile ||
-        currentRole !== "teacher"
+        !isTeacherSession &&
+        !isManagementSession
     ) {
 
         showToast(
-            "Unauthorized: Faculty login required."
+            "Unauthorized: Faculty or management login required."
         );
 
         return;
@@ -1925,7 +1934,7 @@ async function handleTeacherUpload(event) {
                 null,
 
             teacher_id:
-                currentProfile.id,
+                isTeacherSession ? currentProfile.id : null,
 
             file_name:
                 file.name,
