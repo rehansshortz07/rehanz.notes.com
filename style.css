@@ -19,22 +19,6 @@
   --transition: 180ms ease;
 }
 
-[data-theme="dark"] {
-  --bg: #0b1020;
-  --surface: #12192b;
-  --surface-2: #171f33;
-  --surface-3: #1c263b;
-  --text: #f5f7ff;
-  --muted: #9aa7bd;
-  --muted-2: #6f7d94;
-  --border: #26324a;
-  --primary: #7778f5;
-  --primary-hover: #8b8cf7;
-  --primary-soft: #25284e;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .18);
-  --shadow-md: 0 18px 45px rgba(0, 0, 0, .28);
-}
-
 * {
   box-sizing: border-box;
   margin: 0;
