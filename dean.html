@@ -537,6 +537,128 @@
                
 
                 <!-- =========================================
+                     UPLOAD RESOURCE (Dean/HOD)
+                     Reuses the same form field IDs and the
+                     same handleTeacherUpload()/loadTeacherUploads()
+                     functions from script.js as the Faculty
+                     Portal upload form in index.html.
+                     ========================================= -->
+
+                <div
+                    class="form-card"
+                    style="margin-top:20px;"
+                >
+
+                    <div class="section-heading">
+
+                        <span class="section-icon faculty">
+                            ↑
+                        </span>
+
+                        <div>
+
+                            <span class="eyebrow">
+                                RESOURCE LIBRARY
+                            </span>
+
+                            <h2>
+                                Upload Material
+                            </h2>
+
+                            <p>
+                                Upload academic resources directly to the
+                                secure resource library as Dean/HOD.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <form id="uploadForm" class="smart-form">
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="uploadBranch">Branch</label>
+                                <select id="uploadBranch" required></select>
+                            </div>
+                            <div class="field">
+                                <label for="uploadSemester">Semester</label>
+                                <select id="uploadSemester" required></select>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="uploadType">Material type</label>
+                            <select id="uploadType" required>
+                                <option>Lecture Notes</option>
+                                <option>Question Paper</option>
+                                <option>Assignment</option>
+                                <option>Lab Manual</option>
+                                <option>Important Questions</option>
+                                <option>Syllabus</option>
+                                <option>Reference Material</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="uploadTitle">Resource title</label>
+                            <input id="uploadTitle" type="text" placeholder="e.g. Thermodynamics Unit 1 Notes" required>
+                        </div>
+
+                        <label class="file-drop" for="uploadFile">
+
+                            <input
+                                id="uploadFile"
+                                type="file"
+                                accept="
+                                    .pdf,
+                                    .doc,
+                                    .docx,
+                                    .ppt,
+                                    .pptx,
+                                    .xls,
+                                    .xlsx,
+                                    .png,
+                                    .jpg,
+                                    .jpeg,
+                                    application/pdf,
+                                    application/msword,
+                                    application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                    application/vnd.ms-powerpoint,
+                                    application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                                    application/vnd.ms-excel,
+                                    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                                    image/png,
+                                    image/jpeg
+                                "
+                            >
+
+                            <span class="upload-symbol">↑</span>
+
+                            <strong>Choose resource file</strong>
+
+                            <small id="fileName">
+                                PDF, Word, PowerPoint, Excel, PNG or JPG • Up to 20 MB
+                            </small>
+
+                        </label>
+
+                        <div id="uploadProgressContainer" class="hidden" style="margin-top: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 4px;">
+                                <span id="uploadProgressLabel">Uploading...</span>
+                                <span id="uploadProgressPercent">0%</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; border: 1px solid var(--border);">
+                                <div id="uploadProgressBar" style="width: 0%; height: 100%; background: var(--primary); transition: width 100ms ease;"></div>
+                            </div>
+                        </div>
+
+                        <button class="primary-btn" id="uploadSubmitBtn" type="submit" style="margin-top: 14px;">Upload to Library <span>↑</span></button>
+                    </form>
+
+                </div>
+
+
+                <!-- =========================================
                      ADD FACULTY
                      ========================================= -->
 
@@ -1339,6 +1461,7 @@ function unlockDeanDashboard(managementUser) {
     }
 
     console.log("🔓 Management dashboard unlocked:", managementUser);
+    window.currentManagementUser = managementUser;
     loadAuthorizedFaculty();
 }
 
@@ -1543,6 +1666,7 @@ function escapeHTML(value) {
 function logoutDean() {
     localStorage.removeItem("dean_session");
     supabaseClient.auth.signOut();
+    window.currentManagementUser = null;
 
     const mainContent = document.querySelector(".main-content");
     const loginView = document.getElementById("deanLoginView");
@@ -1574,7 +1698,6 @@ function logoutDean() {
 }
 
 </script>
-
 </body>
 
 </html>
