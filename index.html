@@ -8,6 +8,44 @@
   <title>Learn-Engineering</title>
   <link rel="icon" href="icon-512.png">
   <link rel="stylesheet" href="style.css">
+<style>
+    /* Password visibility toggle + forgot-password link.
+       Scoped here so style.css doesn't need to be touched. */
+    .password-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .password-input-wrapper input {
+        width: 100%;
+        padding-right: 42px;
+    }
+    .toggle-password-btn {
+        position: absolute;
+        right: 8px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+        padding: 4px;
+        opacity: 0.6;
+    }
+    .toggle-password-btn:hover {
+        opacity: 1;
+    }
+    .forgot-password-link {
+        background: none;
+        border: none;
+        padding: 6px 0 0;
+        margin: 0;
+        font-size: 12px;
+        color: var(--primary, #5b5bd6);
+        cursor: pointer;
+        text-decoration: underline;
+        display: inline-block;
+    }
+</style>
 </head>
 <body>
 <div class="app-shell">
@@ -107,7 +145,11 @@
 
       <div class="field">
         <label for="studentPassword">Password</label>
-        <input id="studentPassword" type="password" placeholder="Your password" autocomplete="current-password" minlength="6" required>
+        <div class="password-input-wrapper">
+          <input id="studentPassword" type="password" placeholder="Your password" autocomplete="current-password" minlength="6" required>
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('studentPassword', this)" aria-label="Show password">👁</button>
+        </div>
+        <button type="button" class="forgot-password-link" onclick="handleForgotPassword('studentEmail')">Forgot password?</button>
       </div>
 
       <div class="field">
@@ -176,7 +218,11 @@
 
       <div class="field">
         <label for="teacherPassword">Password</label>
-        <input id="teacherPassword" type="password" placeholder="Your password" autocomplete="current-password" minlength="6" required>
+        <div class="password-input-wrapper">
+          <input id="teacherPassword" type="password" placeholder="Your password" autocomplete="current-password" minlength="6" required>
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('teacherPassword', this)" aria-label="Show password">👁</button>
+        </div>
+        <button type="button" class="forgot-password-link" onclick="handleForgotPassword('teacherEmail')">Forgot password?</button>
       </div>
 
       <div class="field">
