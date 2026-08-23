@@ -27,6 +27,45 @@
     <style>
 
         /* =====================================================
+           PASSWORD VISIBILITY TOGGLE + FORGOT PASSWORD
+           ===================================================== */
+
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-input-wrapper input {
+            width: 100%;
+            padding-right: 42px;
+        }
+        .toggle-password-btn {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            padding: 4px;
+            opacity: 0.6;
+        }
+        .toggle-password-btn:hover {
+            opacity: 1;
+        }
+        .forgot-password-link {
+            background: none;
+            border: none;
+            padding: 6px 0 0;
+            margin: 0;
+            font-size: 12px;
+            color: var(--primary, #5b5bd6);
+            cursor: pointer;
+            text-decoration: underline;
+            display: inline-block;
+        }
+
+        /* =====================================================
            MANAGEMENT PORTAL VIEW CONTROL
            ===================================================== */
 
@@ -373,14 +412,19 @@
                             Password
                         </label>
 
-                        <input
-                            id="deanLoginPassword"
-                            type="password"
-                            placeholder="Enter your password"
-                            autocomplete="current-password"
-                            minlength="6"
-                            required
-                        >
+                        <div class="password-input-wrapper">
+                            <input
+                                id="deanLoginPassword"
+                                type="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                minlength="6"
+                                required
+                            >
+                            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('deanLoginPassword', this)" aria-label="Show password">👁</button>
+                        </div>
+
+                        <button type="button" class="forgot-password-link" onclick="handleForgotPassword('deanLoginEmail')">Forgot password?</button>
 
                     </div>
 
