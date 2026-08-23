@@ -494,6 +494,88 @@ function selectRole(role) {
 }
 
 /* =========================================================
+   PASSWORD VISIBILITY TOGGLE
+   Shared by student, faculty, and Dean/HOD login forms.
+   ========================================================= */
+
+function togglePasswordVisibility(inputId, buttonEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const isCurrentlyHidden = input.type === "password";
+    input.type = isCurrentlyHidden ? "text" : "password";
+
+    if (buttonEl) {
+        buttonEl.textContent = isCurrentlyHidden ? "🙈" : "👁";
+        buttonEl.setAttribute(
+            "aria-label",
+            isCurrentlyHidden ? "Hide password" : "Show password"
+        );
+    }
+}
+
+/* =========================================================
+   FORGOT PASSWORD
+   Shared by student, faculty, and Dean/HOD login forms.
+   Sends a Supabase password-reset email; the link takes the
+   user to reset-password.html where they set a new password.
+   ========================================================= */
+
+let forgotPasswordCooldownUntil = 0;
+
+async function handleForgotPassword(emailFieldId) {
+
+    const now = Date.now();
+
+    if (now < forgotPasswordCooldownUntil) {
+        const secondsLeft = Math.ceil((forgotPasswordCooldownUntil - now) / 1000);
+        showToast(`Please wait ${secondsLeft}s before requesting another reset email.`);
+        return;
+    }
+
+    const emailInput = document.getElementById(emailFieldId);
+    let email = emailInput?.value.trim() || "";
+
+    if (!email) {
+        email = (prompt("Enter the email address for your account:") || "").trim();
+    }
+
+    if (!email) {
+        showToast("Please enter your email to reset your password.");
+        return;
+    }
+
+    try {
+
+        showToast("Sending password reset email...");
+
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(
+            email,
+            { redirectTo: window.location.origin + "/reset-password.html" }
+        );
+
+        if (error) throw error;
+
+        // Supabase itself enforces roughly a 60s cooldown per email;
+        // mirror that here so a second click shows a clear wait
+        // message instead of a raw API error.
+        forgotPasswordCooldownUntil = Date.now() + 60000;
+
+        showToast(`Reset link sent to ${email}. Check your inbox (and spam folder).`);
+
+    } catch (error) {
+        console.error("Password reset error:", error);
+
+        if (error.message?.toLowerCase().includes("security purposes")) {
+            forgotPasswordCooldownUntil = Date.now() + 60000;
+            showToast("A reset email was already sent recently — check your inbox, or wait a minute before requesting another.");
+        } else {
+            showToast(error.message || "Could not send reset email. Please try again.");
+        }
+    }
+}
+
+/* =========================================================
    STUDENT AUTHENTICATION & PROFILE CREATION
    ========================================================= */
 
