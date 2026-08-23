@@ -154,6 +154,81 @@
                 </form>
             </div>
 
+
+            <!-- =========================================
+                 BULK IMPORT (Excel / CSV)
+                 Reads a spreadsheet client-side, validates
+                 every row against branches/semesters, then
+                 inserts in small chunks so one bad row
+                 doesn't fail the whole batch.
+                 ========================================= -->
+
+            <div class="form-card" style="margin-top:20px;">
+
+                <div class="section-heading">
+                    <span class="section-icon faculty">📥</span>
+                    <div>
+                        <span class="eyebrow">BULK ENROLLMENT</span>
+                        <h2>Import Students from Excel</h2>
+                        <p>Upload the official university list instead of adding students one by one.</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px;">
+                    <button type="button" class="secondary-btn" id="downloadTemplateBtn">
+                        Download Template <span>↓</span>
+                    </button>
+                    <small style="color: var(--text-muted, #888);">
+                        Columns: Full Name, University Number, Branch Code, Semester
+                    </small>
+                </div>
+
+                <label class="file-drop" for="bulkStudentFile">
+                    <input id="bulkStudentFile" type="file" accept=".xlsx,.xls,.csv">
+                    <span class="upload-symbol">↑</span>
+                    <strong>Choose Excel or CSV file</strong>
+                    <small>.xlsx, .xls or .csv • Branch Code must match: COMMON, CSE, ECE, ME, CE, AE</small>
+                </label>
+
+                <div id="bulkImportPreview" class="hidden" style="margin-top:16px;">
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                        <div id="bulkImportSummary" style="font-size:13px; color: var(--text-muted, #888);"></div>
+                        <button type="button" class="primary-btn" id="bulkImportSubmitBtn">
+                            Import Valid Rows <span>→</span>
+                        </button>
+                    </div>
+
+                    <div style="max-height:320px; overflow:auto; border:1px solid var(--border, #e5e5e5); border-radius:8px;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                            <thead style="position:sticky; top:0; background: var(--surface-2, #f7f7f7);">
+                                <tr>
+                                    <th style="text-align:left; padding:8px;">Row</th>
+                                    <th style="text-align:left; padding:8px;">Name</th>
+                                    <th style="text-align:left; padding:8px;">University No.</th>
+                                    <th style="text-align:left; padding:8px;">Branch</th>
+                                    <th style="text-align:left; padding:8px;">Semester</th>
+                                    <th style="text-align:left; padding:8px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bulkImportPreviewBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="bulkImportProgressContainer" class="hidden" style="margin-top:12px;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px;">
+                            <span id="bulkImportProgressLabel">Importing...</span>
+                            <span id="bulkImportProgressPercent">0%</span>
+                        </div>
+                        <div style="width:100%; height:8px; background: var(--surface-2, #f0f0f0); border-radius:4px; overflow:hidden; border:1px solid var(--border, #e5e5e5);">
+                            <div id="bulkImportProgressBar" style="width:0%; height:100%; background: var(--primary); transition: width 150ms ease;"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
             <!-- STUDENT DIRECTORY / TABLE CARD -->
             <div class="faculty-management-card" style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px;">
                 <div class="faculty-management-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:18px;">
@@ -222,6 +297,7 @@
 
 <!-- SUPABASE & SCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
@@ -286,7 +362,293 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("studentSearch")?.addEventListener("input", loadStudentsTable);
     document.getElementById("filterBranch")?.addEventListener("change", loadStudentsTable);
     document.getElementById("filterSemester")?.addEventListener("change", loadStudentsTable);
+
+    // 3. Bulk Import Handlers
+    initBulkStudentImport();
 });
+
+
+/* =========================================================
+   BULK STUDENT IMPORT (Excel / CSV)
+   ========================================================= */
+
+const VALID_BRANCH_CODES = ["COMMON", "CSE", "ECE", "ME", "CE", "AE"];
+
+let bulkImportValidRows = []; // rows that passed validation, ready to insert
+
+function initBulkStudentImport() {
+
+    const downloadBtn = document.getElementById("downloadTemplateBtn");
+    const fileInput = document.getElementById("bulkStudentFile");
+    const submitBtn = document.getElementById("bulkImportSubmitBtn");
+
+    if (downloadBtn) {
+        downloadBtn.addEventListener("click", downloadStudentTemplate);
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener("change", handleBulkFileSelected);
+    }
+
+    if (submitBtn) {
+        submitBtn.addEventListener("click", runBulkStudentImport);
+    }
+}
+
+
+function downloadStudentTemplate() {
+
+    const headerRow = ["Full Name", "University Number", "Branch Code", "Semester"];
+
+    const sampleRows = [
+        ["John Smith", "UNI2026001", "CSE", 3],
+        ["Priya Rao", "UNI2026002", "ME", 5],
+        ["Aslam Khan", "UNI2026003", "COMMON", 1]
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet([headerRow, ...sampleRows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+
+    XLSX.writeFile(workbook, "learn-engineering-student-template.xlsx");
+}
+
+
+async function handleBulkFileSelected(event) {
+
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const previewSection = document.getElementById("bulkImportPreview");
+    const previewBody = document.getElementById("bulkImportPreviewBody");
+    const summaryEl = document.getElementById("bulkImportSummary");
+
+    try {
+
+        showToast("Reading file...");
+
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[firstSheetName];
+
+        // Array-of-arrays so we can handle flexible header names ourselves
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+        if (!rows || rows.length < 2) {
+            showToast("File appears to be empty.");
+            return;
+        }
+
+        // Match header names loosely (case/spacing tolerant)
+        const headerRow = rows[0].map((h) => String(h).trim().toLowerCase());
+
+        const nameCol = headerRow.findIndex((h) => h.includes("name"));
+        const uniNumCol = headerRow.findIndex((h) => h.includes("university") || h.includes("id") || h.includes("number") || h.includes("roll"));
+        const branchCol = headerRow.findIndex((h) => h.includes("branch"));
+        const semCol = headerRow.findIndex((h) => h.includes("sem"));
+
+        if (nameCol === -1 || uniNumCol === -1 || branchCol === -1 || semCol === -1) {
+            showToast("Couldn't find Name/University Number/Branch/Semester columns. Use the template.");
+            return;
+        }
+
+        // Pre-fetch existing university numbers to catch duplicates before hitting the DB
+        const { data: existingStudents, error: existErr } = await supabaseClient
+            .from("student_profiles")
+            .select("university_number");
+
+        if (existErr) {
+            console.warn("Could not pre-fetch existing students for duplicate check:", existErr);
+        }
+
+        const existingUniNumbers = new Set(
+            (existingStudents || []).map((s) => String(s.university_number).trim().toLowerCase())
+        );
+
+        const seenInFile = new Set();
+        const parsedRows = [];
+
+        for (let i = 1; i < rows.length; i++) {
+
+            const row = rows[i];
+            if (!row || row.every((c) => String(c).trim() === "")) continue; // skip blank rows
+
+            const name = String(row[nameCol] ?? "").trim();
+            const universityNumber = String(row[uniNumCol] ?? "").trim();
+            const branchRaw = String(row[branchCol] ?? "").trim().toUpperCase();
+            const semRaw = String(row[semCol] ?? "").trim();
+            const semesterNum = Number(semRaw);
+
+            const issues = [];
+
+            if (!name) issues.push("Missing name");
+            if (!universityNumber) issues.push("Missing university number");
+
+            if (!VALID_BRANCH_CODES.includes(branchRaw)) {
+                issues.push(`Invalid branch "${branchRaw}" (use ${VALID_BRANCH_CODES.join("/")})`);
+            }
+
+            if (!semesterNum || semesterNum < 1 || semesterNum > 8) {
+                issues.push("Invalid semester (1-8)");
+            }
+
+            if (branchRaw === "COMMON" && semesterNum > 2) {
+                issues.push("COMMON branch is only valid for Semester 1 or 2");
+            }
+
+            const uniNumKey = universityNumber.toLowerCase();
+
+            if (uniNumKey) {
+                if (existingUniNumbers.has(uniNumKey)) {
+                    issues.push("Already exists in database");
+                } else if (seenInFile.has(uniNumKey)) {
+                    issues.push("Duplicate within this file");
+                } else {
+                    seenInFile.add(uniNumKey);
+                }
+            }
+
+            parsedRows.push({
+                rowNumber: i + 1,
+                name,
+                universityNumber,
+                branchCode: branchRaw,
+                semesterNum,
+                valid: issues.length === 0,
+                issues
+            });
+        }
+
+        renderBulkImportPreview(parsedRows);
+
+    } catch (error) {
+        console.error("Bulk import parse error:", error);
+        showToast("Could not read that file. Make sure it's a valid Excel or CSV file.");
+    }
+}
+
+
+function renderBulkImportPreview(parsedRows) {
+
+    const previewSection = document.getElementById("bulkImportPreview");
+    const previewBody = document.getElementById("bulkImportPreviewBody");
+    const summaryEl = document.getElementById("bulkImportSummary");
+    const submitBtn = document.getElementById("bulkImportSubmitBtn");
+
+    const validRows = parsedRows.filter((r) => r.valid);
+    const invalidRows = parsedRows.filter((r) => !r.valid);
+
+    bulkImportValidRows = validRows;
+
+    previewBody.innerHTML = parsedRows.map((r) => `
+        <tr style="border-top:1px solid var(--border, #eee); ${r.valid ? "" : "background: rgba(220,53,69,0.06);"}">
+            <td style="padding:6px 8px;">${r.rowNumber}</td>
+            <td style="padding:6px 8px;">${escapeHTML(r.name)}</td>
+            <td style="padding:6px 8px;">${escapeHTML(r.universityNumber)}</td>
+            <td style="padding:6px 8px;">${escapeHTML(r.branchCode)}</td>
+            <td style="padding:6px 8px;">${r.semesterNum || "-"}</td>
+            <td style="padding:6px 8px; ${r.valid ? "color:#1a7f37;" : "color:#c0392b;"}">
+                ${r.valid ? "✓ Ready" : escapeHTML(r.issues.join("; "))}
+            </td>
+        </tr>
+    `).join("");
+
+    summaryEl.textContent =
+        `${parsedRows.length} rows found — ${validRows.length} ready to import, ${invalidRows.length} need fixing`;
+
+    if (submitBtn) {
+        submitBtn.disabled = validRows.length === 0;
+        submitBtn.textContent = validRows.length > 0
+            ? `Import ${validRows.length} Valid Row${validRows.length === 1 ? "" : "s"} →`
+            : "No valid rows to import";
+    }
+
+    previewSection.classList.remove("hidden");
+}
+
+
+async function runBulkStudentImport() {
+
+    if (!bulkImportValidRows.length) return;
+
+    const progressContainer = document.getElementById("bulkImportProgressContainer");
+    const progressBar = document.getElementById("bulkImportProgressBar");
+    const progressLabel = document.getElementById("bulkImportProgressLabel");
+    const progressPercent = document.getElementById("bulkImportProgressPercent");
+    const submitBtn = document.getElementById("bulkImportSubmitBtn");
+
+    submitBtn.disabled = true;
+    progressContainer?.classList.remove("hidden");
+
+    try {
+
+        // Resolve branch_id / semester_id lookups once, not per row
+        const { data: branches, error: branchErr } = await supabaseClient.from("branches").select("id, code");
+        if (branchErr) throw branchErr;
+
+        const { data: semesters, error: semErr } = await supabaseClient.from("semesters").select("id, semester_number");
+        if (semErr) throw semErr;
+
+        const branchMap = new Map(branches.map((b) => [b.code, b.id]));
+        const semesterMap = new Map(semesters.map((s) => [s.semester_number, s.id]));
+
+        const payloadRows = bulkImportValidRows
+            .map((r) => ({
+                name: r.name,
+                university_number: r.universityNumber,
+                branch_id: branchMap.get(r.branchCode),
+                current_semester_id: semesterMap.get(r.semesterNum),
+                __rowNumber: r.rowNumber
+            }))
+            .filter((r) => r.branch_id && r.current_semester_id);
+
+        const CHUNK_SIZE = 50;
+        let inserted = 0;
+        let failed = [];
+
+        for (let i = 0; i < payloadRows.length; i += CHUNK_SIZE) {
+
+            const chunk = payloadRows.slice(i, i + CHUNK_SIZE);
+            const chunkForInsert = chunk.map(({ __rowNumber, ...rest }) => rest);
+
+            const { error: insertErr } = await supabaseClient
+                .from("student_profiles")
+                .insert(chunkForInsert);
+
+            if (insertErr) {
+                console.error("Chunk insert failed:", insertErr, chunk.map((c) => c.__rowNumber));
+                failed.push({ rows: chunk.map((c) => c.__rowNumber), reason: insertErr.message });
+            } else {
+                inserted += chunk.length;
+            }
+
+            const percent = Math.round(((i + chunk.length) / payloadRows.length) * 100);
+            if (progressBar) progressBar.style.width = percent + "%";
+            if (progressPercent) progressPercent.textContent = percent + "%";
+            if (progressLabel) progressLabel.textContent = `Importing ${i + chunk.length} / ${payloadRows.length}...`;
+        }
+
+        if (failed.length === 0) {
+            showToast(`Imported ${inserted} students successfully.`);
+        } else {
+            showToast(`Imported ${inserted} students. ${failed.length} batch(es) failed — check console for row numbers.`);
+        }
+
+        document.getElementById("bulkStudentFile").value = "";
+        document.getElementById("bulkImportPreview")?.classList.add("hidden");
+        bulkImportValidRows = [];
+
+        loadStudentsTable();
+
+    } catch (error) {
+        console.error("Bulk import error:", error);
+        showToast(error.message || "Bulk import failed.");
+    } finally {
+        submitBtn.disabled = false;
+        progressContainer?.classList.add("hidden");
+    }
+}
 
 async function loadStudentsTable() {
     const loading = document.getElementById("studentLoading");
