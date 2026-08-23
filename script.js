@@ -544,26 +544,44 @@ async function handleStudentSubmit(event) {
         const { data: branchData } = await supabaseClient.from("branches").select("id, code, name").eq("code", branchCode).single();
         const { data: semesterData } = await supabaseClient.from("semesters").select("id, semester_number").eq("semester_number", Number(semesterNumber)).single();
 
-        // Update profile record linked via auth ID, storing/updating university number reference
-        const profilePayload = {
-            id: user.id,
-            name: name,
-            university_number: universityNumber,
-            branch_id: branchData.id,
-            current_semester_id: semesterData.id
-        };
+        // Claim the existing Dean/HOD-authorized row for this
+        // student and link it to their auth account. This replaces
+        // a direct insert/upsert, which fails silently when a
+        // Dean-created row with this university_number already
+        // exists (unique constraint), since that row's original
+        // id never matches this new auth user's id.
+        const { data: claimRows, error: claimError } = await supabaseClient.rpc(
+            "claim_student_account",
+            {
+                input_name: name,
+                input_university_number: universityNumber,
+                input_branch_code: branchCode,
+                input_semester_number: Number(semesterNumber)
+            }
+        );
 
-        await supabaseClient.from("student_profiles").upsert(profilePayload, { onConflict: "id" });
+        if (claimError) {
+            console.error("Student claim error:", claimError);
+            throw new Error("Unable to verify student credentials.");
+        }
+
+        const claimedProfile = claimRows?.[0];
+
+        if (!claimedProfile) {
+            showToast("Access Denied: Your details don't match an authorized student record, or this account is already linked to a different login.");
+            await supabaseClient.auth.signOut();
+            return;
+        }
 
         currentRole = "student";
         currentProfile = {
-            id: user.id,
-            name,
-            university_number: universityNumber,
+            id: claimedProfile.id,
+            name: claimedProfile.name,
+            university_number: claimedProfile.university_number,
             branch: branchCode,
             semester: String(semesterNumber),
-            branch_id: branchData.id,
-            current_semester_id: semesterData.id,
+            branch_id: claimedProfile.branch_id,
+            current_semester_id: claimedProfile.current_semester_id,
             email: user.email
         };
 
@@ -584,7 +602,7 @@ async function restoreStudentProfile(user) {
     const { data: profile, error } = await supabaseClient
         .from("student_profiles")
         .select(`id, name, branch_id, current_semester_id, branches ( code, name ), semesters ( semester_number )`)
-        .eq("id", user.id)
+        .eq("auth_user_id", user.id)
         .maybeSingle();
 
     if (error || !profile) return false;
