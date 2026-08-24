@@ -373,33 +373,13 @@ async function initializeUniNotes() {
     }
 }
 
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
+supabaseClient.auth.onAuthStateChange(async (event) => {
     if (event === "SIGNED_OUT") {
         currentRole = null;
         currentProfile = null;
         localStorage.removeItem("uninotes_profile");
         localStorage.removeItem("uninotes_role");
         showView("roleView");
-        return;
-    }
-
-    // Catch OTP magic-link callback for students and faculty.
-    // Supabase emits SIGNED_IN when the user lands back on index.html
-    // after clicking the emailed link.
-    if (event === "SIGNED_IN" && session?.user) {
-        const user = session.user;
-
-        const hasStudentPending =
-            pendingStudentData || localStorage.getItem("pendingStudentData");
-
-        const hasTeacherPending =
-            pendingTeacherData || localStorage.getItem("pendingTeacherData");
-
-        if (hasStudentPending) {
-            await handleStudentOtpCallback(user);
-        } else if (hasTeacherPending) {
-            await handleTeacherOtpCallback(user);
-        }
     }
 });
 
@@ -516,11 +496,16 @@ function selectRole(role) {
 /* =========================================================
    PASSWORD VISIBILITY TOGGLE
    Shared by student, faculty, and Dean/HOD login forms.
+   Fixed to prevent layout jumps/scrolling on click.
    ========================================================= */
 
 function togglePasswordVisibility(inputId, buttonEl) {
     const input = document.getElementById(inputId);
     if (!input) return;
+
+    // Remember cursor position to avoid cursor jump
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
 
     const isCurrentlyHidden = input.type === "password";
     input.type = isCurrentlyHidden ? "text" : "password";
@@ -531,6 +516,14 @@ function togglePasswordVisibility(inputId, buttonEl) {
             "aria-label",
             isCurrentlyHidden ? "Hide password" : "Show password"
         );
+    }
+
+    // Keep focus on input without causing the window/page to scroll jump
+    input.focus({ preventScroll: true });
+    
+    // Restore text selection cursor position
+    if (start !== null && end !== null) {
+        input.setSelectionRange(start, end);
     }
 }
 
@@ -569,15 +562,9 @@ async function handleForgotPassword(emailFieldId) {
 
         showToast("Sending password reset email...");
 
-        const RESET_REDIRECT =
-            window.location.hostname === "localhost" ||
-            window.location.hostname === "127.0.0.1"
-                ? "https://learn-engg.vercel.app/resetpassword.html"
-                : window.location.origin + "/resetpassword.html";
-
         const { error } = await supabaseClient.auth.resetPasswordForEmail(
             email,
-            { redirectTo: RESET_REDIRECT }
+            { redirectTo: window.location.origin + "/reset-password.html" }
         );
 
         if (error) throw error;
@@ -737,98 +724,22 @@ async function restoreStudentProfile(user) {
 /* =========================================================
    AUTHORIZED FACULTY VERIFICATION & PREVIEW UPDATES
    ========================================================= */
-let pendingTeacherData = null;
-
-let pendingStudentData = null;
-
-function showStudentFormAgain() {
-    document.getElementById("studentForm")?.classList.remove("hidden");
-    document.getElementById("studentOtpPending")?.classList.add("hidden");
-}
-
-async function handleStudentOtpCallback(user) {
-
-    let pending = pendingStudentData;
-
-    if (!pending) {
-        const stored = localStorage.getItem("pendingStudentData");
-        if (stored) {
-            try { pending = JSON.parse(stored); } catch (_) {}
-        }
-    }
-
-    if (!pending) return false;
-
-    localStorage.removeItem("pendingStudentData");
-    pendingStudentData = null;
-
-    const { data: claimRows, error: claimError } = await supabaseClient.rpc(
-        "claim_student_account",
-        {
-            input_name: pending.name,
-            input_university_number: pending.universityNumber,
-            input_branch_code: pending.branchCode,
-            input_semester_number: pending.semesterNumber
-        }
-    );
-
-    if (claimError) {
-        console.error("Student OTP claim error:", claimError);
-        showToast("Verification failed. Please try logging in again.");
-        await supabaseClient.auth.signOut();
-        return false;
-    }
-
-    const claimedProfile = claimRows?.[0];
-
-    if (!claimedProfile) {
-        showToast("Access Denied: Your details don't match an authorized student record, or this account is already linked to a different login.");
-        await supabaseClient.auth.signOut();
-        return false;
-    }
-
-    currentRole = "student";
-    currentProfile = {
-        id: claimedProfile.id,
-        name: claimedProfile.name,
-        university_number: claimedProfile.university_number,
-        branch: pending.branchCode,
-        semester: String(pending.semesterNumber),
-        branch_id: claimedProfile.branch_id,
-        current_semester_id: claimedProfile.current_semester_id,
-        email: user.email
-    };
-
-    saveLocalProfile();
-    selectedBranch = pending.branchCode;
-    selectedSemester = String(pending.semesterNumber);
-
-    openStudentDashboard();
-    showToast("Welcome! Student portal loaded.");
-    return true;
-}
-
-function showTeacherFormAgain() {
-    document.getElementById("teacherForm")?.classList.remove("hidden");
-    document.getElementById("teacherOtpPending")?.classList.add("hidden");
-}
-
 async function handleTeacherSubmit(event) {
     event.preventDefault();
 
-    const email        = document.getElementById("teacherEmail")?.value.trim();
-    const name         = document.getElementById("teacherName")?.value.trim();
+    const email = document.getElementById("teacherEmail")?.value.trim();
+    const password = document.getElementById("teacherPassword")?.value;
+    const name = document.getElementById("teacherName")?.value.trim();
     const universityId = document.getElementById("teacherId")?.value.trim();
-    const branchCode   = document.getElementById("teacherBranch")?.value;
+    const branchCode = document.getElementById("teacherBranch")?.value;
 
-    if (!email || !name || !universityId || !branchCode) {
+    if (!email || !password || !name || !universityId || !branchCode) {
         showToast("Please fill all faculty fields.");
         return;
     }
 
     try {
-        showToast("Verifying faculty details...");
-
+        // Securely check authorization via Supabase backend function (RPC)
         const { data: isAuthorized, error: rpcError } = await supabaseClient.rpc("verify_faculty", {
             input_university_id: universityId,
             input_name: name,
@@ -842,94 +753,63 @@ async function handleTeacherSubmit(event) {
             return;
         }
 
-        pendingTeacherData = { name, universityId, branchCode };
-        localStorage.setItem("pendingTeacherData", JSON.stringify(pendingTeacherData));
+        let user = null;
+        let { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
 
-        const { error: otpError } = await supabaseClient.auth.signInWithOtp({
-            email,
-            options: {
-                shouldCreateUser: true,
-                emailRedirectTo: "https://learn-engg.vercel.app/index.html"
+        if (authError) {
+            if (authError.message?.toLowerCase().includes("already registered") || authError.status === 422) {
+                const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (loginError) throw loginError;
+                user = loginData?.user;
+            } else {
+                throw authError;
             }
-        });
+        } else {
+            user = authData?.user;
+        }
 
-        if (otpError) throw otpError;
+        if (!user) throw new Error("Faculty authentication failed.");
 
-        document.getElementById("teacherForm")?.classList.add("hidden");
-        document.getElementById("teacherOtpPending")?.classList.remove("hidden");
-        const displayEl = document.getElementById("teacherOtpEmailDisplay");
-        if (displayEl) displayEl.textContent = `We sent a login link to ${email}`;
+        const { data: branchData } = await supabaseClient.from("branches").select("id, code, name").eq("code", branchCode).single();
+
+        const profilePayload = {
+            auth_user_id: user.id,
+            name: name,
+            university_id: universityId,
+            branch_id: branchData.id,
+            approved: true
+        };
+
+        const { data: existingTeacher } = await supabaseClient.from("teacher_profiles").select("id").eq("auth_user_id", user.id).maybeSingle();
+
+        let teacherId;
+        if (existingTeacher) {
+            const { data: updated } = await supabaseClient.from("teacher_profiles").update(profilePayload).eq("auth_user_id", user.id).select("id").single();
+            teacherId = updated.id;
+        } else {
+            const { data: inserted } = await supabaseClient.from("teacher_profiles").insert(profilePayload).select("id").single();
+            teacherId = inserted.id;
+        }
+
+        currentRole = "teacher";
+        currentProfile = {
+            id: teacherId,
+            auth_user_id: user.id,
+            name: name,
+            university_id: universityId,
+            branch: branchCode,
+            branch_id: branchData.id,
+            email: user.email
+        };
+
+        saveLocalProfile();
+        openTeacherDashboard();
+        showToast("Faculty portal unlocked successfully.");
 
     } catch (error) {
-        console.error("Teacher OTP error:", error);
-        showToast(error.message || "Could not send login link. Please try again.");
+        console.error("Teacher setup error:", error);
+        showToast(error.message || "Failed to verify or set up faculty account.");
     }
-}
-
-async function handleTeacherOtpCallback(user) {
-
-    let pending = pendingTeacherData;
-
-    if (!pending) {
-        const stored = localStorage.getItem("pendingTeacherData");
-        if (stored) {
-            try { pending = JSON.parse(stored); } catch (_) {}
-        }
-    }
-
-    if (!pending) return false;
-
-    localStorage.removeItem("pendingTeacherData");
-    pendingTeacherData = null;
-
-    const { name, universityId, branchCode } = pending;
-
-    const { data: branchData } = await supabaseClient
-        .from("branches").select("id, code, name").eq("code", branchCode).single();
-
-    if (!branchData) {
-        showToast("Branch not found. Please try again.");
-        await supabaseClient.auth.signOut();
-        return false;
-    }
-
-    const profilePayload = {
-        auth_user_id: user.id,
-        name,
-        university_id: universityId,
-        branch_id: branchData.id,
-        approved: true
-    };
-
-    const { data: existingTeacher } = await supabaseClient
-        .from("teacher_profiles").select("id").eq("auth_user_id", user.id).maybeSingle();
-
-    let teacherId;
-    if (existingTeacher) {
-        const { data: updated } = await supabaseClient
-            .from("teacher_profiles").update(profilePayload).eq("auth_user_id", user.id).select("id").single();
-        teacherId = updated?.id;
-    } else {
-        const { data: inserted } = await supabaseClient
-            .from("teacher_profiles").insert(profilePayload).select("id").single();
-        teacherId = inserted?.id;
-    }
-
-    currentRole = "teacher";
-    currentProfile = {
-        id: teacherId,
-        auth_user_id: user.id,
-        name,
-        university_id: universityId,
-        branch: branchCode,
-        branch_id: branchData.id,
-        email: user.email
-    };
-
-    saveLocalProfile();
-    openTeacherDashboard();
-    showToast("Faculty portal unlocked successfully.");
-    return true;
 }
 /* =========================================================
    WORKSPACE RETURN BANNER & PREVIEW TOGGLE
