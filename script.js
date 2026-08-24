@@ -496,16 +496,11 @@ function selectRole(role) {
 /* =========================================================
    PASSWORD VISIBILITY TOGGLE
    Shared by student, faculty, and Dean/HOD login forms.
-   Fixed to prevent layout jumps/scrolling on click.
    ========================================================= */
 
 function togglePasswordVisibility(inputId, buttonEl) {
     const input = document.getElementById(inputId);
     if (!input) return;
-
-    // Remember cursor position to avoid cursor jump
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
 
     const isCurrentlyHidden = input.type === "password";
     input.type = isCurrentlyHidden ? "text" : "password";
@@ -516,14 +511,6 @@ function togglePasswordVisibility(inputId, buttonEl) {
             "aria-label",
             isCurrentlyHidden ? "Hide password" : "Show password"
         );
-    }
-
-    // Keep focus on input without causing the window/page to scroll jump
-    input.focus({ preventScroll: true });
-    
-    // Restore text selection cursor position
-    if (start !== null && end !== null) {
-        input.setSelectionRange(start, end);
     }
 }
 
