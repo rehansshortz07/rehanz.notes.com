@@ -549,15 +549,9 @@ async function handleForgotPassword(emailFieldId) {
 
         showToast("Sending password reset email...");
 
-        const RESET_REDIRECT =
-            window.location.hostname === "localhost" ||
-            window.location.hostname === "127.0.0.1"
-                ? "https://learn-engg.vercel.app/resetpassword.html"
-                : window.location.origin + "/resetpassword.html";
-
         const { error } = await supabaseClient.auth.resetPasswordForEmail(
             email,
-            { redirectTo: RESET_REDIRECT }
+            { redirectTo: window.location.origin + "/reset-password.html" }
         );
 
         if (error) throw error;
