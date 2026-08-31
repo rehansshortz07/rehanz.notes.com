@@ -1,147 +1,64 @@
-const CACHE_NAME = "learn-engineering-v5";
-
+const CACHE_NAME = "uninotes-cache-v5.1"; // Increment cache version to force a clean update
 const ASSETS_TO_CACHE = [
-  "./",
   "./index.html",
   "./style.css",
   "./script.js",
-  "./manifest.json",
-  "./icon-512.png"
+  "./dean.html",
+  "./analytics.html",
+  "./students.html"
 ];
 
-/* =========================================================
-   INSTALL
-   Download the new version into a NEW cache.
-   Do NOT activate it immediately.
-   ========================================================= */
-
+// Install Event - Caching Core Assets
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-
-  // IMPORTANT:
-  // Do not call skipWaiting() here.
-  // We want the page to show "Update Available".
+  self.skipWaiting();
 });
 
-
-/* =========================================================
-   ACTIVATE
-   Delete old caches.
-   ========================================================= */
-
+// Activate Event - Clean up old caches
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames
-          .filter((cacheName) => cacheName !== CACHE_NAME)
-          .map((cacheName) => caches.delete(cacheName))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       );
     })
   );
+  self.clients.claim();
 });
 
-
-/* =========================================================
-   FETCH
-   Network-first for HTML.
-   Cache-first for static assets.
-   ========================================================= */
-
+// Fetch Event - Serve from Cache or Network
 self.addEventListener("fetch", (event) => {
+  // Skip cross-origin requests like Supabase API calls or CDNs
+  if (!event.request.url.startsWith(self.location.origin)) return;
 
-  // Only handle same-origin requests.
-  if (new URL(event.request.url).origin !== self.location.origin) {
-    return;
-  }
-
-  // Ignore non-GET requests.
-  if (event.request.method !== "GET") {
-    return;
-  }
-
-  const request = event.request;
-  const url = new URL(request.url);
-
-  /*
-   * HTML/navigation:
-   *
-   * Always try the network first.
-   * This makes new deployments detectable much faster.
-   */
-  if (
-    request.mode === "navigate" ||
-    url.pathname.endsWith(".html") ||
-    url.pathname === "/"
-  ) {
-    event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
-
-          // Update cached HTML with the latest version.
-          const responseClone = networkResponse.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-
-          return networkResponse;
-        })
-        .catch(() => {
-          return caches.match(request);
-        })
-    );
-
-    return;
-  }
-
-
-  /*
-   * Static files:
-   * Cache first, then network.
-   */
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-
+    caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-
-      return fetch(request).then((networkResponse) => {
-
-        if (
-          networkResponse &&
-          networkResponse.status === 200 &&
-          networkResponse.type === "basic"
-        ) {
-          const responseClone = networkResponse.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-        }
-
+      return fetch(event.request).then((networkResponse) => {
         return networkResponse;
+      }).catch(() => {
+        // Safe fallback for optional files like favicon or manifest
+        if (event.request.url.includes("favicon.ico") || event.request.url.includes("manifest.json")) {
+          return new Response("", { status: 404, statusText: "Not Found" });
+        }
+        
+        // General offline fallback for other missing local assets
+        return new Response("Offline - resource unavailable", {
+          status: 503,
+          statusText: "Service Unavailable",
+          headers: { "Content-Type": "text/plain" }
+        });
       });
     })
   );
-});
-
-
-/* =========================================================
-   MESSAGE
-   The website sends SKIP_WAITING when the user
-   clicks "Update Now".
-   ========================================================= */
-
-self.addEventListener("message", (event) => {
-
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
-
 });
