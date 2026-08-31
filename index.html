@@ -48,6 +48,47 @@
 </style>
 </head>
 <body>
+
+  <!-- =====================================================
+     APP UPDATE NOTIFICATION
+     ===================================================== -->
+
+<div id="updateBanner" class="update-banner hidden">
+
+  <div class="update-banner-content">
+
+    <div class="update-icon">
+      ↑
+    </div>
+
+    <div class="update-text">
+      <strong>Update available</strong>
+      <span>
+        A new version of Learn-Engineering is ready.
+      </span>
+    </div>
+
+    <button
+      id="updateNowBtn"
+      class="update-now-btn"
+      type="button"
+    >
+      Update Now
+    </button>
+
+    <button
+      id="updateLaterBtn"
+      class="update-later-btn"
+      type="button"
+      aria-label="Close update notification"
+    >
+      ×
+    </button>
+
+  </div>
+
+</div>
+  
 <div class="app-shell">
 
 <!-- Workspace Return Banner (Visible only during student preview mode) -->
