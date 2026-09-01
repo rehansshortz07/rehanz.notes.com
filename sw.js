@@ -1,4 +1,4 @@
-const CACHE_NAME = "uninotes-cache-v5.1"; // Increment cache version to force a clean update
+const CACHE_NAME = "uninotes-cache-v6"; // Increment cache version to force a clean update
 const ASSETS_TO_CACHE = [
   "./index.html",
   "./style.css",
