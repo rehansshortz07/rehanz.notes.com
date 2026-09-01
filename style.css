@@ -1415,3 +1415,50 @@ textarea:focus {
     animation-duration: .01ms !important;
   }
 }
+/* Password Field Wrapper & Toggle Button Styles */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 44px; /* Prevents text from overlapping the toggle icon */
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.toggle-password-btn:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.forgot-password-link {
+  align-self: flex-end;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.forgot-password-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
