@@ -652,26 +652,6 @@
 
                 </div>
 
-                <!-- =========================================
-                     MANAGE YOUR UPLOADS (Dean/HOD)
-                     ========================================= -->
-                <div class="form-card" style="margin-top: 20px;">
-                    <div class="section-heading">
-                        <div class="card-heading" style="display: flex; gap: 12px; align-items: center;">
-                            <div class="heading-icon" style="color: var(--danger, #ef4444); background: var(--danger-soft, #fef2f2); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                                🗑
-                            </div>
-                            <div>
-                                <h3 style="margin: 0;">Manage your uploads</h3>
-                                <p style="margin: 4px 0 0; color: var(--muted, #64748b);">
-                                    View or permanently delete your uploaded files.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="managementUploadsList" class="resource-list" style="margin-top: 16px;"></div>
-                </div>
 
                 <!-- =========================================
                      ADD FACULTY
@@ -1000,117 +980,6 @@
    DEAN / HOD MANAGEMENT PORTAL
    ============================================================ */
 
-/* ============================================================
-   LOAD & RENDER DEAN/HOD UPLOADS
-   ============================================================ */
-async function loadManagementUploads() {
-    const listContainer = document.getElementById("managementUploadsList");
-    const savedDean = localStorage.getItem("dean_session");
-
-    if (!listContainer || !savedDean) return;
-
-    let managementUser;
-    try {
-        managementUser = JSON.parse(savedDean);
-    } catch (e) {
-        return;
-    }
-
-    try {
-        listContainer.innerHTML = `<div style="padding: 16px; text-align: center;">Loading your uploads...</div>`;
-
-        // Get live session token to fetch files
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session?.user?.id) {
-            listContainer.innerHTML = `<div class="empty-state"><span>Sign in to view your uploaded files.</span></div>`;
-            return;
-        }
-
-        // Fetch uploaded notes tied to the authenticated auth user
-        const { data: notesData, error } = await supabaseClient
-            .from("notes")
-            .select("*")
-            .eq("teacher_id", session.user.id)
-            .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        if (!notesData || notesData.length === 0) {
-            listContainer.innerHTML = `
-                <div class="empty-state" style="padding: 20px; text-align: center;">
-                    <strong>No files uploaded yet</strong><br>
-                    <span style="color: var(--muted, #64748b); font-size: 13px;">Your uploaded study materials will appear here.</span>
-                </div>
-            `;
-            return;
-        }
-
-        listContainer.innerHTML = notesData.map(note => `
-            <div class="resource-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="file-icon" style="font-weight: bold; background: var(--surface-2, #f1f5f9); padding: 8px 12px; border-radius: 6px;">
-                        ${(getResourceFileExtension(note.file_name) || '.pdf').replace('.', '').toUpperCase()}
-                    </div>
-                    <div class="resource-info">
-                        <strong title="${escapeHTML(note.title)}">${escapeHTML(note.title)}</strong>
-                        <div class="resource-meta" style="font-size: 12px; color: var(--muted, #64748b);">
-                            ${escapeHTML(note.file_name)} • ${(note.file_size / 1024 / 1024).toFixed(2)} MB
-                        </div>
-                    </div>
-                </div>
-                <button type="button" class="danger-btn" style="padding: 6px 12px;" onclick="deleteManagementNote('${note.id}', '${escapeHTML(note.storage_path || '')}')">
-                    Delete
-                </button>
-            </div>
-        `).join("");
-
-    } catch (err) {
-        console.error("Error loading management uploads:", err);
-        listContainer.innerHTML = `<div style="padding: 16px; color: var(--danger);">Unable to load uploads.</div>`;
-    }
-}
-
-/* ============================================================
-   DELETE DEAN/HOD RESOURCE
-   ============================================================ */
-async function deleteManagementNote(noteId, storagePath) {
-    const confirmed = confirm("Are you sure you want to permanently delete this material?");
-    if (!confirmed) return;
-
-    try {
-        showToast("Deleting resource...");
-
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session?.access_token) {
-            throw new Error("Authentication session expired. Please sign in again.");
-        }
-
-        // 1. Delete file from cloud storage worker if path exists
-        if (storagePath) {
-            const deleteUrl = `${PDF_API_URL}/delete?file=${encodeURIComponent(storagePath)}`;
-            await fetch(deleteUrl, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${session.access_token}` }
-            });
-        }
-
-        // 2. Remove database row from Supabase
-        const { error } = await supabaseClient
-            .from("notes")
-            .delete()
-            .eq("id", noteId);
-
-        if (error) throw error;
-
-        showToast("Resource deleted successfully.");
-        loadManagementUploads();
-
-    } catch (err) {
-        console.error("Delete failed:", err);
-        showToast(err.message || "Failed to delete resource.");
-    }
-}
-
 document.addEventListener(
     "DOMContentLoaded",
     () => {
@@ -1180,6 +1049,8 @@ document.addEventListener(
             }
 
         })();
+
+
 
         /* =====================================================
            DEAN / HOD LOGIN
@@ -1582,7 +1453,6 @@ function unlockDeanDashboard(managementUser) {
     console.log("🔓 Management dashboard unlocked:", managementUser);
     window.currentManagementUser = managementUser;
     loadAuthorizedFaculty();
-    loadManagementUploads();
 }
 
 /* ============================================================
