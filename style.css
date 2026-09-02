@@ -1199,7 +1199,7 @@ textarea:focus {
   }
 
    .footer {
-    font-size: 8px; /* Scales text down so all links and copyright text fit */
+    font-size: 10px; /* Scales text down so all links and copyright text fit */
     gap: 3px;
   }
   
@@ -1393,11 +1393,11 @@ textarea:focus {
   }
 
   .section-line p {
-    font-size: 8px;
+    font-size: 9px;
   }
 
    .footer {
-    font-size: 8px; /* Scales text down so all links and copyright text fit */
+    font-size: 12px; /* Scales text down so all links and copyright text fit */
     gap: 0px;
   }
   
