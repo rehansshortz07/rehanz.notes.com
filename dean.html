@@ -651,26 +651,27 @@
                     </form>
 
                 </div>
-<!-- =========================================
-     MANAGE YOUR UPLOADS (Dean/HOD)
-     ========================================= -->
-<div class="form-card" style="margin-top: 20px;">
-    <div class="section-heading">
-        <div class="card-heading" style="display: flex; gap: 12px; align-items: center;">
-            <div class="heading-icon" style="color: var(--danger, #ef4444); background: var(--danger-soft, #fef2f2); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                🗑
-            </div>
-            <div>
-                <h3 style="margin: 0;">Manage your uploads</h3>
-                <p style="margin: 4px 0 0; color: var(--muted, #64748b);">
-                    View or permanently delete your uploaded files.
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <div id="managementUploadsList" class="resource-list" style="margin-top: 16px;"></div>
-</div>
+
+                <!-- =========================================
+                     MANAGE YOUR UPLOADS (Dean/HOD)
+                     ========================================= -->
+                <div class="form-card" style="margin-top: 20px;">
+                    <div class="section-heading">
+                        <div class="card-heading" style="display: flex; gap: 12px; align-items: center;">
+                            <div class="heading-icon" style="color: var(--danger, #ef4444); background: var(--danger-soft, #fef2f2); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                🗑
+                            </div>
+                            <div>
+                                <h3 style="margin: 0;">Manage your uploads</h3>
+                                <p style="margin: 4px 0 0; color: var(--muted, #64748b);">
+                                    View or permanently delete your uploaded files.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="managementUploadsList" class="resource-list" style="margin-top: 16px;"></div>
+                </div>
 
                 <!-- =========================================
                      ADD FACULTY
@@ -999,76 +1000,6 @@
    DEAN / HOD MANAGEMENT PORTAL
    ============================================================ */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        console.log(
-            "🏛️ Dean/HOD Management Portal starting..."
-        );
-
-
-        /* =====================================================
-           RESTORE SESSION
-           Verify the real Supabase Auth session is alive
-           before trusting the localStorage snapshot.
-           If the auth session is gone, clear the stale
-           localStorage entry so the user sees the login form
-           instead of a blank dashboard.
-           ===================================================== */
-
-        (async () => {
-
-            const savedDean =
-                localStorage.getItem("dean_session");
-
-            if (!savedDean) return; // nothing to restore
-
-            try {
-
-                const { data: { session }, error: sessionError } =
-                    await supabaseClient.auth.getSession();
-
-                if (sessionError || !session) {
-                    console.warn(
-                        "Dean session snapshot found but no live auth session. Clearing."
-                    );
-                    localStorage.removeItem("dean_session");
-                    return;
-                }
-
-                const managementUser = JSON.parse(savedDean);
-
-                const { data: rows, error: verifyError } =
-                    await supabaseClient.rpc("claim_dean_hod_account", {
-                        input_name: managementUser.name,
-                        input_university_id: managementUser.university_id,
-                        input_branch: managementUser.branch_code
-                    });
-
-                if (verifyError || !rows || rows.length === 0) {
-                    console.warn(
-                        "Dean session re-verification failed. Clearing.",
-                        verifyError
-                    );
-                    localStorage.removeItem("dean_session");
-                    await supabaseClient.auth.signOut();
-                    return;
-                }
-
-                unlockDeanDashboard(managementUser);
-
-            } catch (error) {
-
-                console.error(
-                    "Invalid saved management session:",
-                    error
-                );
-                localStorage.removeItem("dean_session");
-            }
-
-        })();
-
 /* ============================================================
    LOAD & RENDER DEAN/HOD UPLOADS
    ============================================================ */
@@ -1179,6 +1110,76 @@ async function deleteManagementNote(noteId, storagePath) {
         showToast(err.message || "Failed to delete resource.");
     }
 }
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        console.log(
+            "🏛️ Dean/HOD Management Portal starting..."
+        );
+
+
+        /* =====================================================
+           RESTORE SESSION
+           Verify the real Supabase Auth session is alive
+           before trusting the localStorage snapshot.
+           If the auth session is gone, clear the stale
+           localStorage entry so the user sees the login form
+           instead of a blank dashboard.
+           ===================================================== */
+
+        (async () => {
+
+            const savedDean =
+                localStorage.getItem("dean_session");
+
+            if (!savedDean) return; // nothing to restore
+
+            try {
+
+                const { data: { session }, error: sessionError } =
+                    await supabaseClient.auth.getSession();
+
+                if (sessionError || !session) {
+                    console.warn(
+                        "Dean session snapshot found but no live auth session. Clearing."
+                    );
+                    localStorage.removeItem("dean_session");
+                    return;
+                }
+
+                const managementUser = JSON.parse(savedDean);
+
+                const { data: rows, error: verifyError } =
+                    await supabaseClient.rpc("claim_dean_hod_account", {
+                        input_name: managementUser.name,
+                        input_university_id: managementUser.university_id,
+                        input_branch: managementUser.branch_code
+                    });
+
+                if (verifyError || !rows || rows.length === 0) {
+                    console.warn(
+                        "Dean session re-verification failed. Clearing.",
+                        verifyError
+                    );
+                    localStorage.removeItem("dean_session");
+                    await supabaseClient.auth.signOut();
+                    return;
+                }
+
+                unlockDeanDashboard(managementUser);
+
+            } catch (error) {
+
+                console.error(
+                    "Invalid saved management session:",
+                    error
+                );
+                localStorage.removeItem("dean_session");
+            }
+
+        })();
 
         /* =====================================================
            DEAN / HOD LOGIN
@@ -1581,7 +1582,7 @@ function unlockDeanDashboard(managementUser) {
     console.log("🔓 Management dashboard unlocked:", managementUser);
     window.currentManagementUser = managementUser;
     loadAuthorizedFaculty();
-    loadManagementUploads(); // <-- Add this line
+    loadManagementUploads();
 }
 
 /* ============================================================
