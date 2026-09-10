@@ -264,7 +264,7 @@ const RESOURCE_PAGE_SIZE = 5;
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("Learn-Engineering starting...");
+    console.log("TechVault starting...");
     initializeTheme();
     buildStaticControls();
     bindForms();
@@ -342,7 +342,7 @@ window.addEventListener("appinstalled", () => {
         installBtn.classList.add("hidden");
     }
     deferredPrompt = null;
-    showToast("Learn-Engineering installed successfully!");
+    showToast("TechVault installed successfully!");
 });
 /* =========================================================
    INITIALIZE UNINOTES SESSION & PROFILES
