@@ -1,6 +1,6 @@
 {
-  "name": "Learn Engineering",
-  "short_name": "Learn Engg",
+  "name": "TechVault",
+  "short_name": "TechVault",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b1020",
